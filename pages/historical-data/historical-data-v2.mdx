@@ -1,0 +1,55 @@
+import { Callout } from "nextra-theme-docs";
+
+## Historical Data v2
+
+To download records of interest, **combine the URL Prefix with one of the Route Suffixes in the table below**.
+
+URL Prefix: https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/
+
+| Record Type          | Route Suffix                                                                    | Example                                                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trades               | user/`accountKey`/tradeRecords/`year`/`yearmonthday`                            | [User Trades 20240124](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/C13FZykQfLXKuMAMh2iuG7JxhQqd8otujNRAgVETU6id/tradeRecords/2024/20240124)                            |
+| Market Trades        | market/`marketSymbol`/tradeRecords/`year`/`yearmonthday`                        | [Market Trades 20240220](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/market/SOL-PERP/tradeRecords/2024/20240220)                                                            |
+| Funding Rates        | market/`marketSymbol`/fundingRateRecords/`year`/`yearmonthday`                  | [Funding Rates 20240319](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/market/SOL-PERP/fundingRateRecords/2024/20240319)                                                      |
+| Funding Payments     | user/`accountKey`/fundingPaymentRecords/`year`/`yearmonthday`                   | [User Funding Payments 20231224](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/C13FZykQfLXKuMAMh2iuG7JxhQqd8otujNRAgVETU6id/fundingPaymentRecords/2023/20231224)         |
+| Deposits             | user/`accountKey`/depositRecords/`year`/`yearmonthday`                          | [User Deposits 20240215](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/C13FZykQfLXKuMAMh2iuG7JxhQqd8otujNRAgVETU6id/depositRecords/2024/20240215)                        |
+| Liquidations         | user/`accountKey`/liquidationRecords/`year`/`yearmonthday`                      | [User Liquidations 20240106](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/H7s1cVn4gnC1uhLeNPbwEmg298DNW4N17zD6rQfGs8da/liquidationRecords/2024/20240106)                |
+| Settle PNL           | user/`accountKey`/settlePnlRecords/`year`/`yearmonthday`                        | [User Settle PNL 20240124](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/C13FZykQfLXKuMAMh2iuG7JxhQqd8otujNRAgVETU6id/settlePnlRecords/2024/20240124)                    |
+| LP (BAL)             | user/`accountKey`/lpRecord/`year`/`yearmonthday`                                | [User LP 20240119](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/user/BYhwfY1bkUJZG8N7TQfLXZQF3xHJtM2S4H9DfMjto6Q1/lpRecord/2024/20240119)                                    |
+| Insurance Fund       | market/`marketSymbol`/insuranceFundRecords/`year`/`yearmonthday`                | [Market Insurance Fund 20240214](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/market/USDC/insuranceFundRecords/2024/20240214)                                                |
+| Insurance Fund Stake | authority/`authorityAccountKey`/insuranceFundStakeRecords/`year`/`yearmonthday` | [Insurance Fund Stake 20240305](https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/authority/ELoqJYcFTc8qjGhJShUupEkRomed8rykb3CUhrzAT4Q1/insuranceFundStakeRecords/2024/20240305) |
+
+### Example:
+
+Get historical trades on SOL-PERP for Jan 1, 2024: https://drift-historical-data-v2.s3.eu-west-1.amazonaws.com/program/dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH/market/SOL-PERP/tradeRecords/2024/20240101
+
+### Variables
+
+| variable         | description                                 | example  |
+| ---------------- | ------------------------------------------- | -------- |
+| accountKey       | user sub account public key (not authority) |          |
+| authority        | authority public key                        |          |
+| marketSymbol     | market name                                 | SOL-PERP |
+| year             |                                             | 2023     |
+| month            |                                             | 4        |
+| day              | utc time                                    | 25       |
+| candleResolution |                                             | 1M       |
+
+<Callout type="warning" emoji="⚠️">
+**Your user subaccount public key is not your wallet's public key (authority)!**
+
+If you use your wallet's public key instead of user subaccount public key, you will get **"Access Denied"**.
+
+**Authority** is your wallet's public key, what you see in the URL when you connect your wallet to [app.drift.trade](https://app.drift.trade/). Example: `https://app.drift.trade/overview?authority=<your-public-key>`
+
+**User subaccount public key** is your subaccount unique identifier and even though one wallet can have multiple subaccounts, each subaccount public key is unique.
+
+</Callout>
+
+### Where to find user subaccount public key?
+
+You can find your user subaccount public key in the Settings modal, if you hover over ℹ️ icon:
+
+<img src="/assets/subaccount-pubkey.png" alt="" width="600" height="auto"></img>
+
+[Historical data in the API documentation](https://drift-labs.github.io/v2-teacher/?typescript#url-suffix)

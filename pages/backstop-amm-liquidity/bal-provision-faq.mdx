@@ -1,0 +1,21 @@
+## BAL Provision FAQ
+
+### How is custom max leverage (custom margin ratio) used for BAL?
+
+Once a user sets a custom_margin_ratio (or max leverage), this updates the initial margin available for an account and becomes the basis for whether LP risk limits have been breached.
+
+### What are the auto-derisking measures for BAL?
+
+Upon next pnl settle of an LP market, if the user's initial margin ratio has been breached in the account, the total margin/risk will be checked vs their initial margin ratio (or custom margin ratio if this is set lower). LP accounts will open orders to partially reducing their positions and burning a fraction of their BAL shares in order to fall back into good initial margin health.
+
+### Is there any cost associated with being a BAL provider?
+
+There is no protocol-level fee to add or remove BAL shares, aside from a rounding fee when liquidity is removed (burning BAL shares).
+
+Burning BAL Shares (analogous to cancelling open orders), will automatically settle positions acquired through being an LP to the user account.
+
+Given the LP may acquire a base amount that differs from the market's minimum step size (e.g. 0.1 SOL), the cost basis will be rounded on any residual remainder value below this size. This means **the minimum remove liquidity fee is zero while the maximum is the quote value (using oracle) of the minimum step size in the market**. This amount is determined by the remainder base asset amount in the BAL position.
+
+### All my positions in BAL were closed, but I didn't take any action, and liquidity was removed from the BAL?
+
+If you don't choose to disable automatic de-risking in margin/leverage settings, your positions or shares may be closed or removed if your account falls below the initial margin requirement. This measure is in place to avoid liquidations.

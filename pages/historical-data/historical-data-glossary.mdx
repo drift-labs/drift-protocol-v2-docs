@@ -1,0 +1,219 @@
+import { Callout } from "nextra-theme-docs";
+
+# Historical Data Glossary
+
+## 🟣 v2
+
+<Callout type="info" emoji="ℹ️">
+  This is extensive list for every API endpoint. Choose the category of
+  historical data you're analysing in the right sidebar for quick access. ➡️ ➡️
+  ➡️
+</Callout>
+
+### Shared columns
+
+Columns in the table below are part of each category:
+
+| Column          | Unit      | Precision           | Description                                                                                                           |
+| --------------- | --------- | ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ts              | int       | seconds(since 1970) | Unix timestamp of the event.                                                                                          |
+| txSig           | pubkey    |                     | Transaction signature.                                                                                                |
+| slot            | int       |                     | Slot number of the event.                                                                                             |
+| user            | pubkey    |                     |                                                                                                                       |
+| amount          | int       |                     |                                                                                                                       |
+| programId       | pubkey    |                     | Solana program identifier (AMM\* = Drift protocol mainnet).                                                           |
+| marketType      | perp/spot |                     | Type of market where the order was filled ("Spot", "Perpetual").                                                      |
+| marketIndex     | int       |                     | Perpetual contract [market index](https://github.com/drift-labs/protocol-v1/blob/master/sdk/src/constants/markets.ts) |
+| spotMarketIndex | int       |                     | Index of the spot market.                                                                                             |
+| perpMarketIndex | int       |                     | Index of the perpetual contract market.                                                                               |
+| userAuthority   | pubkey    |                     | Public key of the user's authority account (wallet).                                                                  |
+| oraclePrice     | int       |                     | Oracle price at the time of an event (provided by Pyth/Switchboard).                                                  |
+
+---
+
+### Trades
+
+| Column                                     | unit                              | precision | description                                                                |
+| ------------------------------------------ | --------------------------------- | --------- | -------------------------------------------------------------------------- |
+| fillerReward                               | int                               |           | Reward received by the filler for filling the order.                       |
+| baseAssetAmountFilled                      | int                               |           | Amount of the base asset filled in the order.                              |
+| quoteAssetAmountFilled                     | int                               |           | Amount of the quote asset filled in the order.                             |
+| takerFee                                   | int                               |           | Fee charged to the taker for filling the order.                            |
+| makerRebate                                | int                               |           | Rebate provided to the maker for placing the order.                        |
+| referrerReward                             | int                               |           | Reward received by the referrer for referring the order.                   |
+| quoteAssetAmountSurplus                    | int                               |           | Amount of the quote asset remaining unfilled after the order is completed. |
+| takerOrderBaseAssetAmount                  | int                               |           | Total amount of the base asset the taker ordered to buy or sell.           |
+| takerOrderCumulativeBaseAssetAmountFilled  | int                               |           | Cumulative amount of the base asset filled for the taker's order.          |
+| takerOrderCumulativeQuoteAssetAmountFilled | int                               |           | Cumulative amount of the quote asset filled for the taker's order.         |
+| makerOrderBaseAssetAmount                  | int                               |           | Total amount of the base asset the maker ordered to buy or sell.           |
+| makerOrderCumulativeBaseAssetAmountFilled  | int                               |           | Cumulative amount of the base asset filled for the maker's order.          |
+| makerOrderCumulativeQuoteAssetAmountFilled | int                               |           | Cumulative amount of the quote asset filled for the maker's order.         |
+| makerFee                                   | int                               |           | Fee charged to the maker for placing the order (if not a maker rebate).    |
+| action                                     | fill                              |           | Action type for the order fill event (e.g., "Fill").                       |
+| actionExplanation                          | orderExpired/orderFilledWithMatch |           | Explanation of the action type.                                            |
+| filler                                     | pubkey                            |           | Address of the entity that filled the order.                               |
+| fillRecordId                               | int                               |           | Unique identifier for the order fill record.                               |
+| taker                                      | pubkey                            |           | Address of the taker who placed the order.                                 |
+| takerOrderId                               | int                               |           | Unique identifier for the taker's order.                                   |
+| takerOrderDirection                        | long/short                        |           | Direction of the taker's order (e.g., "Buy", "Sell").                      |
+| maker                                      | pubkey                            |           | Address of the maker who placed the opposing order.                        |
+| makerOrderId                               | int                               |           | Unique identifier for the maker's order.                                   |
+| makerOrderDirection                        | long/short                        |           | Direction of the maker's order (e.g., "Buy", "Sell").                      |
+| spotFulfillmentMethodFee                   | int                               |           | Fee associated with the spot fulfillment method used.                      |
+
+### Market Trades
+
+| Column                                     | unit                                                                 | Precision | Description                                                             |
+| ------------------------------------------ | -------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------- |
+| fillerReward                               | int                                                                  |           | Reward received by the filler for filling the order.                    |
+| baseAssetAmountFilled                      | int                                                                  |           | Amount of the base asset filled in the order.                           |
+| quoteAssetAmountFilled                     | int                                                                  |           | Amount of the quote asset filled in the order.                          |
+| takerFee                                   | int                                                                  |           | Fee charged to the taker for filling the order.                         |
+| makerRebate                                | int                                                                  |           | Rebate provided to the maker for placing the order.                     |
+| referrerReward                             | int                                                                  |           | Reward received by the referrer for referring the order.                |
+| quoteAssetAmountSurplus                    | int                                                                  |           | Amount of the quote asset remaining unfilled after the order.           |
+| takerOrderBaseAssetAmount                  | int                                                                  |           | Total amount of the base asset the taker ordered to buy or sell.        |
+| takerOrderCumulativeBaseAssetAmountFilled  | int                                                                  |           | Cumulative amount of the base asset filled for the taker's order.       |
+| takerOrderCumulativeQuoteAssetAmountFilled | int                                                                  |           | Cumulative amount of the quote asset filled for the taker's order.      |
+| makerOrderBaseAssetAmount                  | int                                                                  |           | Total amount of the base asset the maker ordered to buy or sell.        |
+| makerOrderCumulativeBaseAssetAmountFilled  | int                                                                  |           | Cumulative amount of the base asset filled for the maker's order.       |
+| makerOrderCumulativeQuoteAssetAmountFilled | int                                                                  |           | Cumulative amount of the quote asset filled for the maker's order.      |
+| makerFee                                   | int                                                                  |           | Fee charged to the maker for placing the order (if not a maker rebate). |
+| action                                     | fill                                                                 |           | Action type for the order fill event (e.g., "Fill").                    |
+| actionExplanation                          | orderFilledWithMatch/ orderFilledWithMatchJit/ orderFilledWithAmmjit |           | Explanation of the action type.                                         |
+| filler                                     | pubkey                                                               |           | Address of the entity that filled the order.                            |
+| fillRecordId                               | int                                                                  |           | Unique identifier for the order fill record.                            |
+| taker                                      | pubkey                                                               |           | Address of the taker who placed the order.                              |
+| takerOrderId                               | int                                                                  |           | Unique identifier for the taker's order.                                |
+| takerOrderDirection                        | long/short                                                           |           | Direction of the taker's order (e.g., "Buy", "Sell").                   |
+| maker                                      | pubkey                                                               |           | Address of the maker who placed the opposing order.                     |
+| makerOrderId                               | int                                                                  |           | Unique identifier for the maker's order.                                |
+| makerOrderDirection                        | long/short                                                           |           | Direction of the maker's order (e.g., "Buy", "Sell").                   |
+| spotFulfillmentMethodFee                   | int                                                                  |           | Fee associated with the spot fulfillment method used.                   |
+
+### Funding Rates
+
+| Column                         | unit | precision | Description                                   |
+| ------------------------------ | ---- | --------- | --------------------------------------------- |
+| recordId                       | int  |           | Unique order fill identifier.                 |
+| fundingRate                    | int  |           | Perpetual contract funding rate (long/short). |
+| fundingRateLong                | int  |           | Funding paid by long positions.               |
+| fundingRateShort               | int  |           | Funding paid by short positions.              |
+| cumulativeFundingRateLong      | int  |           | Long positions' cumulative funding.           |
+| cumulativeFundingRateShort     | int  |           | Short positions' cumulative funding.          |
+| oraclePriceTwap                | int  |           | TWAP of oracle price (period).                |
+| markPriceTwap                  | int  |           | TWAP of mark price (period).                  |
+| periodRevenue                  | int  |           | Market revenue for a specific period.         |
+| baseAssetAmountWithAmm         | int  |           | Total base asset in the AMM pool.             |
+| baseAssetAmountWithUnsettledLp | int  |           | Unsettled base asset with LPs.                |
+
+### Funding Payments
+
+| Column                    | unit | precision | description                                                                 |
+| ------------------------- | ---- | --------- | --------------------------------------------------------------------------- |
+| fundingPayment            | int  |           | Amount of funding paid by the user (positive for long, negative for short). |
+| baseAssetAmount           | int  |           | Amount of the base asset involved in the funding payment.                   |
+| userLastCumulativeFunding | int  |           | User's last cumulative funding rate at the time of the event.               |
+| ammCumulativeFundingLong  | int  |           | AMM's cumulative funding rate for long positions at the time of the event.  |
+| ammCumulativeFundingShort | int  |           | AMM's cumulative funding rate for short positions at the time of the event. |
+
+### Deposits
+
+| Column                          | unit               | Precision | Description                                          |
+| ------------------------------- | ------------------ | --------- | ---------------------------------------------------- |
+| marketDepositBalance            | int                |           | Current total market deposits.                       |
+| marketWithdrawBalance           | int                |           | Current total market withdrawals.                    |
+| marketCumulativeDepositInterest | int                |           | Total deposit interest accrued.                      |
+| marketCumulativeBorrowInterest  | int                |           | Total borrow interest accrued.                       |
+| totalDepositsAfter              | int                |           | Total market deposits after this event.              |
+| totalWithdrawsAfter             | int                |           | Total market withdrawals after this event.           |
+| depositRecordId                 | int                |           | Unique identifier for the deposit/withdrawal record. |
+| direction                       | deposit/withdrawal |           | Deposit or withdrawal.                               |
+| explanation (optional)          | str                |           |                                                      |
+
+### Liquidations
+
+| Column                                                               | unit                                                                                                                | precision | description                                    |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------- |
+| liquidationType                                                      | liquidatePerp/ liquidateSpot/ liquidateBorrowForPerpPnl/ liquidatePerpPnlForDeposit/ perpBankruptcy/ spotBankruptcy |           | Liquidation type                               |
+| liquidator                                                           | pubkey                                                                                                              |           | Liquidator                                     |
+| marginRequirement                                                    | int                                                                                                                 |           | Minimum collateral required                    |
+| totalCollateral                                                      | int                                                                                                                 |           | User's total collateral                        |
+| marginFreed                                                          | int                                                                                                                 |           | Collateral returned to user                    |
+| liquidationId                                                        | int                                                                                                                 |           | Unique liquidation ID                          |
+| bankrupt                                                             | bool                                                                                                                |           | User became bankrupt                           |
+| canceledOrderIds                                                     | ListContainer                                                                                                       |           | Array of canceled order IDs during liquidation |
+| liquidatePerp (marketIndex, oraclePrice, ...)                        | int                                                                                                                 |           | Liquidation type with additional details.      |
+| liquidateSpot (assetMarketIndex, assetPrice, ...)                    | int                                                                                                                 |           | Liquidation type with additional details.      |
+| liquidateBorrowForPerpPnl (perpMarketIndex, marketOraclePrice, ...)  | int                                                                                                                 |           | Liquidation type with additional details.      |
+| liquidatePerpPnlForDeposit (perpMarketIndex, marketOraclePrice, ...) | int                                                                                                                 |           | Liquidation type with additional details.      |
+| perpBankruptcy (marketIndex, pnl, ...)                               | int                                                                                                                 |           | Liquidation type with additional details.      |
+| spotBankruptcy (marketIndex, borrowAmount, ...)                      | int                                                                                                                 |           | Liquidation type with additional details.      |
+
+### Settle PNL
+
+| Column                | Unit | Precision | Description                              |
+| --------------------- | ---- | --------- | ---------------------------------------- |
+| pnl                   | int  |           | User's profit or loss.                   |
+| baseAssetAmount       | int  |           | Amount of base asset involved.           |
+| quoteAssetAmountAfter | int  |           | Amount of quote asset after settlement.  |
+| quoteEntryAmount      | int  |           | Amount of quote asset before settlement. |
+| settlePrice           | int  |           | Settlement price.                        |
+| explanation           | none |           |                                          |
+
+### LP (BAL)
+
+| Column                | Unit                           | Description                                      |
+| --------------------- | ------------------------------ | ------------------------------------------------ |
+| action                | addLiquidity / settleLiquidity |                                                  |
+| nShares               | int                            | Number of perpetual contract shares traded.      |
+| deltaBaseAssetAmount  | int                            | Change in base asset position due to the trade.  |
+| deltaQuoteAssetAmount | int                            | Change in quote asset position due to the trade. |
+| pnl                   | int                            | Profit or loss from the trade.                   |
+
+### Insurance Fund
+
+| Column                     | Unit | Precision | Description                                                |
+| -------------------------- | ---- | --------- | ---------------------------------------------------------- |
+| vaultAmountBefore          | int  |           | Total amount deposited into the vault before the event.    |
+| insuranceVaultAmountBefore | int  |           | Total amount in the insurance vault before the event.      |
+| totalIfSharesBefore        | int  |           | Total number of IF shares in circulation before the event. |
+| totalIfSharesAfter         | int  |           | Total number of IF shares in circulation after the event.  |
+| userIfFactor               | int  |           | User's individual IF factor before the event.              |
+| totalIfFactor              | int  |           | Total IF factor for all users before the event.            |
+
+### Insurance Fund Stake
+
+| Column                     | Unit          | Precision | Description                                         |
+| -------------------------- | ------------- | --------- | --------------------------------------------------- |
+| action                     | stakeTransfer |           |                                                     |
+| ifSharesBefore             | int           |           | Total IF shares in circulation before staking.      |
+| userIfSharesBefore         | int           |           | User's individual IF share balance before staking.  |
+| totalIfSharesBefore        | int           |           | Total IF factor for all users before staking.       |
+| ifSharesAfter              | int           |           | Total IF shares in circulation after staking.       |
+| userIfSharesAfter          | int           |           | User's individual IF share balance after staking.   |
+| totalIfSharesAfter         | int           |           | Total IF factor for all users after staking.        |
+| insuranceVaultAmountBefore | int           |           | Total amount in the insurance vault before staking. |
+
+## 🟪 v1
+
+### Trades
+
+| Column              | unit          | Precision           | description                                                                                           | Ext. Link                                                                                     |
+| ------------------- | ------------- | ------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| id                  | int           |                     |                                                                                                       |                                                                                               |
+| programId           | publickey     |                     | the on-chain program interacted with (AMM\* == drift protocol mainnet)                                |                                                                                               |
+| recordId            | int           |                     | sequential count of all trades that ever occured (ensures proper ordering vs by the second timestamp) |                                                                                               |
+| userAuthority       | publickey     |                     |                                                                                                       |                                                                                               |
+| user                | publickey     |                     |                                                                                                       |                                                                                               |
+| baseAssetAmount     | int           | 1e13                | BASE amt of swap (e.g. SOL-PERP)                                                                      |                                                                                               |
+| quoteAssetAmount    | int           | 1e6                 | USDC of swap                                                                                          |                                                                                               |
+| markPriceBefore     | int           | 1e10                |                                                                                                       |                                                                                               |
+| markPriceAfter      | int           | 1e10                |                                                                                                       |                                                                                               |
+| fee                 | int           | 1e6                 | fee paid to AMM by user for swap                                                                      |                                                                                               |
+| liquidation         | bool          |                     | was trade a forced liquidation                                                                        |                                                                                               |
+| direction           | Long \| Short |                     | did user go Long (buy) or Short (sell) the Base amt                                                   |                                                                                               |
+| blockChainTimeStamp | int           | seconds(since 1970) | unix on-chain time stamp                                                                              |                                                                                               |
+| serverTimeStamp     | int           | seconds(since 1970) | exchange history server off-chain time stamp (can be delayed due to outages)                          |                                                                                               |
+| marketIndex         | int           |                     | market Index in Markets Account that user swapped                                                     | [markets](https://github.com/drift-labs/protocol-v1/blob/master/sdk/src/constants/markets.ts) |
+| oraclePrice         | int           | 1e10                | oracle price at time of swap (provided by pyth/switchboard)                                           |                                                                                               |

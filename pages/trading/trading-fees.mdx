@@ -1,0 +1,75 @@
+# Trading Fees
+
+Trading fees on Drift are calculated on a per-trade basis and are based on the filled notional position size.
+
+Trading fees are calculated in the market's quote asset (USDC) and show up in Perpetual Markets as a penalty on the cost basis of position. In the circumstance where a user only holds non-USDC assets on Drift, a borrow for USDC will only appear upon someone settling that perp position's loss (see [P&L](/profit-loss/profit-loss-intro)).
+
+Drift Protocol has a tiered fee structure for all futures markets based on an on-chain calculation of 30-Day Volume\*.
+
+---
+
+BTC-PERP and ETH-PERP, have a reduced fee schedule (vs other markets)
+
+| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
+| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
+| 1        | < 500                                     | < 1m             | -0.25 bps        | 2.5 bps        | 5%                          | 15%                 | 10%\*              |
+| 2        | < 500                                     | > 1m             | -0.25 bps        | 2.25 bps         | 5%                          | 15%                 | 10%\*              |
+| 3        | > 1K                                      | > 5m             | -0.25 bps        | 2 bps         | 5%                          | 15%                 | 10%\*              |
+| 4        | > 2K                                      | > 10m            | -0.25 bps        | 1.75 bps         | 5%                          | 15%                 | 10%\*              |
+| 5        | > 5K                                      | > 50m            | -0.25 bps        | 1.5 bps         | 5%                          | 15%                 | 10%\*              |
+| VIP      | > 10K                                     | > 100m           | -0.25 bps        | .75 bps         | 5%                          | 15%                 | 10%\*              |
+
+
+---
+
+All other Perpetual Trading Fees are charged on a per-tier basis according to the following schedule:
+
+| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
+| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
+| 1        | < 500                                     | < 1m       | -1 bps        | 10 bps        | 5%                          | 15%                 | 10%\*              |
+| 2        | < 500                                     | > 1m             | -1 bps        | 9 bps         | 5%                          | 15%                 | 10%\*              |
+| 3        | > 1K                                      | > 5m             | -1 bps        | 8 bps         | 5%                          | 15%                 | 10%\*              |
+| 4        | > 2K                                      | > 10m            | -1 bps        | 7 bps         | 5%                          | 15%                 | 10%\*              |
+| 5        | > 5K                                      | > 50m            | -1 bps        | 6 bps         | 5%                          | 15%                 | 10%\*              |
+| VIP      | > 10K                                     | > 100m           | -1 bps        | 3 bps         | 5%                          | 15%                 | 10%\*              |
+
+### Taker Fees
+
+Takers are charged a variable Taker Fee depending on which Tier they belong to.
+
+**Tier 1 -- 10 bps**: Default tier.
+
+**Tier 2 -- 9 bps**: Either stake more than 500 *or\* trade over 1m in volume (30D average).
+
+**Tier 3 -- 8 bps**: Either stake more than 1K *or\* trade over 5m in volume (30D average).
+
+**Tier 4 -- 7 bps**: Either stake more than 2K *or\* trade over 10m in volume (30D average).
+
+**Tier 5 -- 6 bps**: Either stake more than 5K *or\* trade over 50m in volume (30D average).
+
+**VIP -- 3 bps**: Either stake more than 10K *or\* trade over 100m in volume (30D average).
+
+### Maker Fees
+
+Makers are provided with a flat 1bps rebate regardless of the Taker Fee paid.
+
+### Referee Discount / Referer Reward
+
+These apply to accounts that were signed up using a referred account. These percentages are applied to the effective taker fee paid.
+
+### Filler Reward
+
+Filler rewards are variable but up to 10% of the effective taker fee paid by the user. See [Keeper Incentives](/about-v2/keeper-incentives).
+
+### Spot Fees
+Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebate for maker. While most longer tail assets can have increased fees (~10 bps) to stay in line with external markets fee schedules.
+
+### Disclaimers
+
+_Drift Protocol reserves the right to end the promotional period and the Taker Incentive Program at any time. If the Drift Protocol chooses to do so, it will provide notice to participating users, but such notice is not required in order to conclude the program early or extend the program. Please note that the terms and conditions of this program are subject to change without notice._
+
+_There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._**
+
+---
+
+_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._

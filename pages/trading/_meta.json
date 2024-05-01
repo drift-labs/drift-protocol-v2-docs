@@ -1,0 +1,20 @@
+{
+    "market-specs":"Market Specs",
+    "prelaunch-markets":"Prelaunch Markets",
+    "perpetuals-trading":"Perpetuals Trading",
+    "what-are-perpetual-futures":"What are Perpetual Futures?",
+    "funding-rates":"Funding Rates",
+    "spot-margin-trading":"What is Spot Margin Trading?",
+    "spot-faq":"Spot FAQ",
+    "margin":"Margin",
+    "order-types":"Order Types",
+    "all-order-types":"All Order Types",
+    "advanced-orders-faq":"Advanced Orders FAQ",
+    "account-health": "Health Breakdown",
+    "auction-parameters":"Auction Parameters",
+    "trading-fees":"Trading Fees",
+    "fee-pool":"Fee Pool",
+    "versioned-transactions": "Versioned Transactions",
+    "block-conditions": "Block Conditions",
+    "oracles": "Oracles"
+}

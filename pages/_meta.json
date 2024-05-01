@@ -1,0 +1,36 @@
+{
+  "index": "👾 Welcome to Drift Protocol",
+  "about-v2": "🏎 About Drift v2",
+  "getting-started": "👋🏻 Getting Started",
+  "trading": "📈 Trading",
+  "profit-loss": "💸 Profit & Loss (P&L)",
+  "liquidations": "💀 Liquidations",
+  "lend-borrow": "🏦 Lend & Borrow",
+  "market-makers": "💦 Market Makers",
+  "insurance-fund": "🏝️ Insurance Fund",
+  "backstop-amm-liquidity": "🌊 Backstop AMM Liquidity",
+  "API": "🪀 API",
+  "sdk-documentation": "📕 SDK Documentation",
+  "tutorial-bots": "🤖 Tutorial Bots",
+  "historical-data": "⏳ Historical Data",
+  "referral-link": "💌 Referral Link",
+  "drift-draw": "🍀 Drift Draw",
+  "risk-and-safety": "⛑️ Risk and Safety",
+  "security": "🔐 Security",
+  "glossary": "🔤 Glossary",
+  "--- Legal": {
+    "title": "LEGAL",
+    "type": "separator"
+  },
+  "legal-and-regulations": "Legal and Regulations",
+  "contributing-to-drift": {
+    "title": "Contributing to Drift Protocol",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://twitter.com/DriftProtocol",
+    "newWindow": true
+  }
+}

@@ -1,0 +1,62 @@
+# Tutorial: Order Trigger Bot
+
+# Introduction
+
+Order Trigger Bots (Trigger Bots) are responsible for marking orders that satisfy the trigger condition, including:
+
+-   **Trigger Market Orders -** Stop Market and Take Profit
+
+-   **Trigger Limit Orders -** Stop Limit and Take Profit Limit
+
+Trigger Bots receive a small compensation for each successfully marked order.
+
+See [Keepers & Decentralised Orderbook](/about-v2/decentralized-orderbook) for a technical explanation of how the decentralised orderbook (DLOB) and matching incentives work.
+
+Trigger Bots are similar to [Tutorial: Order Matching Bot](/tutorial-bots/keeper-bots/tutorial-order-matching-bot) in that they:
+
+-   also maintain a local copy of the [Keepers & Decentralised Orderbook](/about-v2/decentralized-orderbook);
+
+-   do not require the operator to manage collateral; and
+
+-   receive a small reward for performing their duties.
+
+# Getting Started
+
+The reference implementation of a Trigger Bot is available [here](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/trigger.ts).
+
+Follow the instructions at [Keeper Bots](/about-v2/keepers) to set the required environment variables and make sure a `ClearingHouseUser` is initialised.
+
+Start the Trigger Bot:
+
+```shell
+yarn run dev:trigger
+```
+
+# Technical Explanation
+
+## 1. Get nodes from the DLOB that are ready to be triggered
+
+The DLOB implementation includes a method for getting orders ready to be triggered:
+
+```typescript
+const market = this.driftClient.getMarketAccounts()[0]; // get a MarketAccount
+
+const oraclePriceData = this.driftClient.getOracleDataForMarket(marketIndex);
+
+const nodesToTrigger = this.dlob.findNodesToTrigger(
+    marketIndex,
+    this.slotSubscriber.getSlot(),
+    oraclePriceData.price
+);
+```
+
+## 2. Call `trigger_order` on `DriftClient`
+
+```typescript
+const user = this.userMap.get(nodeToTrigger.node.userAccount.toString());
+const txSig = await this.driftClient.triggerOrder(
+    nodeToTrigger.node.userAccount,
+    user.getUserAccount(),
+    nodeToTrigger.node.order
+);
+```

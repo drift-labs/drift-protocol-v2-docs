@@ -1,0 +1,85 @@
+import { Callout } from "nextra-theme-docs";
+
+# Advanced Orders FAQ
+
+**How are the Limit Orders filled?**
+
+Limit Orders are taker orders that are filled against the AMM. 
+The orders are stored and settled on-chain. The queue is constructed by a network of off-chain keepers that are incentivised to fill orders against the AMM based on age.
+
+**Is there a charge for placing an order? Is that charged in SOL or USDC?**
+
+Network fees aside, there is no additional SOL charge for placing an order. The taker fee is charged in USDC and is only applied if the trade is filled. If a trade is only partially filled, the fee charged will be for the notional amount filled.
+
+**Is there a charge for cancelling an order? Is that charged in SOL or USDC?**
+
+No - if you cancel an open order, you will not be charged by the protocol. Fees are only charged on filled orders.
+
+**Is my order guaranteed to execute?**
+
+These orders are executed 'best effort' by the network with special economic incentives designed to mimic the typical execution order seen in a Centralised Limit Order Book (CLOB).
+
+**What are conditional limit orders?**
+
+Conditional limit orders are only placed on the market when the conditions for the orders are met. For instance, stop orders are only placed on the market when the trigger price is hit (the condition being the trigger price).
+
+**What is the difference between a Stop Market and a Stop Limit?**
+
+Both orders are used as downside protection to stop losses. However, where they differ is how the orders are executed. A Stop Market order is immediately sold on the market in full once the trigger price is reached. Stop Limits are slightly different - rather than opening a Market Order, it opens a new limit order which can have a different price to the trigger price used to create the limit order.
+
+**What is the difference between Take Profit Market and Take Profit Limit?**
+
+The difference is in the way these orders are settled. Take Profit Market orders are immediately sold on market upon hitting their trigger price. On the other hand, Take Profit Limit orders are not sold immediately but are partially filled as limit orders. The subsequent limit orders don’t need to have the same target price as their trigger price.
+
+**What is the difference between a Stop Loss and a Take Profit?**
+
+Both order types are set on the market when their triggers are met. Where the two orders differ is in their direction. Stop Losses are used for downside protection to close losing positions and Take Profits are used to close positions that are in profit.
+
+<Callout type="warning" emoji="⚠️">
+**Why my stop loss didn't trigger?**
+
+Limit orders can only get filled if the oracle prices cross. Therefore, just looking at the "fill" candles can be misleading. Use the "oracle" option on the candles to see the historical oracle prices.
+
+Even if the oracle price crosses your stop, fills aren't guaranteed due to the decentralized orderbook. Fillers can submit orders in a permissionless way, and it works on a first-come, first-served basis.
+
+If the price only briefly meets your order, it's not guaranteed to be filled. We're working on improving the filler network, which may help. Additionally, you can run your own filler for your own orders if you're technically inclined and really want guaranteed fills, but even then, there's no guarantee. This is one of the trade-offs we've made to achieve a decentralized and scalable system.
+
+We're also experiencing periods where the oracle is stale, so orders can't be filled. This is further exacerbating the problem, but it's a necessary sacrifice for the security of the protocol. Hopefully, improvements to the Solana and Pyth Network will help fix this.
+</Callout>
+
+
+**Why did my take profit order not work?**
+
+Take profit orders on Drift use the oracle price, not the mark price. This means the order is triggered based on a fair market price from a reliable source (Pyth) instead of the current trading price on the exchange. You can switch between the oracle and mark price view on the chart for better understanding.
+
+**My stop-loss order didn't trigger, and the price went up. Why did I lose money?**
+
+Similar to the take profit scenario, stop-loss orders are also triggered based on the oracle price. If the oracle price briefly touched your stop-loss level and then bounced back, your order might have been executed even though the market price never reached that level.
+
+**What is the difference between a trigger price and a limit price?**
+
+- Trigger price: This price point determines when your order (take profit or stop-loss) gets activated. It uses the oracle price for execution.
+
+- Limit price: This price specifies the exact price at which your order gets filled. It can be used with stop-loss and take-profit orders to guarantee execution at a specific price, but comes with potential slippage (filling at a slightly different price) and fees.
+
+**What does trigger price mean?**
+
+Trigger price refers to the price the particular asset needs to hit before the limit order can be executed against the AMM by a Keeper.
+
+**Why is the orderbook constructed off-chain?**
+
+Drift doesn't construct a central limit orderbook on-chain and instead opts for a flat structure to achieve cost-effective scalability. The network of Keepers monitor on-chain orders and construct their own orderbooks off-chain. This achieves (1) decentralisation (as each Keeper stores its own copy of the orderbook); and (2) computational efficiency (as the high throughput and intensive computations are calculated off-chain).
+
+Theoretically, this should also translate to better performance during periods of high network congestion.
+
+**What is reduce-only?**
+
+**Reduce-only** orders guarantee that you will:
+
+-   NOT be made longer if you are already long (or shorter if you are already short); and
+
+-   NOT be made short if you were previously long (or vice versa).
+
+**What are Keeper bots? How can I participate?**
+
+A Keeper will track and fill orders and earn a reward. Guide to running different types of [Keeper Bots](/tutorial-bots).

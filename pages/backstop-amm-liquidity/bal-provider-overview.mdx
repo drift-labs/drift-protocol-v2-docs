@@ -1,0 +1,93 @@
+import { Callout } from "nextra-theme-docs";
+
+# Backstop AMM Liquidity (BAL)
+
+## Overview
+
+Backstop AMM Liquidity (BAL) is a way for users can opt provide backstop liquidity to selected markets. This action increases liquidity in the market's virtual Automated Market Maker (AMM), enhancing execution quality for other users by reducing price impact.
+
+Adding shares to the Liquidity provision involves boosting `sqrtK` for the AMM's oracle-based constant product liquidity. Increasing `sqrtK` thereby increasing the liquidity pool. Notably, liquidity added to perpetuals markets is cross-margined within Drift, allowing users to earn lending interest and access capital for margin trading.
+
+For a detailed understanding of BAL functionality, refer to the [BAL Technical Explainer](/backstop-amm-liquidity/bal-provider-overview).
+
+<Callout type="warning" emoji="⚠️">
+BAL involves leverage and opens perpetual positions on behalf of the user.
+
+This requires the user to actively manage their account's inventory / risk for best results.
+
+Before using BAL, even with low leverage, please read through all the documentation careful.
+
+</Callout>
+
+### Getting Started with BAL
+
+You’ll take on a share of the AMM’s positions as a counterparty to other Drift traders. For example, if a Drift trader goes short, you’ll receive a long position.
+
+Your liquidity is represented as open orders (bids/asks) and you’ll see your BAL positions in the positions table:
+
+<img src="/assets/DLP-intro-1.png" alt="dlp" width="600" height="auto"></img>
+
+
+### Position Updates & Management
+
+Adding BAL shares, As new trades are filled, your perp position in that market can be updated.
+
+Reducing BAL shares reduces the flow of updates to that market's perp position.
+
+The exact flow of position depends on the fill action vs the AMM (this can be a proto-rata split of protocol-owned and user-owned liquidity or just one or the other). Note that BAL does not get a share of AMM/JIT split fills.
+
+The AMM can fill as a backstop and participate along side other user maker orders to partially rebalance inventory.
+
+[Learn more about how the AMM fills order](/about-v2/drift-amm)
+
+You can manage your risk manually by reducing the perp position or closing it via the close button in the positions table.
+
+<img src="/assets/DLP-intro-2.png" alt="dlp" width="600" height="auto"></img>
+
+### Setting max leverage for your subaccount
+
+A subaccount max leverage is suggested when you add liquidity but can be adjusted in the settings. This setting adjusts your margin requirement for increasing BAL positions. If your account falls below the collateral requirement shown on BAL page, the next P&L settle will trigger de-risking of the position. You can also opt out of this in Margin/Leverage Settings.
+
+<img src="/assets/DLP-intro-3.png" alt="dlp" width="600" height="auto"></img>
+
+### How to add liquidity to BAL
+
+To add liquidity to a perpetual market:
+
+1.  Select the market you'd like to be an LP for and click `Add`
+
+<img src="/assets/dlp-select-market.png" alt="dlp" width="600" height="auto"></img>
+
+2.  In the modal, enter the amount you'd like to provide or the leverage
+
+<img src="/assets/dlp-add-liquidity.png" alt="dlp" width="600" height="auto"></img>
+
+3.  Click `Add`
+
+You may be prompted to create a subaccount for BAL. This is highly recommended in order to easily track BAL and trading P&L.
+
+### How to remove liquidity
+
+You can remove liquidity from the Trading page under the positions tab or you can access it from the BAL page:
+
+1.  Click `Remove`
+
+<img src="/assets/dlp-remove-position.png" alt="dlp" width="600" height="auto"></img>
+
+2.  Select the amount of shares you'd like to remove
+
+<img src="/assets/dlp-select-shares-to-remove.png" alt="dlp" width="600" height="auto"></img>
+
+3.  Click `Remove Liquidity`
+
+### How to view the historical performance for each market
+
+There are 2 ways to access historical performance:
+
+1.  You can click on the 7D or 30D performance in each markets card
+
+<img src="/assets/dlp-performance-chart.png" alt="dlp" width="600" height="auto"></img>
+
+2.  or, in table view, you can click `View Performance` under the 30D Performance column
+
+<img src="/assets/dlp-performance-table-view.png" alt="dlp" width="600" height="auto"></img>

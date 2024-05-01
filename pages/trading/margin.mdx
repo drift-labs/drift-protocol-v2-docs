@@ -1,0 +1,51 @@
+# Margin
+
+Below is a table for initial and maintenance margin requirements for each market. This information is available on the market account and [the SDK](https://github.com/drift-labs/protocol-v2/blob/master/sdk/src/constants/perpMarkets.ts).
+
+Notional size: 10,000
+
+   |     | Perpetuals  | Initial Margin(Margin Ratio / Leverage) | Maintenance Margin(Margin Ratio/ Leverage) | IMF Factor |
+   | --- | ----------  | --------------------------------------- | ------------------------------------------ | ---------- |
+   | 0   | SOL-PERP    | 10% / 10x                               | 20% / 20x                                  | 0.0002     |
+   | 1   | BTC-PERP    | 20% / 20x                               | 33% / 33x                                  | 0.008      |
+   | 2   | ETH-PERP    | 20% / 20x                               | 33% / 33x                                  | 0.002      |
+   | 3   | APT-PERP    | 10% / 10x                               | 20% / 15x                                  | 0.0009     |
+   | 4   | 1MBONK-PERP | 4%  / 4x                                | 7%  / 7x                                   | 0.0006     |
+   | 5   | MATIC-PERP  | 10% / 8x                                | 20% / 12x                                  | 0.0005     |
+   | 6   | ARB-PERP    | 10% / 9x                                | 20% / 14x                                  | 0.0005     |
+   | 7   | DOGE-PERP   | 10% / 8x                                | 20% / 11x                                  | 0.0002     |
+   | 8   | BNB-PERP    | 10% / 10x                               | 20% / 18x                                  | 0.0035     |
+   | 9   | SUI-PERP    | 10% / 9x                                | 20% / 13x                                  | 0.0005     |
+   | 10  | 1MPEPE-PERP | 4%  / 4x                                | 8%  / 8x                                   | 0.0008     |
+   | 11  | OP-PERP     | 10% / 10x                               | 20% / 17x                                  | 0.0005     |
+   | 12  | RNDR-PERP   | 10% / 10x                               | 20% / 18x                                  | 0.0006     |
+   | 13  | XRP-PERP    | 10% / 7x                                | 15% / 8x                                   | 0.0006     |
+   | 14  | HNT-PERP    | 5%  / 5x                                | 15% / 14x                                  | 0.0006     |
+   | 15  | INJ-PERP    | 10% / 10x                               | 15% / 15x                                  | 0.0006     |
+   | 16  | LINK-PERP   | 10% / 10x                               | 15% / 15x                                  | 0.0006     |
+   | 17  | RLB-PERP    | 5%  / 5x                                | 10% / 9x                                   | 0.0001     |
+   | 18  | PYTH-PERP   | 10% / 10x                               | 20% / 19x                                  | 0.0001     |
+   | 19  | TIA-PERP    | 10% / 10x                               | 20% / 20x                                  | 0.0001     |
+   | 20  | JTO-PERP    | 10% / 10x                               | 20% / 20x                                  | 0.0001     |
+   | 21  | SEI-PERP    | 10% / 10x                               | 20% / 20x                                  | 0.0001     |
+   | 22  | AVAX-PERP   | 10% / 10x                               | 20% / 20x                                  | 0.0001     |
+   | 23  | WIF-PERP    | 4%  / 4x                                | 8%  / 8x                                   | 0.0001     |
+   | 24  | JUP-PERP    | 10% / 10x                               | 20% / 19x                                  | 0.0001     |
+   | 25  | DYM-PERP    | 5%  / 5x                                | 10% / 10x                                  | 0.0005     |
+   | 26  | TAO-PERP    | 5%  / 5x                                | 10% / 10x                                  | 0.0001     |
+
+|        | Spot    | Initial Leverage | Maintenance Leverage |IMF Factor |
+|--------|---------|------------------|----------------------|-----------|
+| 0      | USDC    | 1,000,000        | 1,000,000            |0          |
+| 1      | SOL     | 2.3781           | 9.9999               |0.0013     |
+| 2      | mSOL    | 1.6597           | 9.9999               |0.003      |
+| 3      | wBTC    | 1.5903           | 9.9999               |0.105      |
+| 4      | wETH    | 1.7982           | 9.9999               |0.025      |
+| 5      | USDT    | 9.9999           | 19.9996              |0.0004     |
+| 6      | jitoSOL | 1.701            | 9.9999               |0.0006     |
+| 7      | PYTH    | 1.1319           | 4                    |0.001      |
+| 8      | bSOL    | 1.7419           | 9.9999               |0.003      |
+| 9      | JTO     | 1.1791           | 4                    |0.001      |
+| 10     | WIF     | 1                | 2                    |0.004      |
+| 11     | JUP     | 1.0933           | 4                    |0.001      |
+| 12     | RNDR    | 1.0273           | 4                    |0.001      |
