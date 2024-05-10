@@ -1,5 +1,3 @@
-import { Callout } from "nextra-theme-docs";
-
 # Advanced Orders FAQ
 
 **How are the Limit Orders filled?**
@@ -35,18 +33,15 @@ The difference is in the way these orders are settled. Take Profit Market orders
 
 Both order types are set on the market when their triggers are met. Where the two orders differ is in their direction. Stop Losses are used for downside protection to close losing positions and Take Profits are used to close positions that are in profit.
 
-<Callout type="warning" emoji="⚠️">
 **Why my stop loss didn't trigger?**
 
-Limit orders can only get filled if the oracle prices cross. Therefore, just looking at the "fill" candles can be misleading. Use the "oracle" option on the candles to see the historical oracle prices.
+Limit orders will only execute if the oracle prices intersect. For precise historical price data based on the oracle, we recommend switching from 'Candles: Fills' to 'Candles: Oracle' in the top right corner of the chart.
 
-Even if the oracle price crosses your stop, fills aren't guaranteed due to the decentralized orderbook. Fillers can submit orders in a permissionless way, and it works on a first-come, first-served basis.
+Even if the oracle price triggers your stop, executions are not guaranteed due to the decentralized orderbook. Fillers can place orders in a permissionless manner, operating on a first-come, first-served basis.
 
-If the price only briefly meets your order, it's not guaranteed to be filled. We're working on improving the filler network, which may help. Additionally, you can run your own filler for your own orders if you're technically inclined and really want guaranteed fills, but even then, there's no guarantee. This is one of the trade-offs we've made to achieve a decentralized and scalable system.
+If the price briefly matches your order, it may not be executed. We are continually enhancing our filler network. For technically inclined individuals seeking guaranteed fills, you can operate your own filler for personal orders; however, even then, execution cannot be assured. This trade-off is necessary to achieve a decentralized and scalable system.
 
-We're also experiencing periods where the oracle is stale, so orders can't be filled. This is further exacerbating the problem, but it's a necessary sacrifice for the security of the protocol. Hopefully, improvements to the Solana and Pyth Network will help fix this.
-</Callout>
-
+Occasionally, stale oracle information may result in unfilled orders during certain periods.
 
 **Why did my take profit order not work?**
 

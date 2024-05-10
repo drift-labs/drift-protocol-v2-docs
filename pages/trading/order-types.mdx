@@ -1,3 +1,5 @@
+import { Callout } from "nextra-theme-docs";
+
 # Order Types
 
 Drift supports the following order types:
@@ -20,8 +22,9 @@ Market Orders will trigger a Just-In-Time auction, where market makers will be a
 
 Executing a Market Order does not mean the order will execute at exactly the price displayed as the mark price of an asset may change before the JIT Auction is complete. 
 
-
-> The fee paid depends on whether the order is a taker order or a maker order.
+<Callout type="warning" emoji="⚠️">
+The fee paid depends on whether the order is a taker order or a maker order.
+</Callout>
 
 Maker orders are Limit orders with a 'Post' flag.
 

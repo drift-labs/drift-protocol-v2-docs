@@ -1,3 +1,5 @@
+import { Callout } from "nextra-theme-docs";
+
 # All Order Types
 
 ## Advanced Orders
@@ -44,9 +46,14 @@ Take Profit Limit Orders also serve as a max slippage tolerance for the Stop Ord
 | **Short**        | **Take Profit**               | **Buy**         | **Below**         | **True/False** |
 | Short            | Take Profit (Market If Touch) | Sell            | Below             | False          |
 
-> **If Trigger Price < Limit Price:** order starts getting filled once the price is below the trigger price.
 
-> **If Limit Price < Trigger Price:** order starts getting filled once the price is below the limit price.
+<Callout type="warning" emoji="⚠️">
+
+**If Trigger Price < Limit Price:** order starts getting filled once the price is below the trigger price.
+
+**If Limit Price < Trigger Price:** order starts getting filled once the price is below the limit price.
+
+</Callout>
 
 One limitation is that the protocol can only detect that a Trigger Price has been hit if the order has already been or can be partially filled. This means it does not allow for some order configurations to be placed:
 
@@ -57,11 +64,15 @@ One limitation is that the protocol can only detect that a Trigger Price has bee
 | False          | True            | Ok                    |
 | False          | False           | Must be below trigger |
 
+<Callout type="info" emoji="⬇️">
+
 **Example:**
 
-> If Trigger Price is >$140 and a Long is placed with a Limit Price = \$135, there is no way the order can know that \$140 was hit before you try to long when the price falls \$5.
+If Trigger Price is >\$140 and a Long is placed with a Limit Price = \$135, there is no way the order can know that \$140 was hit before you try to long when the price falls \$5.
 
 In the other scenario, if Trigger Price is < \$140 and a Long is placed with a Limit Price = \$135, we will know that \$140 (AND \$135) must have been hit since you were partially filled.
+
+</Callout>
 
 ### Oracle Limit
 

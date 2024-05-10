@@ -1,3 +1,5 @@
+import { Callout } from "nextra-theme-docs";
+
 # Accounting & Settlement
 
 Within Drift Protocol, all token deposits are held in a global collateral vault. This is required for seamless cross-margin and borrow-lend. The only exception to this is the insurance fund vault residing outside.
@@ -11,19 +13,21 @@ Ensuring proper accounting across users requires a robust settlement mechanism. 
 An individual perpetual market has two pools:
 
  A. P&L Pool: to accumulate funds from users with losses for settlement to users with profits
+
  B. Fee Pool: to accumulate a fraction of exchange fees for the Quote Spot Market's Revenue Pool
 
 The P&L Pool receives the highest priority on claimed funds, in order to give user's the best possible experience. The default fraction of exchange fees for the Fee Pool is `total_exchange_fee / 2` and this fraction is determined by: `SHARE_OF_FEES_ALLOCATED_TO_CLEARING_HOUSE`.
 
-
-> The Fee Pool will only get partially filled up by up to 1% of intermediate P&L settled from a user's losses and aggressively drawn down for the benefit of the P&L Pool otherwise.
-
+<Callout type="info" emoji="⬇️">
+The Fee Pool will only get partially filled up by up to 1% of intermediate P&L settled from a user's losses and aggressively drawn down for the benefit of the P&L Pool otherwise.
+</Callout>
 
 ### Spot Market
 
 An individual spot market has two pools:
 
  A. Revenue Pool: to accumulate revenue across the protocol, denominated in this token
+
  B. Fee Pool: to pay fillers and settle portions to the revenue pool
 
 The Revenue Pool can collect fees from:
@@ -34,7 +38,7 @@ The Revenue Pool can collect fees from:
 
 -   Perpetual Markets
 
-and can pay out to
+and can pay out to:
 
 -   Insurance Fund Stakers
 

@@ -1,3 +1,5 @@
+import { Callout } from "nextra-theme-docs";
+
 # Funding Rates
 
 Perpetuals futures have no expiry date, final settlement, or delivery. As such, funding rate payments are used as the incentive mechanism to bring the perpetual futures' mark price in line with the oracle price.
@@ -39,13 +41,17 @@ See [Rebates](/market-makers/maker-rebate-fees) for funding pool sizes where the
 
 Over the hour, the amount available in the Rebate Pool will increase from fees as trades occur, so any existing predicted capped rate should move closer to being balanced.
 
+<Callout type="info" emoji="⬇️">
+
 **Example:**
 
-For BTC-PERP you can check the recent history to get a better idea of what shorts will receive
+For BTC-PERP you can check the recent history to get a better idea of what shorts will receive.
 
 Example funding calculation:
 
 `1/24 * (174.643 - 174.450)/(174.450) = 0.00460% (40.27% APR)`
+
+</Callout>
 
 ![example data](public/assets/mBFRK1HfhF-9o6IaExcW0_screen-shot-2021-12-30-at-115308-am.png)
 
@@ -63,4 +69,7 @@ Funding rates can be showcased in annual terms for easier comparison.
 
 **APY** would be: `(1 + rate) ^ (24 x 365.25) - 1`
 
-> One can approximately track **APY** by allocating funding receipts back into the position (excluding fees/rebates)
+<Callout type="info" emoji="💡">
+One can approximately track **APY** by allocating funding receipts back into the position (excluding fees/rebates).
+</Callout>
+
