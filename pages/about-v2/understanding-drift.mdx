@@ -51,7 +51,7 @@ Drift's virtual AMM (AMM) is the backstop designated liquidity provider for trad
 1. market orders aren't filled by the JIT and
 2. resting orders hit a trigger price that can be filled by the AMM.
 
-The AMM provides a source of constant liquidity for all traders to **take** from. The AMM is considered constant as liquidity is available based on a constant product formula `(x\*y=k){:jsx}` balancing the reserves. Drift's AMM features an inbuilt bid-ask spread that adjusts based on inventory held by the AMM. Users can also LP into the AMM to further collateralize.
+The AMM provides a source of constant liquidity for all traders to **take** from. The AMM is considered constant as liquidity is available based on a constant product formula `(x*y=k)` balancing the reserves. Drift's AMM features an inbuilt bid-ask spread that adjusts based on inventory held by the AMM. Users can also LP into the AMM to further collateralize.
 
 This also means that, even without external makers, Drift Protocol can support new markets without dependence on external market makers to bootstrap liquidity (albeit with additional risks on the immediate availability of unsettled PnL).
 

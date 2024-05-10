@@ -283,7 +283,7 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/drift-labs",
   },
-  docsRepositoryBase: "https://github.com/drift-labs/drift-docs-v2/tree/main",
+  docsRepositoryBase: "https://github.com/drift-labs/drift-protocol-v2-docs/tree/master",
   chat: {
     link: "https://discord.gg/driftprotocol",
   },
