@@ -34,19 +34,25 @@ The user's trade price at liquidation for a perpetual position will be based on 
 
 Liquidations triggered and positions will be liquidated using margin engine prices.
 
-**In the case of an extreme oracle error (): the market will pause most fills, liquidations, and funding rate updates.**
+<Callout type="error" emoji="🚫">
+**In the case of an extreme oracle error: the market will pause most fills, liquidations, and funding rate updates.**
+</Callout>
+
+<Callout type="info" emoji="⬇️">
+
 
 **Example:**
 
-> You deposit 500 USDC and you long 200 SOL-PERP at \$25
+You deposit 500 USDC and you long 200 SOL-PERP at \$25
 
-> Your position value is \$5000 USDC and your margin/collateral is $500 USDC, you have 10x leverage
+Your position value is \$5000 USDC and your margin/collateral is $500 USDC, you have 10x leverage
 
 Note that the Minimum Maintenance Margin for a SOL-PERP is 5% (see Minimum Maintenance Margin for assets here: [Margin](/trading/margin))
 
 Your total collateral is `$500 * 1.00 = $500` and your margin requirement is `$5000 * .05 = 250`
 
 You are liquidated if the price of SOL decreases by 5.28% to \$23.6825. This is because your perp pnl is `200 * $25 * -.0527 = -263.5` and thus your total collateral is `$500 - 263.5 = $236.5`while your margin requirement is `$23.6825 * 200 * .05 = $236.825`.
+</Callout>
 
 # Being a Liquidator
 

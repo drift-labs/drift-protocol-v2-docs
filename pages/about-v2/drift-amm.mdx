@@ -50,8 +50,9 @@ The long and short spread can be asymmetric due to changes in the underlying inv
 
 The bid/ask points on the curve are calculated as follows (exact efficient integer math method calculated on contract):
 
-> bid_quote_reserve = quote_reserve - (quote_reserve / (100%/short_spread))
-> ask_quote_reserve = quote_reserve + (quote_reserve / (100%/long_spread))
+` bid_quote_reserve = quote_reserve - (quote_reserve / (100%/short_spread))`
+
+`ask_quote_reserve = quote_reserve + (quote_reserve / (100%/long_spread))`
 
 The `quote_reserve` is defined as the total AMM reserves of the quote asset. Then using the same k to back out the base_reserve for the bid/ask curves as well.
 
