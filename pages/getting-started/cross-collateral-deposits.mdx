@@ -1,61 +1,74 @@
-# Cross-collateral deposits
+import { Callout } from "nextra-theme-docs";
 
+# Cross-collateral deposits
 
 By default, markets are quoted in USD and P&L is settled in USDC. All tokens deposited within the protocol can earn yield via Borrow/Lend. Until unrealised P&L is settled into your Balances, it will not earn (if profits) or be charged (if losses) the deposit/borrow interest respectively.
 
-Below is a table of assets supported by Drift Protocol.  
+Below is a table of assets supported by Drift Protocol.
 
-Each asset counts towards margin for derivatives trading and has a weight applied to account for their respective volatilities.  
+Each asset counts towards margin for derivatives trading and has a weight applied to account for their respective volatilities.
 
+<Callout type="info" emoji="ℹ️">
+  For instance, depositing USDC gives users a 1:1 margin for derivatives
+  trading, but depositing SOL (80% asset weight) means that 80% of the value of
+  your SOL at the opening of your position will be available as margin for
+  perpetual futures trading.
+</Callout>
 
-> For instance, depositing USDC gives users a 1:1 margin for derivatives trading, but depositing SOL (80% asset weight) means that 80% of the value of your SOL at the opening of your position will be available as margin for perpetual futures trading.
+### Margin Parameters
 
-
-**Margin **Parameters****
-
-| **Asset**     | **Initial Asset Weight** | **Maintenance Asset Weight** | **Initial Liability Weight** | **Maintenance Liability Weight** | **IMF Factor** | 
+| **Asset**     | **Initial Asset Weight** | **Maintenance Asset Weight** | **Initial Liability Weight** | **Maintenance Liability Weight** | **IMF Factor** |
 | ------------- | ------------------------ | ---------------------------- | ---------------------------- | -------------------------------- | -------------- |
 | USDC          | 100%                     | 100%                         | 100%                         | 100%                             | 0              |
-| SOL           | 80%*                      | 90%                          | 120%                         | 110%                             | 0.003          | 
-| mSOL          | 80%*                     | 90%                          | 120%                         | 110%                             | 0.003          | 
-| wBTC (portal) | 80%*                      | 90%                          | 120%                         | 110%                             | 0.105          | 
-| wETH (portal) | 80%*                      | 90%                          | 120%                         | 110%                             | 0.025          | 
-| USDT          | 90%                      | 95%                          | 110%                         | 105%                             | 0.0004         | 
-| JitoSOL       | 80%*                      | 90%                          | 120%                         | 110%                             | 0.00055        | 
-| PYTH          | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        |
-| bSOL          | 80%*                      | 90%                          | 120%                         | 110%                             | 0.00055        |
-| JTO           | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        | 
-| WIF           | 25%*                      | 50%                          | 175%                         | 150%                             | 0.00055        | 
-| JUP           | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        |
+| SOL           | 80%\*                    | 90%                          | 120%                         | 110%                             | 0.003          |
+| DRIFT         | 1%\*                     | 50%                          | 175%                         | 150%                             | 0.00055        |
+| mSOL          | 36%\*                    | 90%                          | 120%                         | 110%                             | 0.003          |
+| wBTC (portal) | 51%\*                    | 90%                          | 120%                         | 110%                             | 0.105          |
+| wETH (portal) | 80%\*                    | 90%                          | 120%                         | 110%                             | 0.025          |
+| USDT          | 90%                      | 95%                          | 110%                         | 105%                             | 0.0004         |
+| JitoSOL       | 35%\*                    | 90%                          | 120%                         | 110%                             | 0.00055        |
+| PYTH          | 50%\*                    | 75%                          | 150%                         | 125%                             | 0.00055        |
+| bSOL          | 47%\*                    | 90%                          | 120%                         | 110%                             | 0.00055        |
+| JTO           | 15%\*                    | 75%                          | 150%                         | 125%                             | 0.00055        |
+| WIF           | 0%\*                     | 50%                          | 175%                         | 150%                             | 0.00055        |
+| JUP           | 32%\*                    | 75%                          | 150%                         | 125%                             | 0.00055        |
+| RNDR          | 13%\*                    | 75%                          | 150%                         | 125%                             | 0.00055        |
+| W             | 16%\*                    | 75%                          | 150%                         | 125%                             | 0.00055        |
+| TNSR          | 25%\*                    | 50%                          | 175%                         | 150%                             | 0.00055        |
 
-Initial Asset Weights are also scaled lower based on notional value of total deposits. As a reference, you can check out UI or the SpotMarket `get_scaled_initial_weight_asset` for this scale factor.
+Initial Asset Weights are adjusted downward based on the notional value of total deposits. This adjustment ensures that larger deposits are appropriately risk-weighted. For more details on how this scaling factor is calculated, refer to the UI or consult the [`get_scaled_initial_asset_weight`](https://github.com/drift-labs/protocol-v2/blob/87642b7457b5d1b7babcfff59fa12aa97d1fd58e/programs/drift/src/state/spot_market.rs#L337) method in the SpotMarket.
 
+The IMF (Initial Margin Factor) acts as a discount on the account size. It adjusts the initial asset weight based on the size of the collateral, incorporating a scaling factor to manage risk.
 
-The IMF Factor acts as a discount on account size:
+<Callout type="info" emoji="⬇️">
+**Example calculation for the initial asset weight for 2000 SOL collateral**
 
-`Initial Asset Weight` on 2000 SOL Collateral (using above) would be:
+Given a collateral amount of 2000 SOL, the **initial asset weight** can be calculated as follows:
 
 `weight = min (.80, 1.1 / [ 1 + (0.003 * sqrt(2000)] )`
 
 `= min(.80, ~.96987) = .80`
+</Callout>
 
 An asset's liability weight can be converted into an LTV ratio using:
 
 `ltv = 1 / liability weight`
 
-| **Asset**        | **Initial LTV** | **Max LTV** |
-| ---------------- | --------------- | ----------- |
-| USDC             | 100%            | 100%        |
-| SOL              | 83.3%           | 90.9%       |
-| mSOL             | 83.3%           | 90.9%       |
-| wBTC (portal)    | 83.3%           | 90.9%       |
-| wETH (portal)    | 83.3%           | 90.9%       |
-| USDT             | 90.9%           | 95.2%       |
-| JitoSOL          | 83.3%           | 90.9%       |
-| PYTH             | 66.7%           | 80.0%       |
-| bSOL             | 83.3%           | 90.9%       |
-| JTO              | 66.7%           | 80.0%       |
-| WIF              | 57.1%           | 66.7%       |
-| JUP              | 66.7%           | 80.0%       |
-
-
+| **Asset**     | **Initial LTV** | **Max LTV** |
+| ------------- | --------------- | ----------- |
+| USDC          | 100%            | 100%        |
+| SOL           | 83.3%           | 90.9%       |
+| mSOL          | 83.3%           | 90.9%       |
+| wBTC (portal) | 83.3%           | 90.9%       |
+| wETH (portal) | 83.3%           | 90.9%       |
+| USDT          | 90.9%           | 95.2%       |
+| JitoSOL       | 83.3%           | 90.9%       |
+| PYTH          | 66.7%           | 80.0%       |
+| bSOL          | 83.3%           | 90.9%       |
+| JTO           | 66.7%           | 80.0%       |
+| WIF           | 57.1%           | 66.7%       |
+| JUP           | 66.7%           | 80.0%       |
+| DRIFT         | 57.1%           | 66.7%       |
+| RNDR          | 66.7%           | 80.0%       |
+| W             | 66.7%           | 80.0%       |
+| TNSR          | 57.1%           | 66.7%       |
