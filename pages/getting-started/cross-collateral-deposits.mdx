@@ -1,35 +1,137 @@
-# Cross-collateral deposits
+import { useData } from "nextra/data";
 
+export const getStaticProps = ({ params }) => {
+  return fetch(`http://localhost:5002/stats/spotMarketAccounts`)
+    .then((res) => res.text())
+    .then((repo) => ({
+      props: {
+        // We add an `ssg` field to the page props,
+        // which will be provided to the Nextra `useData` hook.
+        ssg: {
+          weightData: JSON.parse(repo).result.map((account) => {
+            return [
+              // decode name from array of chars to string
+              account.name
+                .map((charCode) => String.fromCharCode(charCode))
+                .join("")
+                .trim(),
+              account.initialAssetWeight / 100 + '%',
+              account.maintenanceAssetWeight / 100  + '%',
+              account.initialLiabilityWeight / 100  + '%',
+              account.maintenanceLiabilityWeight / 100  + '%',
+              account.imfFactor / 1e6,
+            ];
+          }),
+          ltvData: JSON.parse(repo).result.map((account) => {
+            return [
+              // decode name from array of chars to string
+              account.name
+                .map((charCode) => String.fromCharCode(charCode))
+                .join("")
+                .trim(),
+              ((1 / account.initialLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
+              ((1 / account.maintenanceLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
+            ];
+          }),
+        },
+      },
+      // The page will be considered as stale and regenerated every 60 seconds.
+      revalidate: 60,
+    }));
+};
+
+export const AssetWeightsTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+        "Asset",
+        "Initial Asset Weight",
+        "Maintenance Asset Weight",
+        "Initial Liability Weight",
+        "Maintenance Liability Weight",
+        "IMF Factor",
+      ];
+
+const { weightData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {weightData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const LTVTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+        "Asset",
+        "Initial LTV",
+        "Max LTV",
+      ];
+
+const { ltvData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {ltvData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+# Cross-collateral deposits
 
 By default, markets are quoted in USD and P&L is settled in USDC. All tokens deposited within the protocol can earn yield via Borrow/Lend. Until unrealised P&L is settled into your Balances, it will not earn (if profits) or be charged (if losses) the deposit/borrow interest respectively.
 
-Below is a table of assets supported by Drift Protocol.  
+Below is a table of assets supported by Drift Protocol.
 
-Each asset counts towards margin for derivatives trading and has a weight applied to account for their respective volatilities.  
-
+Each asset counts towards margin for derivatives trading and has a weight applied to account for their respective volatilities.
 
 > For instance, depositing USDC gives users a 1:1 margin for derivatives trading, but depositing SOL (80% asset weight) means that 80% of the value of your SOL at the opening of your position will be available as margin for perpetual futures trading.
 
+**Margin Parameters**
 
-**Margin **Parameters****
-
-| **Asset**     | **Initial Asset Weight** | **Maintenance Asset Weight** | **Initial Liability Weight** | **Maintenance Liability Weight** | **IMF Factor** | 
-| ------------- | ------------------------ | ---------------------------- | ---------------------------- | -------------------------------- | -------------- |
-| USDC          | 100%                     | 100%                         | 100%                         | 100%                             | 0              |
-| SOL           | 80%*                      | 90%                          | 120%                         | 110%                             | 0.003          | 
-| mSOL          | 80%*                     | 90%                          | 120%                         | 110%                             | 0.003          | 
-| wBTC (portal) | 80%*                      | 90%                          | 120%                         | 110%                             | 0.105          | 
-| wETH (portal) | 80%*                      | 90%                          | 120%                         | 110%                             | 0.025          | 
-| USDT          | 90%                      | 95%                          | 110%                         | 105%                             | 0.0004         | 
-| JitoSOL       | 80%*                      | 90%                          | 120%                         | 110%                             | 0.00055        | 
-| PYTH          | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        |
-| bSOL          | 80%*                      | 90%                          | 120%                         | 110%                             | 0.00055        |
-| JTO           | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        | 
-| WIF           | 25%*                      | 50%                          | 175%                         | 150%                             | 0.00055        | 
-| JUP           | 50%*                      | 75%                          | 150%                         | 125%                             | 0.00055        |
+<AssetWeightsTable />
 
 Initial Asset Weights are also scaled lower based on notional value of total deposits. As a reference, you can check out UI or the SpotMarket `get_scaled_initial_weight_asset` for this scale factor.
-
 
 The IMF Factor acts as a discount on account size:
 
@@ -43,19 +145,6 @@ An asset's liability weight can be converted into an LTV ratio using:
 
 `ltv = 1 / liability weight`
 
-| **Asset**        | **Initial LTV** | **Max LTV** |
-| ---------------- | --------------- | ----------- |
-| USDC             | 100%            | 100%        |
-| SOL              | 83.3%           | 90.9%       |
-| mSOL             | 83.3%           | 90.9%       |
-| wBTC (portal)    | 83.3%           | 90.9%       |
-| wETH (portal)    | 83.3%           | 90.9%       |
-| USDT             | 90.9%           | 95.2%       |
-| JitoSOL          | 83.3%           | 90.9%       |
-| PYTH             | 66.7%           | 80.0%       |
-| bSOL             | 83.3%           | 90.9%       |
-| JTO              | 66.7%           | 80.0%       |
-| WIF              | 57.1%           | 66.7%       |
-| JUP              | 66.7%           | 80.0%       |
+**Asset LTVs**
 
-
+<LTVTable />

@@ -1,3 +1,253 @@
+import { useData } from "nextra/data";
+
+export const getStaticProps = ({ params }) => {
+  return fetch(`http://localhost:5002/stats/feeStructure`)
+    .then((res) => res.json())
+    .then((repo) => {
+      const responseData = repo.result;
+      console.log({responseData});
+      const perpFeeTiers = responseData.perpFeeStructure.feeTiers.filter(feeTier => feeTier.makerRebateNumerator !== 0);
+      const spotFeeTiers = responseData.spotFeeStructure.feeTiers.filter(feeTier => feeTier.makerRebateNumerator !== 0);;
+
+      // PERP FEE STRUCTURE
+
+      const perpFeeStructureData = perpFeeTiers.map((feeTier, index) => {
+        return [
+          index + 1,
+          "todo",
+          "todo",
+          Math.round(
+            (feeTier.feeNumerator / feeTier.feeDenominator -
+              feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
+              1e4
+          ) + " bps",
+          Math.round((feeTier.feeNumerator / feeTier.feeDenominator) * 1e4) +
+            " bps",
+          Math.round(
+            (feeTier.refereeFeeNumerator / feeTier.refereeFeeDenominator) * 100
+          ) + "%",
+          Math.round(
+            (feeTier.referrerRewardNumerator /
+              feeTier.referrerRewardDenominator) *
+              100
+          ) + "%",
+          Math.round(
+            (responseData.perpFeeStructure.fillerRewardStructure.rewardNumerator /
+              responseData.perpFeeStructure.fillerRewardStructure.rewardDenominator) *
+              100
+          ) + "%",
+        ];
+      });
+
+      perpFeeStructureData[perpFeeStructureData.length - 1][0] = 'VIP'
+
+      // SPECIAL PERP DISCOUNT FEE STRUCTURE
+
+      const specialDiscountPerpFeeStructure = perpFeeTiers.map((feeTier, index) => {
+        return [
+          index + 1,
+          "todo",
+          "todo",
+          Math.round(
+            (feeTier.feeNumerator / feeTier.feeDenominator -
+              feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
+              1e4
+          ) / 4 + " bps",
+          Math.round((feeTier.feeNumerator / feeTier.feeDenominator) * 1e4) / 4 +
+            " bps",
+          Math.round(
+            (feeTier.refereeFeeNumerator / feeTier.refereeFeeDenominator) * 100
+          ) + "%",
+          Math.round(
+            (feeTier.referrerRewardNumerator /
+              feeTier.referrerRewardDenominator) *
+              100
+          ) + "%",
+          Math.round(
+            (responseData.perpFeeStructure.fillerRewardStructure.rewardNumerator /
+              responseData.perpFeeStructure.fillerRewardStructure.rewardDenominator) *
+              100
+          ) + "%",
+        ];
+      });
+
+      specialDiscountPerpFeeStructure[specialDiscountPerpFeeStructure.length - 1][0] = 'VIP'
+
+      // SPOT FEE STRUCTURE
+
+      const spotFeeStructureData = spotFeeTiers.map((feeTier, index) => {
+        return [
+          index + 1,
+          "todo",
+          "todo",
+          Math.round(
+            (feeTier.feeNumerator / feeTier.feeDenominator -
+              feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
+              1e4
+          ) + " bps",
+          Math.round((feeTier.feeNumerator / feeTier.feeDenominator) * 1e4) +
+            " bps",
+          Math.round(
+            (feeTier.refereeFeeNumerator / feeTier.refereeFeeDenominator) * 100
+          ) + "%",
+          Math.round(
+            (feeTier.referrerRewardNumerator /
+              feeTier.referrerRewardDenominator) *
+              100
+          ) + "%",
+          Math.round(
+            (responseData.spotFeeStructure.fillerRewardStructure.rewardNumerator /
+              responseData.spotFeeStructure.fillerRewardStructure.rewardDenominator) *
+              100
+          ) + "%",
+        ];
+      });
+
+      spotFeeStructureData[spotFeeStructureData.length - 1][0] = 'VIP'
+
+      return {
+        props: {
+          // We add an `ssg` field to the page props,
+          // which will be provided to the Nextra `useData` hook.
+          ssg: {
+            perpFeeStructureData,
+            spotFeeStructureData,
+            specialDiscountPerpFeeStructure
+          },
+          // The page will be considered as stale and regenerated every 60 seconds.
+          revalidate: 60,
+        },
+      };
+    });
+
+};
+
+export const PerpFeeStructureTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "USDC Insurance Fund Staked Amount",
+       "Volume (30D)",
+       "Maker Fee",
+       "Taker Fee",
+       "Referree Taker Discount",
+       "Referrer Reward",
+       "Filler Reward",
+      ];
+
+const { perpFeeStructureData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {perpFeeStructureData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const SpotFeeStructureTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "USDC Insurance Fund Staked Amount",
+       "Volume (30D)",
+       "Maker Fee",
+       "Taker Fee",
+       "Referree Taker Discount",
+       "Referrer Reward",
+       "Filler Reward",
+      ];
+
+const { spotFeeStructureData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {spotFeeStructureData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const SpecialDiscountPerpFeeStructureTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "USDC Insurance Fund Staked Amount",
+       "Volume (30D)",
+       "Maker Fee",
+       "Taker Fee",
+       "Referree Taker Discount",
+       "Referrer Reward",
+       "Filler Reward",
+      ];
+
+const { specialDiscountPerpFeeStructure } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {specialDiscountPerpFeeStructure.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
 # Trading Fees
 
 Trading fees on Drift are calculated on a per-trade basis and are based on the filled notional position size.
@@ -10,28 +260,28 @@ Drift Protocol has a tiered fee structure for all futures markets based on an on
 
 SOL-PERP, BTC-PERP, and ETH-PERP, have a reduced fee schedule (vs other markets)
 
-| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
+| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward** |
 | -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
-| 1        | < 500                                     | < 1m             | -0.25 bps        | 2.5 bps        | 5%                          | 15%                 | 10%\*              |
-| 2        | < 500                                     | > 1m             | -0.25 bps        | 2.25 bps         | 5%                          | 15%                 | 10%\*              |
-| 3        | > 1K                                      | > 5m             | -0.25 bps        | 2 bps         | 5%                          | 15%                 | 10%\*              |
-| 4        | > 2K                                      | > 10m            | -0.25 bps        | 1.75 bps         | 5%                          | 15%                 | 10%\*              |
-| 5        | > 5K                                      | > 50m            | -0.25 bps        | 1.5 bps         | 5%                          | 15%                 | 10%\*              |
-| VIP      | > 10K                                     | > 100m           | -0.25 bps        | .75 bps         | 5%                          | 15%                 | 10%\*              |
+| 1        | < 500                                | < 1m             | -0.25 bps     | 2.5 bps       | 5%                          | 15%                 | 10%\*             |
+| 2        | < 500                                | > 1m             | -0.25 bps     | 2.25 bps      | 5%                          | 15%                 | 10%\*             |
+| 3        | > 1K                                 | > 5m             | -0.25 bps     | 2 bps         | 5%                          | 15%                 | 10%\*             |
+| 4        | > 2K                                 | > 10m            | -0.25 bps     | 1.75 bps      | 5%                          | 15%                 | 10%\*             |
+| 5        | > 5K                                 | > 50m            | -0.25 bps     | 1.5 bps       | 5%                          | 15%                 | 10%\*             |
+| VIP      | > 10K                                | > 100m           | -0.25 bps     | .75 bps       | 5%                          | 15%                 | 10%\*             |
 
 
 ---
 
 All other Perpetual Trading Fees are charged on a per-tier basis according to the following schedule:
 
-| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
+| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward** |
 | -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
-| 1        | < 500                                     | < 1m       | -1 bps        | 10 bps        | 5%                          | 15%                 | 10%\*              |
-| 2        | < 500                                     | > 1m             | -1 bps        | 9 bps         | 5%                          | 15%                 | 10%\*              |
-| 3        | > 1K                                      | > 5m             | -1 bps        | 8 bps         | 5%                          | 15%                 | 10%\*              |
-| 4        | > 2K                                      | > 10m            | -1 bps        | 7 bps         | 5%                          | 15%                 | 10%\*              |
-| 5        | > 5K                                      | > 50m            | -1 bps        | 6 bps         | 5%                          | 15%                 | 10%\*              |
-| VIP      | > 10K                                     | > 100m           | -1 bps        | 3 bps         | 5%                          | 15%                 | 10%\*              |
+| 1        | < 500                                | < 1m             | -1 bps        | 10 bps        | 5%                          | 15%                 | 10%\*             |
+| 2        | < 500                                | > 1m             | -1 bps        | 9 bps         | 5%                          | 15%                 | 10%\*             |
+| 3        | > 1K                                 | > 5m             | -1 bps        | 8 bps         | 5%                          | 15%                 | 10%\*             |
+| 4        | > 2K                                 | > 10m            | -1 bps        | 7 bps         | 5%                          | 15%                 | 10%\*             |
+| 5        | > 5K                                 | > 50m            | -1 bps        | 6 bps         | 5%                          | 15%                 | 10%\*             |
+| VIP      | > 10K                                | > 100m           | -1 bps        | 3 bps         | 5%                          | 15%                 | 10%\*             |
 
 ### Taker Fees
 
@@ -62,6 +312,7 @@ These apply to accounts that were signed up using a referred account. These perc
 Filler rewards are variable but up to 10% of the effective taker fee paid by the user. See [Keeper Incentives](/about-v2/keeper-incentives).
 
 ### Spot Fees
+
 Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebate for maker. While most longer tail assets can have increased fees (~10 bps) to stay in line with external markets fee schedules.
 
 ### Disclaimers
@@ -73,3 +324,17 @@ _There are risks associated with Insurance Fund Staking. Read more about the [In
 ---
 
 _Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
+
+**Special Discount Fee Structure**
+
+Applies to SOL-PERP, BTC-PERP, and ETH-PERP only
+
+<SpecialDiscountPerpFeeStructureTable />
+
+**Perp Market Fee Structure**
+
+<PerpFeeStructureTable />
+
+**Spot Market Fee Structure**
+
+<SpotFeeStructureTable />
