@@ -9,13 +9,46 @@ export const getStaticProps = ({ params }) => {
       const perpFeeTiers = responseData.perpFeeStructure.feeTiers.filter(feeTier => feeTier.makerRebateNumerator !== 0);
       const spotFeeTiers = responseData.spotFeeStructure.feeTiers.filter(feeTier => feeTier.makerRebateNumerator !== 0);;
 
+      // FEE TIER CUTOFFS
+      const feeTiers = [
+        {
+          tier: 0,
+          volume: 0,
+          staked: 0,
+        },
+        {
+          tier: 1,
+          volume: 1 + 'M',
+          staked: 500,
+        },
+        {
+          tier: 2,
+          volume: 5 + 'M',
+          staked: 1 + 'K',
+        },
+        {
+          tier: 3,
+          volume: 10 + 'M',
+          staked: 2 + 'K',
+        },
+        {
+          tier: 4,
+          volume: 50 + 'M',
+          staked: 5 + 'K',
+        },
+        {
+          tier: 'VIP',
+          volume: 100 + 'M',
+          staked: 10 + 'K',
+        }
+      ];
+
+
       // PERP FEE STRUCTURE
 
       const perpFeeStructureData = perpFeeTiers.map((feeTier, index) => {
         return [
           index + 1,
-          "todo",
-          "todo",
           Math.round(
             (feeTier.feeNumerator / feeTier.feeDenominator -
               feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
@@ -46,8 +79,6 @@ export const getStaticProps = ({ params }) => {
       const specialDiscountPerpFeeStructure = perpFeeTiers.map((feeTier, index) => {
         return [
           index + 1,
-          "todo",
-          "todo",
           Math.round(
             (feeTier.feeNumerator / feeTier.feeDenominator -
               feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
@@ -78,8 +109,6 @@ export const getStaticProps = ({ params }) => {
       const spotFeeStructureData = spotFeeTiers.map((feeTier, index) => {
         return [
           index + 1,
-          "todo",
-          "todo",
           Math.round(
             (feeTier.feeNumerator / feeTier.feeDenominator -
               feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
@@ -112,7 +141,8 @@ export const getStaticProps = ({ params }) => {
           ssg: {
             perpFeeStructureData,
             spotFeeStructureData,
-            specialDiscountPerpFeeStructure
+            specialDiscountPerpFeeStructure,
+            feeTiers,
           },
           // The page will be considered as stale and regenerated every 60 seconds.
           revalidate: 60,
@@ -127,8 +157,6 @@ export const PerpFeeStructureTable = () => {
   
   const headings = [
        "Tier",
-       "USDC Insurance Fund Staked Amount",
-       "Volume (30D)",
        "Maker Fee",
        "Taker Fee",
        "Referree Taker Discount",
@@ -169,8 +197,6 @@ export const SpotFeeStructureTable = () => {
   
   const headings = [
        "Tier",
-       "USDC Insurance Fund Staked Amount",
-       "Volume (30D)",
        "Maker Fee",
        "Taker Fee",
        "Referree Taker Discount",
@@ -211,8 +237,6 @@ export const SpecialDiscountPerpFeeStructureTable = () => {
   
   const headings = [
        "Tier",
-       "USDC Insurance Fund Staked Amount",
-       "Volume (30D)",
        "Maker Fee",
        "Taker Fee",
        "Referree Taker Discount",
@@ -248,6 +272,45 @@ return <table>
 
 };
 
+export const FeeTiersTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "Required USDC Insurance Fund Staked Amount",
+       "Required 30D Volume",
+      ];
+
+const { feeTiers } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {feeTiers.map((row, i) => {
+      return (
+        <tr key={i}>
+          <>
+            <td key={`${i}_0`}>{row.tier}</td>
+            <td key={`${i}_1`}>{row.staked}</td>
+            <td key={`${i}_2`}>{row.volume}</td>
+          </>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
 # Trading Fees
 
 Trading fees on Drift are calculated on a per-trade basis and are based on the filled notional position size.
@@ -261,7 +324,7 @@ Drift Protocol has a tiered fee structure for all futures markets based on an on
 SOL-PERP, BTC-PERP, and ETH-PERP, have a reduced fee schedule (vs other markets)
 
 | **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward** |
-| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
+| -------- | ------------------------------------ | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ----------------- |
 | 1        | < 500                                | < 1m             | -0.25 bps     | 2.5 bps       | 5%                          | 15%                 | 10%\*             |
 | 2        | < 500                                | > 1m             | -0.25 bps     | 2.25 bps      | 5%                          | 15%                 | 10%\*             |
 | 3        | > 1K                                 | > 5m             | -0.25 bps     | 2 bps         | 5%                          | 15%                 | 10%\*             |
@@ -269,13 +332,12 @@ SOL-PERP, BTC-PERP, and ETH-PERP, have a reduced fee schedule (vs other markets)
 | 5        | > 5K                                 | > 50m            | -0.25 bps     | 1.5 bps       | 5%                          | 15%                 | 10%\*             |
 | VIP      | > 10K                                | > 100m           | -0.25 bps     | .75 bps       | 5%                          | 15%                 | 10%\*             |
 
-
 ---
 
 All other Perpetual Trading Fees are charged on a per-tier basis according to the following schedule:
 
 | **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward** |
-| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
+| -------- | ------------------------------------ | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ----------------- |
 | 1        | < 500                                | < 1m             | -1 bps        | 10 bps        | 5%                          | 15%                 | 10%\*             |
 | 2        | < 500                                | > 1m             | -1 bps        | 9 bps         | 5%                          | 15%                 | 10%\*             |
 | 3        | > 1K                                 | > 5m             | -1 bps        | 8 bps         | 5%                          | 15%                 | 10%\*             |
@@ -289,15 +351,15 @@ Takers are charged a variable Taker Fee depending on which Tier they belong to.
 
 **Tier 1 -- 10 bps**: Default tier.
 
-**Tier 2 -- 9 bps**: Either stake more than 500 *or\* trade over 1m in volume (30D average).
+**Tier 2 -- 9 bps**: Either stake more than 500 \*or\* trade over 1m in volume (30D average).
 
-**Tier 3 -- 8 bps**: Either stake more than 1K *or\* trade over 5m in volume (30D average).
+**Tier 3 -- 8 bps**: Either stake more than 1K \*or\* trade over 5m in volume (30D average).
 
-**Tier 4 -- 7 bps**: Either stake more than 2K *or\* trade over 10m in volume (30D average).
+**Tier 4 -- 7 bps**: Either stake more than 2K \*or\* trade over 10m in volume (30D average).
 
-**Tier 5 -- 6 bps**: Either stake more than 5K *or\* trade over 50m in volume (30D average).
+**Tier 5 -- 6 bps**: Either stake more than 5K \*or\* trade over 50m in volume (30D average).
 
-**VIP -- 3 bps**: Either stake more than 10K *or\* trade over 100m in volume (30D average).
+**VIP -- 3 bps**: Either stake more than 10K \*or\* trade over 100m in volume (30D average).
 
 ### Maker Fees
 
@@ -319,13 +381,19 @@ Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebat
 
 _Drift Protocol reserves the right to end the promotional period and the Taker Incentive Program at any time. If the Drift Protocol chooses to do so, it will provide notice to participating users, but such notice is not required in order to conclude the program early or extend the program. Please note that the terms and conditions of this program are subject to change without notice._
 
-_There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._**
+_There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._\*\*
 
 ---
 
 _Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
 
-**Special Discount Fee Structure**
+## Fee Tiers
+
+_To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of them. E.g. just meeting the minimum volume quota will qualify you, without needing the Insurance Fund Stake as well_
+
+<FeeTiersTable />
+
+## Fee Structures
 
 Applies to SOL-PERP, BTC-PERP, and ETH-PERP only
 
