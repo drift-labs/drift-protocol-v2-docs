@@ -1,7 +1,7 @@
 import { useData } from "nextra/data";
 
 export const getStaticProps = ({ params }) => {
-  return fetch(`http://localhost:5002/stats/spotMarketAccounts`)
+  return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
     .then((res) => res.text())
     .then((repo) => ({
       props: {

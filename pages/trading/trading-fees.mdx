@@ -2,7 +2,7 @@ import { useData } from "nextra/data";
 
 export const getStaticProps = async ({ params }) => {
   const perpFeeAdjustmentData = await fetch(
-    `http://localhost:5002/stats/perpMarketAccounts`
+    `https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts`
   )
     .then((res) => res.json())
     .then((repo) => {
@@ -21,7 +21,7 @@ export const getStaticProps = async ({ params }) => {
     });
 
 const spotFeeAdjustmentData = await fetch(
-`http://localhost:5002/stats/spotMarketAccounts`
+`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`
 )
 .then((res) => res.json())
 .then((repo) => {
@@ -40,7 +40,7 @@ const adjustedFeeSpotMarkets = repo.result.filter(
     });
 
 const feeStructureResult = await fetch(
-`http://localhost:5002/stats/feeStructure`
+`https://mainnet-beta.api.drift.trade/stats/feeStructure`
 )
 .then((res) => res.json())
 .then((repo) => {
