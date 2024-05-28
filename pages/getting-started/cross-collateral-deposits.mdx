@@ -1,7 +1,7 @@
 import { useData } from "nextra/data";
 
-export const getStaticProps = async ({ params }) => {
-  const spotMarketData = await fetch(`http://localhost:5002/stats/spotMarketAccounts`)
+export const getStaticProps = ({ params }) => {
+  return fetch(`http://localhost:5002/stats/spotMarketAccounts`)
     .then((res) => res.text())
     .then((repo) => ({
       props: {
@@ -38,9 +38,6 @@ export const getStaticProps = async ({ params }) => {
       // The page will be considered as stale and regenerated every 60 seconds.
       revalidate: 60,
     }));
-
-    return spotMarketData;
-
 };
 
 export const AssetWeightsTable = () => {
