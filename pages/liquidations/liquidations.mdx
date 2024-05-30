@@ -24,7 +24,7 @@ As such, liquidations are calculated based on your account level leverage rather
 
 You can be liquidated when your `totalCollateral` becomes less than your`maintenanceMarginRequirement`. Your total collateral is the weighted value of your deposits and perp pnl. Your margin requirement is the weighted value of your borrows and perp positions.  
 
-Once your total collateral value falls below your margin requirement, liquidations will first cancel any open orders + LP positions. After this, until your account's total collateral is above the `maintenanceMarginRequirement + liqBufferRatio` liquidators can iteratively liquidate any portion of assets and liabilities over a throttled time window (to avoid single price instance from a heavily deleveraging account). The `liqBufferRatio` is set on the Drift State Account and is meant to sufficiently bring an account away from the liquidation boundary but heavily punish users.  
+Once your total collateral value falls below your margin requirement, liquidations will first cancel any open orders + LP positions. After this, until your account's total collateral is above the `maintenanceMarginRequirement + liqBufferRatio` liquidators can iteratively liquidate any portion of assets and liabilities over a throttled time window (to avoid single price instance from a heavily deleveraging account). The `liqBufferRatio` is set on the Drift State Account and is meant to sufficiently bring an account away from the liquidation boundary but not heavily punish users.  
 
 The `Health` measure on the user page can help visualise how close a user is to liquidation territory. At 0 Health, a user can get liquidated.
 
