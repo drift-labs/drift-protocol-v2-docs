@@ -1,53 +1,412 @@
+import { useData } from "nextra/data";
+
+export const getStaticProps = async ({ params }) => {
+  const perpFeeAdjustmentData = await fetch(
+    `https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts`
+  )
+    .then((res) => res.json())
+    .then((repo) => {
+      const adjustedFeePerpMarkets = repo.result.filter(
+        (perpMarket) => perpMarket.feeAdjustment !== 0
+      );
+
+      return {
+        perpFeeAdjustmentData: adjustedFeePerpMarkets.map((perpMarket) => [
+        perpMarket.name
+          .map((charCode) => String.fromCharCode(charCode))
+          .join("")
+          .trim(),
+        (perpMarket.feeAdjustment > 0 ? '+':'') + perpMarket.feeAdjustment + "%" + (perpMarket.feeAdjustment > 0 ? ' (premium)' : ' (discount)'),
+      ])};
+    });
+
+const spotFeeAdjustmentData = await fetch(
+`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`
+)
+.then((res) => res.json())
+.then((repo) => {
+const adjustedFeeSpotMarkets = repo.result.filter(
+(spotMarket) => spotMarket.feeAdjustment !== 0
+);
+
+      return {
+        spotFeeAdjustmentData: adjustedFeeSpotMarkets.map((spotMarket) => [
+        spotMarket.name
+          .map((charCode) => String.fromCharCode(charCode))
+          .join("")
+          .trim(),
+          (spotMarket.feeAdjustment > 0 ? '+':'') + spotMarket.feeAdjustment + "%" + (spotMarket.feeAdjustment > 0 ? ' (premium)' : ' (discount)'),
+      ])};
+    });
+
+const feeStructureResult = await fetch(
+`https://mainnet-beta.api.drift.trade/stats/feeStructure`
+)
+.then((res) => res.json())
+.then((repo) => {
+const responseData = repo.result;
+console.log({ responseData });
+const perpFeeTiers = responseData.perpFeeStructure.feeTiers.filter(
+(feeTier) => feeTier.makerRebateNumerator !== 0
+);
+const spotFeeTiers = responseData.spotFeeStructure.feeTiers.filter(
+(feeTier) => feeTier.makerRebateNumerator !== 0
+);
+// FEE TIER CUTOFFS
+const feeTiers = [
+{
+tier: 0,
+volume: 0,
+staked: 0,
+},
+{
+tier: 1,
+volume: 1 + "M",
+staked: 500,
+},
+{
+tier: 2,
+volume: 5 + "M",
+staked: 1 + "K",
+},
+{
+tier: 3,
+volume: 10 + "M",
+staked: 2 + "K",
+},
+{
+tier: 4,
+volume: 50 + "M",
+staked: 5 + "K",
+},
+{
+tier: "VIP",
+volume: 100 + "M",
+staked: 10 + "K",
+},
+];
+
+      // PERP FEE STRUCTURE
+
+      const perpFeeStructureData = perpFeeTiers.map((feeTier, index) => {
+        return [
+          index + 1,
+          Math.round(
+            '-' + (feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
+              1e4
+          ) + " bps",
+          Math.round((feeTier.feeNumerator / feeTier.feeDenominator) * 1e4) +
+            " bps",
+          Math.round(
+            (feeTier.refereeFeeNumerator / feeTier.refereeFeeDenominator) * 100
+          ) + "%",
+          Math.round(
+            (feeTier.referrerRewardNumerator /
+              feeTier.referrerRewardDenominator) *
+              100
+          ) + "%",
+          Math.round(
+            (responseData.perpFeeStructure.fillerRewardStructure
+              .rewardNumerator /
+              responseData.perpFeeStructure.fillerRewardStructure
+                .rewardDenominator) *
+              100
+          ) + "%",
+        ];
+      });
+
+      perpFeeStructureData[perpFeeStructureData.length - 1][0] = "VIP";
+
+      // SPOT FEE STRUCTURE
+
+      const spotFeeStructureData = spotFeeTiers.map((feeTier, index) => {
+        return [
+          index + 1,
+          Math.round(
+            '-' + (feeTier.makerRebateNumerator / feeTier.makerRebateDenominator) *
+              1e4
+          ) + " bps",
+          Math.round((feeTier.feeNumerator / feeTier.feeDenominator) * 1e4) +
+            " bps",
+          Math.round(
+            (feeTier.refereeFeeNumerator / feeTier.refereeFeeDenominator) * 100
+          ) + "%",
+          Math.round(
+            (feeTier.referrerRewardNumerator /
+              feeTier.referrerRewardDenominator) *
+              100
+          ) + "%",
+          Math.round(
+            (responseData.spotFeeStructure.fillerRewardStructure
+              .rewardNumerator /
+              responseData.spotFeeStructure.fillerRewardStructure
+                .rewardDenominator) *
+              100
+          ) + "%",
+        ];
+      });
+
+      if (spotFeeStructureData.length > 1) {
+        spotFeeStructureData[spotFeeStructureData.length - 1][0] = "VIP";
+      }
+
+      return {
+        perpFeeStructureData,
+        spotFeeStructureData,
+        feeTiers,
+      };
+    });
+
+return {
+props: {
+ssg: {
+...spotFeeAdjustmentData,
+...perpFeeAdjustmentData,
+...feeStructureResult,
+},
+// The page will be considered as stale and regenerated every 60 seconds.
+revalidate: 60,
+},
+};
+};
+
+export const PerpFeeStructureTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "Maker Fee",
+       "Taker Fee",
+       "Referree Taker Discount",
+       "Referrer Reward",
+       "Filler Reward",
+      ];
+
+const { perpFeeStructureData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {perpFeeStructureData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+};
+
+export const SpotFeeStructureTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "Maker Fee",
+       "Taker Fee",
+       "Referree Taker Discount",
+       "Referrer Reward",
+       "Filler Reward",
+      ];
+
+const { spotFeeStructureData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {spotFeeStructureData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const FeeTiersTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Tier",
+       "Required USDC Insurance Fund Staked Amount",
+       "Required 30D Volume",
+      ];
+
+const { feeTiers } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {feeTiers.map((row, i) => {
+      return (
+        <tr key={i}>
+          <>
+            <td key={`${i}_0`}>{row.tier}</td>
+            <td key={`${i}_1`}>{row.staked}</td>
+            <td key={`${i}_2`}>{row.volume}</td>
+          </>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const AdjustedPerpMarketFeesTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Market",
+       "Fee Adjustment",
+      ];
+
+const { perpFeeAdjustmentData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {perpFeeAdjustmentData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
+export const AdjusteSpotMarketFeesTable = () => {
+  // Get the data from SSG, and render it as a component.
+  
+  const headings = [
+       "Market",
+       "Fee Adjustment",
+      ];
+
+const { spotFeeAdjustmentData } = useData();
+
+return <table>
+
+  <thead>
+    <tr>
+      <>
+        {headings.map((heading) => (
+          <th key={heading}>{heading}</th>
+        ))}
+      </>
+    </tr>
+  </thead>
+  <tbody>
+    {spotFeeAdjustmentData.map((row, i) => {
+      return (
+        <tr key={i}>
+          {row.map((cell, j) => {
+            return <td key={j}>{cell}</td>;
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+};
+
 # Trading Fees
 
 Trading fees on Drift are calculated on a per-trade basis and are based on the filled notional position size.
 
 Trading fees are calculated in the market's quote asset (USDC) and show up in Perpetual Markets as a penalty on the cost basis of position. In the circumstance where a user only holds non-USDC assets on Drift, a borrow for USDC will only appear upon someone settling that perp position's loss (see [P&L](/profit-loss/profit-loss-intro)).
 
-Drift Protocol has a tiered fee structure for all futures markets based on an on-chain calculation of 30-Day Volume\*.
+Drift Protocol has a tiered fee structure for all futures markets based on an on-chain calculation of 30-Day Volume or Insurance Fund Stake\*.
 
 ---
 
-SOL-PERP, BTC-PERP, and ETH-PERP, have a reduced fee schedule (vs other markets)
+## Fee Structures
 
-| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
-| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
-| 1        | < 500                                     | < 1m             | -0.25 bps        | 2.5 bps        | 5%                          | 15%                 | 10%\*              |
-| 2        | < 500                                     | > 1m             | -0.25 bps        | 2.25 bps         | 5%                          | 15%                 | 10%\*              |
-| 3        | > 1K                                      | > 5m             | -0.25 bps        | 2 bps         | 5%                          | 15%                 | 10%\*              |
-| 4        | > 2K                                      | > 10m            | -0.25 bps        | 1.75 bps         | 5%                          | 15%                 | 10%\*              |
-| 5        | > 5K                                      | > 50m            | -0.25 bps        | 1.5 bps         | 5%                          | 15%                 | 10%\*              |
-| VIP      | > 10K                                     | > 100m           | -0.25 bps        | .75 bps         | 5%                          | 15%                 | 10%\*              |
+_Some markets can have discounted or increased fees_ [See Fee-Adjusted Markets](#fee-adjusted-markets)
 
+### Perp Market Fees
+
+<PerpFeeStructureTable />
+
+### Spot Market Fees
+
+<SpotFeeStructureTable />
+
+## Fee Tiers
+
+_To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of them. E.g. just meeting the minimum volume quota will qualify you, without needing the Insurance Fund Stake as well._
+
+_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
+
+<FeeTiersTable />
+
+## Fee-Adjusted Markets
+
+_These markets have a flat adjustment to all fees_
+
+### Perp Markets
+
+<AdjustedPerpMarketFeesTable />
+
+### Spot Markets
+
+<AdjusteSpotMarketFeesTable />
 
 ---
-
-All other Perpetual Trading Fees are charged on a per-tier basis according to the following schedule:
-
-| **Tier** | **USDCInsurance Fund Staked Amount** | **Volume (30D)** | **Maker Fee** | **Taker Fee** | **Referree Taker Discount** | **Referrer Reward** | **Filler Reward**  |
-| -------- | ----------------------------------------- | ---------------- | ------------- | ------------- | --------------------------- | ------------------- | ------------------ |
-| 1        | < 500                                     | < 1m       | -1 bps        | 10 bps        | 5%                          | 15%                 | 10%\*              |
-| 2        | < 500                                     | > 1m             | -1 bps        | 9 bps         | 5%                          | 15%                 | 10%\*              |
-| 3        | > 1K                                      | > 5m             | -1 bps        | 8 bps         | 5%                          | 15%                 | 10%\*              |
-| 4        | > 2K                                      | > 10m            | -1 bps        | 7 bps         | 5%                          | 15%                 | 10%\*              |
-| 5        | > 5K                                      | > 50m            | -1 bps        | 6 bps         | 5%                          | 15%                 | 10%\*              |
-| VIP      | > 10K                                     | > 100m           | -1 bps        | 3 bps         | 5%                          | 15%                 | 10%\*              |
 
 ### Taker Fees
 
-Takers are charged a variable Taker Fee depending on which Tier they belong to.
-
-**Tier 1 -- 10 bps**: Default tier.
-
-**Tier 2 -- 9 bps**: Either stake more than 500 *or\* trade over 1m in volume (30D average).
-
-**Tier 3 -- 8 bps**: Either stake more than 1K *or\* trade over 5m in volume (30D average).
-
-**Tier 4 -- 7 bps**: Either stake more than 2K *or\* trade over 10m in volume (30D average).
-
-**Tier 5 -- 6 bps**: Either stake more than 5K *or\* trade over 50m in volume (30D average).
-
-**VIP -- 3 bps**: Either stake more than 10K *or\* trade over 100m in volume (30D average).
+Takers are charged a variable Taker Fee depending on which Tier they belong to. ([See PERP/SPOT Fee Structures](#fee-structures))
 
 ### Maker Fees
 
@@ -62,14 +421,15 @@ These apply to accounts that were signed up using a referred account. These perc
 Filler rewards are variable but up to 10% of the effective taker fee paid by the user. See [Keeper Incentives](/about-v2/keeper-incentives).
 
 ### Spot Fees
-Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebate for maker. While most longer tail assets can have increased fees (~10 bps) to stay in line with external markets fee schedules.
+
+Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebate for maker.
+
+### Fee Adjustments
+
+Longer tail assets can have increased fees to stay in line with external markets fee schedules. Some markets will periodically have flat discounts applied to all fee tiers. [See Fee-Adjusted Markets](#fee-adjusted-markets)
 
 ### Disclaimers
 
 _Drift Protocol reserves the right to end the promotional period and the Taker Incentive Program at any time. If the Drift Protocol chooses to do so, it will provide notice to participating users, but such notice is not required in order to conclude the program early or extend the program. Please note that the terms and conditions of this program are subject to change without notice._
 
-_There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._**
-
----
-
-_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
+_There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._\*\*
