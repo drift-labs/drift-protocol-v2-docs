@@ -368,6 +368,42 @@ Trading fees are calculated in the market's quote asset (USDC) and show up in Pe
 
 Drift Protocol has a tiered fee structure for all futures markets based on an on-chain calculation of 30-Day Volume or Insurance Fund Stake\*.
 
+---
+
+## Fee Structures
+
+_Some markets can have discounted or increased fees_ [See Fee-Adjusted Markets](#fee-adjusted-markets)
+
+### Perp Market Fees
+
+<PerpFeeStructureTable />
+
+### Spot Market Fees
+
+<SpotFeeStructureTable />
+
+## Fee Tiers
+
+_To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of them. E.g. just meeting the minimum volume quota will qualify you, without needing the Insurance Fund Stake as well._
+
+_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
+
+<FeeTiersTable />
+
+## Fee-Adjusted Markets
+
+_These markets have a flat adjustment to all fees_
+
+### Perp Markets
+
+<AdjustedPerpMarketFeesTable />
+
+### Spot Markets
+
+<AdjusteSpotMarketFeesTable />
+
+---
+
 ### Taker Fees
 
 Takers are charged a variable Taker Fee depending on which Tier they belong to. ([See PERP/SPOT Fee Structures](#fee-structures))
@@ -397,33 +433,3 @@ Longer tail assets can have increased fees to stay in line with external markets
 _Drift Protocol reserves the right to end the promotional period and the Taker Incentive Program at any time. If the Drift Protocol chooses to do so, it will provide notice to participating users, but such notice is not required in order to conclude the program early or extend the program. Please note that the terms and conditions of this program are subject to change without notice._
 
 _There are risks associated with Insurance Fund Staking. Read more about the [Insurance Fund Staking](/insurance-fund/insurance-fund-staking) and [Risks](/security/risks))._\*\*
-
-## Fee Tiers
-
-_To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of them. E.g. just meeting the minimum volume quota will qualify you, without needing the Insurance Fund Stake as well_
-
-_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
-
-<FeeTiersTable />
-
-## Fee-Adjusted Markets
-
-_These markets have a flat adjustment to all fees_
-
-### Perp Markets
-
-<AdjustedPerpMarketFeesTable />
-
-### Spot Markets
-
-<AdjusteSpotMarketFeesTable />
-
-## Fee Structures
-
-### Perp Market Fee Structure
-
-<PerpFeeStructureTable />
-
-### Spot Market Fee Structure
-
-<SpotFeeStructureTable />
