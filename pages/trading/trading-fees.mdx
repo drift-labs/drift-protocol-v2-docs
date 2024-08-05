@@ -57,32 +57,38 @@ const feeTiers = [
 {
 tier: 0,
 volume: 0,
-staked: 0,
+usdcStaked: 0,
+driftStaked: 0,
 },
 {
 tier: 1,
 volume: 1 + "M",
-staked: 500,
+usdcStaked: 500,
+driftStaked: 1 + "K",
 },
 {
 tier: 2,
 volume: 5 + "M",
-staked: 1 + "K",
+usdcStaked: 1 + "K",
+driftStaked: 10 + "K",
 },
 {
 tier: 3,
 volume: 10 + "M",
-staked: 2 + "K",
+usdcStaked: 2 + "K",
+driftStaked: 25 + "K",
 },
 {
 tier: 4,
 volume: 50 + "M",
-staked: 5 + "K",
+usdcStaked: 5 + "K",
+driftStaked: 100 + "K",
 },
 {
 tier: "VIP",
 volume: 100 + "M",
-staked: 10 + "K",
+usdcStaked: 10 + "K",
+driftStaked: 120 + "K",
 },
 ];
 
@@ -255,6 +261,7 @@ export const FeeTiersTable = () => {
   const headings = [
        "Tier",
        "Required USDC Insurance Fund Staked Amount",
+       "Required DRIFT Insurance Fund Staked Amount",
        "Required 30D Volume",
       ];
 
@@ -277,7 +284,8 @@ return <table>
         <tr key={i}>
           <>
             <td key={`${i}_0`}>{row.tier}</td>
-            <td key={`${i}_1`}>{row.staked}</td>
+            <td key={`${i}_1`}>{row.usdcStaked}</td>
+            <td key={`${i}_1`}>{row.driftStaked}</td>
             <td key={`${i}_2`}>{row.volume}</td>
           </>
         </tr>
