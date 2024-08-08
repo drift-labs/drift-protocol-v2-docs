@@ -1,0 +1,83 @@
+export const FuelBaseRatesTable = () => {
+    // Get the data from SSG, and render it as a component.
+  
+    const headings = [
+        "Activity",
+        "Base Earn Rate",
+    ];
+
+    const earnRateData = [
+        ["DRIFT Staking", "10 FUEL for every DRIFT staked for 28 days"],
+        ["Taker Volume", '1 FUEL for every $1 in taker volume'],
+        ["Maker Volume", '1 FUEL for every $1 in maker volume'],
+        // ["Deposits (Lending)", "None at this time"],
+        // ["Borrowing", "None at this time"],
+        // ["Open Interest", "None at this time"],
+    ]
+
+    return <table>
+        <thead>
+            <tr>
+                <>
+                    {headings.map((heading) => (
+                        <th key={heading}>{heading}</th>
+                    ))}
+                </>
+            </tr>
+        </thead>
+        <tbody>
+            {earnRateData.map((row, i) => {
+                return (
+                    <tr key={i}>
+                        {row.map((cell, j) => {
+                        return <td key={j}>{cell}</td>;
+                        })}
+                    </tr>
+                );
+            })}
+        </tbody>
+    </table>
+};
+
+
+<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center',  padding: '24px 0 0 0' }}>
+    <img src="/assets/fuel-droplet-large.svg" alt="Fuel Droplet" style={{ marginRight: '16px', position: 'relative', top: '2px' }} />
+    <h1 style={{fontSize: '44px', fontWeight: 'bold'}}>FUEL</h1>
+</div>
+
+## Overview
+
+FUEL is Drift’s first on-chain loyalty program for Driftoors designed to recognise those who continue to use Drift and are active participants in its mission. Your activity won’t go unrecognized — whether you’re actively trading perps or staking you can now kick things into high gear with FUEL. 
+
+The FUEL program has been designed to take into consideration a broad range of activity throughout the Drift ecosystem. Your activity is represented with each FUEL you earn and you’ll be able to accelerate even faster with Activity Boosters.
+
+## How do I Earn Fuel?
+
+Watch your FUEL grow with each click. FUEL earnings are continuously added to your account while performing various actions on Drift, and can be viewed at [app.drift.trade/fuel](http://app.drift.trade/fuel). The total FUEL earned reflects the activity across all of your subaccounts.
+
+The following activities on Drift earn FUEL:
+<FuelBaseRatesTable />
+
+Taker and maker FUEL earnings are added to your account immedaitely as the activity is completed.
+
+All earn rates that are time-based, such as DRIFT staking, are also continuously added, but the amount is divided over a 28-day period. Example: if you stake 100 DRIFT, and the earn rate is 10 FUEL per DRIFT staked for 28 days, after one day you will have earned about 35.7 FUEL (10 FUEL / 28 days * 100 DRIFT).
+
+As the FUEL program continues to be rolled out, rewards for other activities like deposits/lending, borrowing, and having open interest may be added in the future.
+
+## What are Boosters?
+
+Activity boosters provide an accelerated earn rate for different activities. The boosted rate is added to the base earn rate for the activity. Example: if the base earn rate for taker volume is 1 FUEL for every \$1, and there's a booster of 5 FUEL for every \$1 in SOL-PERP, then the earn rate for SOL-PERP becomes 6 FUEL for every \$1 in taker volume as long as the booster is active.
+
+All currently active boosters and their rates can be found at: [app.drift.trade/fuel](http://app.drift.trade/fuel).
+
+## What can I redeem FUEL for?
+
+In the future, you’ll be able to burn (redeem) your FUEL to supercharge your Drift experience. The goal of the program is to recognize contributors and create a fun experience.
+
+More details on what you can redeem your FUEL for and how to redeem it will be coming soon!
+
+---
+
+Disclaimer:
+
+Please be advised that any FUEL acquired through the FUEL program is solely for recognition purposes. Holding any FUEL holds no monetary or intrinsic value and cannot be redeemed for cash or any other form of currency.  FUEL is not transferable, assignable, or tradable in any form. Drift reserves the right to modify, suspend, or terminate the Fuel program at any time without prior notice. Your participation in the FUEL program constitutes your acceptance of the above.
