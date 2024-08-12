@@ -1,0 +1,34 @@
+# Introduction to Prediction Markets
+
+Each Drift prediction market supports a binary outcome (YES or NO) represented by price 1 or 0. These markets support all the advanced order types (limit, stop, etc) available in other markets and have multiple capital efficiency benefits vs other prediction markets:
+
+- earn lending interest on all supported collateral
+- get margin extended on all supported non-usdc collateral tokens, with 0% interest until losses (realized or unrealized) get settled by a counterparty. after losses get settled, the account pays a floating borrow rate specified [here](https://app.drift.trade/earn/lend-borrow/borrow).
+  - trading with sufficient/solely USDC do not risk any margin/borrow interest
+  - additionally, solely USDC collateralized accounts (with no other positions) face no liquidation risk (even with depeg in usdc like in march 2023)
+- every account's margin requirement is only the 'worst case liability'.
+  - this can be more capital efficient vs typical open order allocation:
+    1. users can still earn lending interest with open orders.
+    2. liquidity providers with two-sided orders or orders that would only reduce risk require no additional margin.
+
+## Initialization, Resolution, and Settlement
+
+### Initialization
+
+Upon sufficient community requests and liquidity support/interest, Drift's security council (an elected multisig under realms governance) can initialize. For conservative purposes, markets will require full margin requirement. Prices are bounded between 0 and 1 and a market margin ratio of 100% requires liability value of the position (`1 - price` for shorts and `price` for longs).
+
+### Resolution
+
+The security council (an elected multisig under realms governance) also acts as the resolver for all prediction markets. After an indicated resolution time, the resolution step is to update the oracle (to a fixed value 0 or 1) and setting an expiry date.
+
+### Settlement
+
+After the expiry date is set, users can only trade the market in reduce only mode (no new entrants or risk-increasing positions). After expiry date and settlement is triggered, users can settle their positions at the settlement price (determined by the stable resolution oracle).
+
+In a tail-risk event where the market has a shortfall that is not covered by fees or insurance, the shortfall will be socialized into a settlement price (i.e. settlement price can be < 1 despite a resolution set to 1).
+
+### Under what circumstances can a shortfall occur?
+
+Despite setting a market's margin ratio for 100% collateralization, if a user uses another token (for example consider with 80%/90% initial/maintainance asset weight), if the value falls beyond 1-`initial_asset_weight`% (20% in example case) before liquidators take over, and SOL insurance is depleted, that means that USDC insurance is required to service the prediction market position.
+
+Again, the shortfall must exceed the market's USDC insurance fund or market's specific fee pool for settlement price to be impacted.
