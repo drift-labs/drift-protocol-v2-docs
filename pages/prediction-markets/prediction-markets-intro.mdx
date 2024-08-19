@@ -1,5 +1,15 @@
 # Introduction to Prediction Markets
 
+## Overview
+
+B.E.T is the first capital-efficient prediction market on Solana. Bet bigger on real-world outcomes.
+
+Here’s how:
+
+- Use 30+ tokens (supported as collateral) — not just USDC.
+- Hedge your bets on a unified platform.
+- Earn yield while in position.
+
 Each Drift prediction market supports a binary outcome (YES or NO) represented by price 1 or 0. These markets support all the advanced order types (limit, stop, etc) available in other markets and have multiple capital efficiency benefits vs other prediction markets:
 
 - earn lending interest on all supported collateral
@@ -32,3 +42,39 @@ In a tail-risk event where the market has a shortfall that is not covered by fee
 Despite setting a market's margin ratio for 100% collateralization, if a user uses another token (for example consider with 80%/90% initial/maintainance asset weight), if the value falls beyond 1-`initial_asset_weight`% (20% in example case) before liquidators take over, and SOL insurance is depleted, that means that USDC insurance is required to service the prediction market position.
 
 Again, the shortfall must exceed the market's USDC insurance fund or market's specific fee pool for settlement price to be impacted.
+
+## FAQ
+
+### **How do prices reflect the probability of winning?**
+
+Prices are the cost of buying 1 share, and they range between \$0 to \$1. When the market is resolved, the price of the correct share will resolve to \$1, whereas the shares of the opposing side will resolve to \$0.
+
+For the more advanced users, you may notice that
+
+`Cost of “Yes” share + Cost of “No” share = $1`
+
+This is because a “No” share is essentially selling a “Yes” share on margin.
+
+### **How do I make money?**
+
+When the markets are resolved, and you own shares of the correct side, the prices of those shares will resolve to \$1.
+
+Example:
+
+You bought `Yes` shares for “Donald Trump wins 2024 US Elections” market at \$0.70 per share. If Donald Trump does indeed win the 2024 US Elections, you will make a profit of (\$1 - \$0.70 = \$0.30) per `Yes` share that you own.
+
+The same calculation works for `No` shares too.
+
+### **Can I sell my shares at any time?**
+
+Yes, you can sell your shares at any time.
+
+If you bought `Yes` shares at \$0.40/share, and it is now worth \$0.60/share, you may want to de-risk and sell some/all of your `Yes` shares for a profit.
+
+### Does my B.E.T activity earn Fuel?
+
+All B.E.T trades will be boosted by Fuel. The Fuel booster will be available for two weeks - from the 19th of August till the 1st of September.
+
+**How is Fuel calculated?**
+
+For every \$1 trade, you will receive 1 FUEL. This is further boosted by a 5X Fuel Boost. This means that during the 2-week period, you will receive 5 FUEL for every \$1 traded.
