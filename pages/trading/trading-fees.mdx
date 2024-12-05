@@ -57,37 +57,31 @@ const feeTiers = [
 {
 tier: 0,
 volume: 0,
-usdcStaked: 0,
 driftStaked: 0,
 },
 {
 tier: 1,
 volume: 1 + "M",
-usdcStaked: 500,
 driftStaked: 1 + "K",
 },
 {
 tier: 2,
 volume: 5 + "M",
-usdcStaked: 1 + "K",
 driftStaked: 10 + "K",
 },
 {
 tier: 3,
 volume: 10 + "M",
-usdcStaked: 2 + "K",
 driftStaked: 50 + "K",
 },
 {
 tier: 4,
 volume: 50 + "M",
-usdcStaked: 5 + "K",
 driftStaked: 100 + "K",
 },
 {
 tier: "VIP",
 volume: 100 + "M",
-usdcStaked: 10 + "K",
 driftStaked: 120 + "K",
 },
 ];
@@ -260,7 +254,6 @@ export const FeeTiersTable = () => {
   
   const headings = [
        "Tier",
-       "Required USDC Insurance Fund Staked Amount",
        "Required DRIFT Insurance Fund Staked Amount",
        "Required 30D Volume",
       ];
@@ -284,7 +277,6 @@ return <table>
         <tr key={i}>
           <>
             <td key={`${i}_0`}>{row.tier}</td>
-            <td key={`${i}_1`}>{row.usdcStaked}</td>
             <td key={`${i}_1`}>{row.driftStaked}</td>
             <td key={`${i}_2`}>{row.volume}</td>
           </>
@@ -370,11 +362,13 @@ return <table>
 
 # Trading Fees
 
-Trading fees on Drift are calculated on a per-trade basis and are based on the filled notional position size.
+Drift offers a highly competitive fee structure with low taker fees and maker rebates across all tiers, with the potential for even lower fees as trading volume increases. Fees are calculated per trade based on the filled notional position size and are charged in the market's quote asset (USDC), affecting the position's cost basis.
 
-Trading fees are calculated in the market's quote asset (USDC) and show up in Perpetual Markets as a penalty on the cost basis of position. In the circumstance where a user only holds non-USDC assets on Drift, a borrow for USDC will only appear upon someone settling that perp position's loss (see [P&L](/profit-loss/profit-loss-intro)).
+**High-volume markets benefit from a 75% fee reduction, with rates starting as low as 2.5 bps. [See Fee-Adjusted Markets](#fee-adjusted-markets)**
 
-Drift Protocol has a tiered fee structure for all futures markets based on an on-chain calculation of 30-Day Volume or Insurance Fund Stake\*.
+If a user holds only non-USDC assets, a USDC borrow may be triggered upon settlement of a loss in perpetual markets (see [P&L](/profit-loss/profit-loss-intro)).
+
+Drift's tiered fees for futures markets are based on an on-chain calculation of 30-Day Volume or Insurance Fund Stake*.
 
 ---
 
