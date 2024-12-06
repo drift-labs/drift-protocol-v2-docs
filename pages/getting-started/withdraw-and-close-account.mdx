@@ -17,16 +17,16 @@ You can partially withdraw collateral if you have enough initial free collateral
  </Callout>
 
 <Callout type="error" emoji="🚫">
-Deleting an account permanently removes all associated history. This includes points and there's no way to retrieve them.
-</Callout>
-
-<Callout type="error" emoji="🚫">
 Referred accounts cannot be deleted. 
 </Callout>
 
 ### Dynamic rent reclaiming
 
 Every account incurs a base account rent of ~0.035 SOL. During periods of high sign-ups (sybil activity), Drift's program adds an excess fee on top of this base rent. For example, a user might pay 0.035 SOL (base rent) + 0.1901 SOL (excess fee) = 0.2251 SOL to create an account.
+
+### Idle Account Deletion
+
+The Drift Security Council periodically triggers the cleanup of idle accounts in the Drift program. This is done to clear unused space and optimize infrastructure and keeper networks. Authorities of these accounts receive their SOL rent back to their wallets. Accounts eligible for deletion [must be inactive for ~3 months and hold under ~$0.05 in notional value](https://github.com/drift-labs/protocol-v2/blob/d005aae63375f6d8884480f089034a9d6d072d13/programs/drift/src/instructions/keeper.rs#L2138). Account history will still available through the UI and the account may be re-created by the user at any time.
 
 ### Recovering Funds
 
