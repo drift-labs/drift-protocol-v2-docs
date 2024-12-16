@@ -13,7 +13,7 @@ Perpetuals futures have no expiry date, final settlement, or delivery. As such, 
 | Mark TWAP Calc      | (bid TWAP + ask TWAP) / 2                       |
 | Frequency           | End of Hour\* (9:00 AM, 10:00 AM, ...)          |
 
-Note: Funding rate magnitudes are clamped at 0.12626% and are delayed at large divergences (see [Oracles](/trading/oracles)). Individual Market TWAP updates utilize the side of the book for trade executions, Bid and Ask TWAPs in the market are calculated and/or estimated on every trade.
+Note: Funding rate hourly magnitudes are clamped according to the market's Contract Tier (>=B: 0.125%, C: 0.208%, <C: 0.4167%) and can be delayed at large divergences (see [Oracles](/trading/oracles)). Individual Market TWAP updates utilize the side of the book for trade executions, Bid and Ask TWAPs in the market are calculated and/or estimated on every trade.
 
 ### Unrealised -> Realised Funding
 
