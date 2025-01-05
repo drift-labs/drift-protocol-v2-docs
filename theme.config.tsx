@@ -285,7 +285,7 @@ const config: DocsThemeConfig = {
   },
   docsRepositoryBase: "https://github.com/drift-labs/drift-protocol-v2-docs/tree/master",
   chat: {
-    link: "https://discord.gg/driftprotocol",
+    link: "https://discord.com/invite/fMcZBH8ErM",
   },
   useNextSeoProps() {
     const { asPath } = useRouter();
