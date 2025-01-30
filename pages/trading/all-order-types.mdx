@@ -82,17 +82,6 @@ For example, if you place a **Long Oracle Limit Order** on SOL-PERP with an offs
 
 It's important to note that these orders can fill at any time the offset is met, so long as the account collateral is sufficient, regardless of how far the price is from what it was at the time of order placement.
 
-#### Protected Maker Mode for Oracle Limits
-When a user's account is set to Protected Market Maker mode, tighter oracle validity checks are applied to their oracle limit orders. These orders can only be filled under the following conditions:
-
-- The oracle is sufficiently valid for the AMM to execute fills.
-- And at least one of these criteria is met:
-  - The oracle staleness is 0 slots, ensuring the oracle data is fully up to date.
-  - The taker's order qualifies for instant fills against the AMM.
-  - The taker's order has been resting for at least 10 slots, providing time for arbitrage opportunities to update the price.
-
-This mode provides partial protection for resting oracle orders, enforcing on timely updates or non-arbitrage activity. Like other special user margin modes, enabling Protected Maker Mode is permissionless but has limited slot availability.
-
 
 ### Order Flags
 
@@ -103,3 +92,18 @@ Additionally, orders can include flags that specify execution parameters. The pr
 - **Post-Only**: Enforces that the order is a maker order that can provide liquidity to the pool for a reduced exchange fee (0%). Without this flag, orders that don't execute immediately are not post-only.
 
 - **Immediate or cancel (IOC)**: An order that is placed and potentially partially filled. The remainder that is not filled immediately is then cancelled.
+
+
+### Protected Maker Mode
+When a user's account is set to Protected Market Maker mode, tighter oracle validity checks are applied to their limit orders. These orders can only be filled at the quoted price under the following conditions:
+
+- The oracle is sufficiently valid for the AMM to execute fills.
+- And at least one of these criteria is met:
+  - The oracle staleness is 0 slots, ensuring the oracle data is fully up to date.
+  - The taker's order qualifies for instant fills against the AMM.
+  - The taker's order has been resting for at least 10 slots, preventing latency arbitrage race against the quote price.
+
+If the above is not met, the maker will automatically update their quotes an additional 10 bps in favor (e.g. lower for bids, higher for asks) vs the current price. By doing so, this mode provides partial protection for resting liqudity orders on-chain, providing the best prices only upon timely oracle updates and non-latency-arbitrage activity.
+
+Like other special user margin modes, enabling Protected Maker Mode is permissionless but has limited slot availability.
+
