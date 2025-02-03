@@ -99,8 +99,7 @@ When a user's account is set to Protected Market Maker mode, tighter oracle vali
 
 - The oracle is sufficiently valid for the AMM to execute fills.
 - And at least one of these criteria is met:
-  - The oracle staleness is 0 slots, ensuring the oracle data is fully up to date.
-  - The taker's order qualifies for instant fills against the AMM.
+  - The taker's order qualifies for instant fills against the AMM (order counts below whats typical of latency arbitrageurs).
   - The taker's order has been resting for at least 10 slots, preventing latency arbitrage race against the quote price.
 
 If the above is not met, the maker will automatically update their quotes an additional 10 bps in favor (e.g. lower for bids, higher for asks) vs the current price. By doing so, this mode provides partial protection for resting liqudity orders on-chain, providing the best prices only upon timely oracle updates and non-latency-arbitrage activity.
