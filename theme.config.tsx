@@ -11,7 +11,7 @@ const logo = (
       viewBox="0 0 74 96"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ marginRight: '15px' }}
+      style={{ marginRight: "15px" }}
     >
       <path
         d="M66.8651 76.3843C66.8651 79.5163 65.6982 82.2622 63.8248 84.3683C63.8027 84.3931 63.7873 84.4233 63.7805 84.4559V84.4559C63.7523 84.5906 63.8729 84.7091 64.0065 84.6762C69.4086 83.3451 73.7764 78.7307 73.7764 72.6711V41.2575C73.7764 31.9714 68.5896 23.3907 60.1698 18.7477L26.1725 0L19.4379 3.81057L53.2586 22.4608C61.6783 27.1039 66.8651 35.6846 66.8651 44.9707V76.3843Z"
@@ -283,9 +283,10 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/drift-labs",
   },
-  docsRepositoryBase: "https://github.com/drift-labs/drift-protocol-v2-docs/tree/master",
+  docsRepositoryBase:
+    "https://github.com/drift-labs/drift-protocol-v2-docs/tree/master",
   chat: {
-    link: "https://discord.gg/driftprotocol",
+    link: "https://discord.com/invite/95kByNnDy5",
   },
   useNextSeoProps() {
     const { asPath } = useRouter();
@@ -322,7 +323,7 @@ const config: DocsThemeConfig = {
           name="og:title"
           content={title ? title + " – Drift Protocol" : "Drift Protocol"}
         />
-         <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/assets/favicon.png" type="image/png" />
         <link
           rel="icon"
