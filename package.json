@@ -20,9 +20,15 @@
   "dependencies": {
     "canvas-txt": "^4.1.1",
     "dotenv": "^16.4.5",
+<<<<<<< HEAD
     "next": "^13.0.6",
     "nextra": "2.13.4",
     "nextra-theme-docs": "2.13.4",
+=======
+    "next": "^14.0.0",
+    "nextra": "latest",
+    "nextra-theme-docs": "latest",
+>>>>>>> master
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "ts-node": "^10.9.2"
