@@ -1,7 +1,7 @@
 {
-  "name": "nextra-docs-template",
-  "version": "0.0.1",
-  "description": "Nextra docs template",
+  "name": "drift-protocol-v2-docs",
+  "version": "0.0.2",
+  "description": "Drift Protocol V2 Documentation",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,20 +9,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xentoshi/drift-documentation-v2"
+    "url": "https://github.com/drift-labs/drift-protocol-v2-docs"
   },
   "author": "Xentoshi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xentoshi/drift-documentation-v2/issues"
+    "url": "https://github.com/drift-labs/drift-protocol-v2-docs/issues"
   },
-  "homepage": "https://github.com/xentoshi/drift-documentation-v2",
+  "homepage": "https://github.com/drift-labs/drift-protocol-v2-docs",
   "dependencies": {
     "canvas-txt": "^4.1.1",
     "dotenv": "^16.4.5",
-    "next": "^14.0.0",
-    "nextra": "latest",
-    "nextra-theme-docs": "latest",
+    "next": "^13.0.6",
+    "nextra": "2.13.4",
+    "nextra-theme-docs": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "ts-node": "^10.9.2"
