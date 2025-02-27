@@ -8,4 +8,13 @@ const withNextra = require('nextra')({
   latex: true,
 })
 
-module.exports = withNextra();
+const nextConfig = {
+  exportPathMap: async function (
+    defaultPathMap,
+    { dev, dir, outDir, distDir, buildId }
+  ) {
+    return defaultPathMap;
+  },
+}
+
+module.exports = withNextra(nextConfig);
