@@ -1,51 +1,29 @@
-# Margin
+import { useData } from 'nextra/data'
+import React from 'react'
 
-Below is a table for initial and maintenance margin requirements for each market. This information is available on the market account and [the SDK](https://github.com/drift-labs/protocol-v2/blob/master/sdk/src/constants/perpMarkets.ts).
+export const getStaticProps = async () => {
+  const res = await fetch('https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts')
+  const data = await res.json()
 
-Notional size: 10,000
+  const tableData = data.result.map((market, index) => {
+    const name = market.name
+      .map((charCode) => String.fromCharCode(charCode))
+      .join('')
+      .trim()
 
-   |     | Perpetuals  | Initial Margin(Margin Ratio / Leverage) | Maintenance Margin(Margin Ratio/ Leverage) | IMF Factor |
-   | --- | ----------  | --------------------------------------- | ------------------------------------------ | ---------- |
-   | 0   | SOL-PERP    | 10% / 10x                               | 5% / 20x                                  | 0.0002     |
-   | 1   | BTC-PERP    | 5% / 20x                               | 3.33% / 33x                                  | 0.008      |
-   | 2   | ETH-PERP    | 5% / 20x                               | 3.33% / 33x                                  | 0.002      |
-   | 3   | APT-PERP    | 10% / 10x                               | 6.67% / 15x                                  | 0.0009     |
-   | 4   | 1MBONK-PERP | 25%  / 4x                                | 14.2%  / 7x                                   | 0.0006     |
-   | 5   | MATIC-PERP  | 12.5% / 8x                                | 8.33% / 12x                                  | 0.0005     |
-   | 6   | ARB-PERP    | 11.11% / 9x                                | 7.14% / 14x                                  | 0.0005     |
-   | 7   | DOGE-PERP   | 12.5% / 8x                                | 9.1% / 11x                                  | 0.0002     |
-   | 8   | BNB-PERP    | 10% / 10x                               | 5.55% / 18x                                  | 0.0035     |
-   | 9   | SUI-PERP    | 11.11% / 9x                                | 7.7% / 13x                                  | 0.0005     |
-   | 10  | 1MPEPE-PERP | 25%  / 4x                                | 12.5%  / 8x                                   | 0.0008     |
-   | 11  | OP-PERP     | 10% / 10x                               | 5.9% / 17x                                  | 0.0005     |
-   | 12  | RNDR-PERP   | 10% / 10x                               | 5.55% / 18x                                  | 0.0006     |
-   | 13  | XRP-PERP    | 14.2% / 7x                                | 12.5% / 8x                                   | 0.0006     |
-   | 14  | HNT-PERP    | 20%  / 5x                                | 7.14% / 14x                                  | 0.0006     |
-   | 15  | INJ-PERP    | 10% / 10x                               | 6.67% / 15x                                  | 0.0006     |
-   | 16  | LINK-PERP   | 10% / 10x                               | 6.67% / 15x                                  | 0.0006     |
-   | 17  | RLB-PERP    | 20%  / 5x                                | 11.11% / 9x                                   | 0.0001     |
-   | 18  | PYTH-PERP   | 10% / 10x                               | 5.2% / 19x                                  | 0.0001     |
-   | 19  | TIA-PERP    | 10% / 10x                               | 5% / 20x                                  | 0.0001     |
-   | 20  | JTO-PERP    | 10% / 10x                               | 5% / 20x                                  | 0.0001     |
-   | 21  | SEI-PERP    | 10% / 10x                               | 5% / 20x                                  | 0.0001     |
-   | 22  | AVAX-PERP   | 10% / 10x                               | 5% / 20x                                  | 0.0001     |
-   | 23  | WIF-PERP    | 25%  / 4x                                | 12.5%  / 8x                                   | 0.0001     |
-   | 24  | JUP-PERP    | 10% / 10x                               | 5.2% / 19x                                  | 0.0001     |
-   | 25  | DYM-PERP    | 20%  / 5x                                | 10% / 10x                                  | 0.0005     |
-   | 26  | TAO-PERP    | 20%  / 5x                                | 10% / 10x                                  | 0.0001     |
+    return {
+      index,
+      name,
+      marginRatioInitial: market.marginRatioInitial,
+      marginRatioMaintenance: market.marginRatioMaintenance,
+      imfFactor: market.imfFactor,
+    }
+  })
 
-|        | Spot    | Initial Leverage | Maintenance Leverage |IMF Factor |
-|--------|---------|------------------|----------------------|-----------|
-| 0      | USDC    | 1,000,000        | 1,000,000            |0          |
-| 1      | SOL     | 2.3781           | 9.9999               |0.0013     |
-| 2      | mSOL    | 1.6597           | 9.9999               |0.003      |
-| 3      | wBTC    | 1.5903           | 9.9999               |0.105      |
-| 4      | wETH    | 1.7982           | 9.9999               |0.025      |
-| 5      | USDT    | 9.9999           | 19.9996              |0.0004     |
-| 6      | jitoSOL | 1.701            | 9.9999               |0.0006     |
-| 7      | PYTH    | 1.1319           | 4                    |0.001      |
-| 8      | bSOL    | 1.7419           | 9.9999               |0.003      |
-| 9      | JTO     | 1.1791           | 4                    |0.001      |
-| 10     | WIF     | 1                | 2                    |0.004      |
-| 11     | JUP     | 1.0933           | 4                    |0.001      |
-| 12     | RNDR    | 1.0273           | 4                    |0.001      |
+  return {
+    props: {
+      ssg: { tableData },
+    },
+    revalidate: 60,
+  }
+}
