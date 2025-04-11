@@ -6,18 +6,20 @@ export const getStaticProps = async () => {
   );
   const data = await res.json();
 
-  const perpMarginData = data.result.map((market, index) => {
-    return {
-      index,
-      name: market.name
-        .map((charCode) => String.fromCharCode(charCode))
-        .join("")
-        .trim(),
-      marginRatioInitial: market.marginRatioInitial,
-      marginRatioMaintenance: market.marginRatioMaintenance,
-      imfFactor: market.imfFactor,
-    };
-  });
+  const perpMarginData = data.result
+    .filter((market) => !("prediction" in market.contractType))
+    .map((market, index) => {
+      return {
+        index,
+        name: market.name
+          .map((charCode) => String.fromCharCode(charCode))
+          .join("")
+          .trim(),
+        marginRatioInitial: (market.marginRatioInitial / 1e2).toFixed(2) + "%",
+        marginRatioMaintenance: (market.marginRatioMaintenance / 1e2).toFixed(2) + "%",
+        imfFactor: (market.imfFactor / 1e6).toFixed(6),
+      };
+    });
 
   return {
     props: {
@@ -25,9 +27,10 @@ export const getStaticProps = async () => {
         perpMarginData,
       },
     },
-    revalidate: 3600, // Rebuild page every hr
+    revalidate: 3600,
   };
 };
+
 
 export const PerpMarginTable = () => {
   const { perpMarginData } = useData();
@@ -35,9 +38,9 @@ export const PerpMarginTable = () => {
   const headings = [
     "Index",
     "Market",
-    "marginRatioInitial",
-    "marginRatioMaintenance",
-    "imfFactor",
+    "Initial Margin Ratio",
+    "Maintenance Margin Ratio",
+    "IMF Factor",
   ];
 
   return (
@@ -71,14 +74,9 @@ Below is a table for initial and maintenance margin requirements for each market
 These values include:
 - **Initial Margin Ratio** (`marginRatioInitial`)
 - **Maintenance Margin Ratio** (`marginRatioMaintenance`)
-- **IMF Factor**, which affects leverage at higher notional sizes
+- **IMF Factor**, (`imfFactor`) affects leverage at higher notional sizes
 
 Data below is updated every hour from `PerpMarketAccount`.
 
-### Perpetual Markets
-
 <PerpMarginTable />
 
----
-
-Note: All values shown are raw
