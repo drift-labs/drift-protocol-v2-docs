@@ -9,14 +9,16 @@ export const getStaticProps = async () => {
   const perpMarginData = data.result
     .filter((market) => !("prediction" in market.contractType))
     .map((market, index) => {
+      const initRatio = market.marginRatioInitial / 1e4;
+      const maintRatio = market.marginRatioMaintenance / 1e4;
       return {
         index,
         name: market.name
           .map((charCode) => String.fromCharCode(charCode))
           .join("")
           .trim(),
-        marginRatioInitial: (market.marginRatioInitial / 1e2).toFixed(2) + "%",
-        marginRatioMaintenance: (market.marginRatioMaintenance / 1e2).toFixed(2) + "%",
+        initial: `${(initRatio * 100).toFixed(2)}% / ${(1 / initRatio).toFixed(0)}x`,
+        maintenance: `${(maintRatio * 100).toFixed(2)}% / ${(1 / maintRatio).toFixed(0)}x`,
         imfFactor: (market.imfFactor / 1e6).toFixed(6),
       };
     });
@@ -31,15 +33,14 @@ export const getStaticProps = async () => {
   };
 };
 
-
 export const PerpMarginTable = () => {
   const { perpMarginData } = useData();
 
   const headings = [
     "Index",
-    "Market",
-    "Initial Margin Ratio",
-    "Maintenance Margin Ratio",
+    "Perpetuals",
+    "Initial Margin (Margin Ratio / Leverage)",
+    "Maintenance Margin (Margin Ratio / Leverage)",
     "IMF Factor",
   ];
 
@@ -57,8 +58,8 @@ export const PerpMarginTable = () => {
           <tr key={row.index}>
             <td>{row.index}</td>
             <td>{row.name}</td>
-            <td>{row.marginRatioInitial}</td>
-            <td>{row.marginRatioMaintenance}</td>
+            <td>{row.initial}</td>
+            <td>{row.maintenance}</td>
             <td>{row.imfFactor}</td>
           </tr>
         ))}
@@ -66,6 +67,7 @@ export const PerpMarginTable = () => {
     </table>
   );
 };
+
 
 # Margin Requirements
 
