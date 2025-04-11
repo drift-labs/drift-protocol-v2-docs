@@ -27,3 +27,59 @@ export const getStaticProps = async () => {
     revalidate: 3600,
   }
 }
+
+const RawPerpMarginTable = () => {
+  const { tableData } = useData()
+
+  const headings = [
+    'Index',
+    'Perpetual',
+    'marginRatioInitial',
+    'marginRatioMaintenance',
+    'imfFactor',
+  ]
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          {headings.map((h) => (
+            <th key={h}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {tableData.map((row) => (
+          <tr key={row.index}>
+            <td>{row.index}</td>
+            <td>{row.name}</td>
+            <td>{row.marginRatioInitial}</td>
+            <td>{row.marginRatioMaintenance}</td>
+            <td>{row.imfFactor}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+export default function Page() {
+  return (
+    <>
+      <h1>Margin (Raw API Data)</h1>
+      <p>
+        Below is the raw, unprocessed data pulled from{' '}
+        <code>https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts</code>.
+      </p>
+      <p>
+        Values are pulled from the on-chain <code>PerpMarketAccount</code> and include:
+        <ul>
+          <li><code>marginRatioInitial</code></li>
+          <li><code>marginRatioMaintenance</code></li>
+          <li><code>imfFactor</code></li>
+        </ul>
+      </p>
+      <RawPerpMarginTable />
+    </>
+  )
+}
