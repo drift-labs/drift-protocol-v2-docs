@@ -1,55 +1,56 @@
-import { useData } from 'nextra/data'
-import React from 'react'
+import { useData } from "nextra/data";
 
 export const getStaticProps = async () => {
-  const res = await fetch('https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts')
-  const data = await res.json()
+  const res = await fetch(
+    "https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts"
+  );
+  const data = await res.json();
 
-  const tableData = data.result.map((market, index) => {
-    const name = market.name
-      .map((charCode) => String.fromCharCode(charCode))
-      .join('')
-      .trim()
-
+  const perpMarginData = data.result.map((market, index) => {
     return {
       index,
-      name,
+      name: market.name
+        .map((charCode) => String.fromCharCode(charCode))
+        .join("")
+        .trim(),
       marginRatioInitial: market.marginRatioInitial,
       marginRatioMaintenance: market.marginRatioMaintenance,
       imfFactor: market.imfFactor,
-    }
-  })
+    };
+  });
 
   return {
     props: {
-      ssg: { tableData },
+      ssg: {
+        perpMarginData,
+      },
     },
-    revalidate: 3600,
-  }
-}
+    revalidate: 3600, // Rebuild page every hr
+  };
+};
 
-const RawPerpMarginTable = () => {
-  const { tableData } = useData()
+export const PerpMarginTable = () => {
+  const { perpMarginData } = useData();
 
   const headings = [
-    'Index',
-    'Perpetual',
-    'marginRatioInitial',
-    'marginRatioMaintenance',
-    'imfFactor',
-  ]
+    "Index",
+    "Market",
+    "marginRatioInitial",
+    "marginRatioMaintenance",
+    "imfFactor",
+  ];
 
   return (
     <table>
       <thead>
         <tr>
-          {headings.map((h) => (
-            <th key={h}>{h}</th>
+          {headings.map((heading) => (
+            <th key={heading}>{heading}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {tableData.map((row) => (
+        {perpMarginData.map((row) => (
           <tr key={row.index}>
             <td>{row.index}</td>
             <td>{row.name}</td>
@@ -60,26 +61,24 @@ const RawPerpMarginTable = () => {
         ))}
       </tbody>
     </table>
-  )
-}
+  );
+};
 
-export default function Page() {
-  return (
-    <>
-      <h1>Margin (Raw API Data)</h1>
-      <p>
-        Below is the raw, unprocessed data pulled from{' '}
-        <code>https://mainnet-beta.api.drift.trade/stats/perpMarketAccounts</code>.
-      </p>
-      <p>
-        Values are pulled from the on-chain <code>PerpMarketAccount</code> and include:
-        <ul>
-          <li><code>marginRatioInitial</code></li>
-          <li><code>marginRatioMaintenance</code></li>
-          <li><code>imfFactor</code></li>
-        </ul>
-      </p>
-      <RawPerpMarginTable />
-    </>
-  )
-}
+# Margin Requirements
+
+Below is a table for initial and maintenance margin requirements for each market. Pulled directly from the protocol’s on-chain state.
+
+These values include:
+- **Initial Margin Ratio** (`marginRatioInitial`)
+- **Maintenance Margin Ratio** (`marginRatioMaintenance`)
+- **IMF Factor**, which affects leverage at higher notional sizes
+
+Data below is updated every hour from `PerpMarketAccount`.
+
+### Perpetual Markets
+
+<PerpMarginTable />
+
+---
+
+Note: All values shown are raw
