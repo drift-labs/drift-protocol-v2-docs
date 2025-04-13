@@ -6,27 +6,43 @@ export const getStaticProps = async () => {
   );
   const data = await res.json();
 
-  const perpMarginData = data.result
-    .filter((market) => !("prediction" in market.contractType))
-    .map((market, index) => {
-      const initRatio = market.marginRatioInitial / 1e4;
-      const maintRatio = market.marginRatioMaintenance / 1e4;
-      return {
-        index,
-        name: market.name
-          .map((charCode) => String.fromCharCode(charCode))
-          .join("")
-          .trim(),
-        initial: `${(initRatio * 100).toFixed(2)}% / ${(1 / initRatio).toFixed(0)}x`,
-        maintenance: `${(maintRatio * 100).toFixed(2)}% / ${(1 / maintRatio).toFixed(0)}x`,
-        imfFactor: (market.imfFactor / 1e6).toFixed(6),
-      };
+  const perpMarginData = [];
+  const highLeverageMarkets = [];
+
+  data.result.forEach((market, index) => {
+    if ("prediction" in market.contractType) return;
+
+    const name = market.name.map((c) => String.fromCharCode(c)).join("").trim();
+    const initRatio = market.marginRatioInitial / 1e4;
+    const maintRatio = market.marginRatioMaintenance / 1e4;
+    const imf = +(market.imfFactor / 1e6).toFixed(6);
+
+    perpMarginData.push({
+      index,
+      name,
+      initial: `${(initRatio * 100).toFixed(2)}% / ${(1 / initRatio).toFixed(0)}x`,
+      maintenance: `${(maintRatio * 100).toFixed(2)}% / ${(1 / maintRatio).toFixed(0)}x`,
+      imfFactor: imf,
     });
+
+    if (market.highLeverageMarginRatioInitial > 0) {
+      const hlInit = market.highLeverageMarginRatioInitial / 1e4;
+      const hlMaint = market.highLeverageMarginRatioMaintenance / 1e4;
+
+      highLeverageMarkets.push({
+        index,
+        name,
+        initial: `${(hlInit * 100).toFixed(2)}% / ${(1 / hlInit).toFixed(0)}x`,
+        maintenance: `${(hlMaint * 100).toFixed(2)}% / ${(1 / hlMaint).toFixed(0)}x`,
+      });
+    }
+  });
 
   return {
     props: {
       ssg: {
         perpMarginData,
+        highLeverageMarkets,
       },
     },
     revalidate: 3600,
@@ -39,8 +55,8 @@ export const PerpMarginTable = () => {
   const headings = [
     "Index",
     "Perpetuals",
-    "Initial Margin (Margin Ratio / Leverage)",
-    "Maintenance Margin (Margin Ratio / Leverage)",
+    "Initial Margin (Ratio / Leverage)",
+    "Maintenance Margin (Ratio / Leverage)",
     "IMF Factor",
   ];
 
@@ -68,6 +84,38 @@ export const PerpMarginTable = () => {
   );
 };
 
+export const HighLeverageTable = () => {
+  const { highLeverageMarkets } = useData();
+
+  const headings = [
+    "Index",
+    "Perpetuals",
+    "High Leverage Initial (Ratio / Leverage)",
+    "High Leverage Maintenance (Ratio / Leverage)",
+  ];
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          {headings.map((heading) => (
+            <th key={heading}>{heading}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {highLeverageMarkets.map((row) => (
+          <tr key={row.index}>
+            <td>{row.index}</td>
+            <td>{row.name}</td>
+            <td>{row.initial}</td>
+            <td>{row.maintenance}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
 
 # Margin Requirements
 
@@ -80,5 +128,16 @@ These values include:
 
 Data below is updated every hour from `PerpMarketAccount`.
 
+---
+
+### Perpetual Markets
+
 <PerpMarginTable />
 
+---
+
+### High Leverage Mode Markets
+
+If a user has High Leverage Mode turned on, Taker trading fees for all perp markets will be **2× the bottom fee tier**.
+
+<HighLeverageTable />
