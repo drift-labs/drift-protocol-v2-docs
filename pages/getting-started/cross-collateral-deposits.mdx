@@ -1,5 +1,5 @@
 import { useData } from "nextra/data";
-
+import { useSubscribedAssetWeightsData } from "./hooks/useSubscribedAssetWeightsData";
 export const getStaticProps = ({ params }) => {
   return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
     .then((res) => res.text())
@@ -53,7 +53,7 @@ export const AssetWeightsTable = () => {
       ];
 
 const { weightData } = useData();
-
+const liveWeightData = useSubscribedAssetWeightsData(weightData);
 return <table>
 
   <thead>
@@ -66,7 +66,7 @@ return <table>
     </tr>
   </thead>
   <tbody>
-    {weightData.map((row, i) => {
+    {liveWeightData?.map((row, i) => {
       return (
         <tr key={i}>
           {row.map((cell, j) => {
