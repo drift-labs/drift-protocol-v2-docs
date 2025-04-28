@@ -1,6 +1,6 @@
 import { decodeName, SpotMarketAccount } from "@drift-labs/sdk";
 import { useEffect, useState } from "react";
-import { getSpotMarketAccountSusbcriber } from "../../../utils/spot-markets";
+import { getSpotMarketAccountSusbcriber } from "../utils/spot-markets";
 type AssetWeightsData = Array<
   [string, string, string, string, string, number, boolean]
 >;
@@ -51,3 +51,5 @@ export const useSubscribedAssetWeightsData = (
   }, []);
   return data ?? [];
 };
+
+export default useSubscribedAssetWeightsData;
