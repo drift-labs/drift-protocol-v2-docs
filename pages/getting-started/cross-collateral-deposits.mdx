@@ -1,5 +1,6 @@
 import { useData } from "nextra/data";
 import { useSubscribedAssetWeightsData } from "./hooks/useSubscribedAssetWeightsData";
+import modStyles from "./getting-started.module.css";
 export const getStaticProps = ({ params }) => {
   return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
     .then((res) => res.text())
@@ -53,7 +54,7 @@ export const AssetWeightsTable = () => {
       ];
 
 const { weightData } = useData();
-const liveWeightData = useSubscribedAssetWeightsData(weightData);
+const liveWeightData = useSubscribedAssetWeightsData(weightData.map((row) => [...row, false]));
 return <table>
 
   <thead>
@@ -68,8 +69,8 @@ return <table>
   <tbody>
     {liveWeightData?.map((row, i) => {
       return (
-        <tr key={i}>
-          {row.map((cell, j) => {
+        <tr key={i} className={row[6] ? modStyles.flashUpdate : ""}>
+          {row.slice(0, -1).map((cell, j) => {
             return <td key={j}>{cell}</td>;
           })}
         </tr>

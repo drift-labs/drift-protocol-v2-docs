@@ -1,0 +1,13 @@
+@keyframes flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(168, 85, 247, 0.2); /* soft purple flash */
+  }
+}
+
+.flashUpdate {
+  animation: flash 1s ease-in-out;
+}
