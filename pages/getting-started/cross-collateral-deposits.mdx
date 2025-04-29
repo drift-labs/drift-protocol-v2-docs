@@ -1,45 +1,29 @@
 import { useData } from "nextra/data";
 import useSubscribedAssetWeightsData from "../../hooks/useSubscribedAssetWeightsData";
 import modStyles from "./getting-started.module.css";
-export const getStaticProps = ({ params }) => {
-  return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
-    .then((res) => res.text())
-    .then((repo) => ({
-      props: {
-        // We add an `ssg` field to the page props,
-        // which will be provided to the Nextra `useData` hook.
-        ssg: {
-          weightData: JSON.parse(repo).result.map((account) => {
-            return [
-              // decode name from array of chars to string
-              account.name
-                .map((charCode) => String.fromCharCode(charCode))
-                .join("")
-                .trim(),
-              account.initialAssetWeight / 100 + '%',
-              account.maintenanceAssetWeight / 100  + '%',
-              account.initialLiabilityWeight / 100  + '%',
-              account.maintenanceLiabilityWeight / 100  + '%',
-              account.imfFactor / 1e6,
-            ];
-          }),
-          ltvData: JSON.parse(repo).result.map((account) => {
-            return [
-              // decode name from array of chars to string
-              account.name
-                .map((charCode) => String.fromCharCode(charCode))
-                .join("")
-                .trim(),
-              ((1 / account.initialLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
-              ((1 / account.maintenanceLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
-            ];
-          }),
-        },
-      },
-      // The page will be considered as stale and regenerated every 60 seconds.
-      revalidate: 60,
-    }));
-};
+import { decodeName } from "@drift-labs/sdk";
+ export const getStaticProps = ({ params }) => {
+   return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
+     .then((res) => res.text())
+     .then((repo) => ({
+       props: {
+         // We add an `ssg` field to the page props,
+         // which will be provided to the Nextra `useData` hook.
+         ssg: {
+           ltvData: JSON.parse(repo).result.map((account) => {
+             return [
+               // decode name from array of chars to string
+               decodeName(account.name),
+               ((1 / account.initialLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
+               ((1 / account.maintenanceLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
+             ];
+           }),
+         },
+       },
+       // The page will be considered as stale and regenerated every 60 seconds.
+       revalidate: 60,
+     }));
+ };
 
 export const AssetWeightsTable = () => {
   // Get the data from SSG, and render it as a component.
@@ -53,8 +37,8 @@ export const AssetWeightsTable = () => {
         "IMF Factor",
       ];
 
-const { weightData } = useData();
-const liveWeightData = useSubscribedAssetWeightsData(weightData.map((row) => [...row, false]) ?? []);
+// const { weightData } = useData();
+const liveWeightData = useSubscribedAssetWeightsData([]);
 return <table>
 
   <thead>
@@ -67,7 +51,7 @@ return <table>
     </tr>
   </thead>
   <tbody>
-    {liveWeightData?.map((row, i) => {
+    {liveWeightData && liveWeightData.length > 0 ? liveWeightData?.map((row, i) => {
       return (
         <tr key={i} className={row[6] ? modStyles.flashUpdate : ""}>
           {row.slice(0, -1).map((cell, j) => {
@@ -75,7 +59,7 @@ return <table>
           })}
         </tr>
       );
-    })}
+    }) : <tr><td colSpan={headings.length}><div className={modStyles.loading}>Loading...</div></td></tr>}
   </tbody>
 </table>
 

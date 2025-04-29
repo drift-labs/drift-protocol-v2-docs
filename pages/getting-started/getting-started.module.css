@@ -11,3 +11,10 @@
 .flashUpdate {
   animation: flash 1s ease-in-out;
 }
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  animation: flash 1s ease-in-out infinite;
+}
