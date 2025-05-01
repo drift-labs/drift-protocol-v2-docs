@@ -172,7 +172,7 @@ const getWeightDataFromAccount = (
   );
 
   return {
-    asset: marketName,
+    asset: stripPoolId(marketName),
     initialAssetWeight: scaledInitialAssetWeight
       ? Math.floor(scaledInitialAssetWeight / 100) + "%"
       : (account.initialAssetWeight / 100).toFixed(0) + "%",
@@ -192,7 +192,7 @@ const getWeightDataFromAccount = (
 
 const getLTVDataWeightData = (weightData: AssetWeightsData): LTVsData => {
   return {
-    asset: weightData.asset,
+    asset: stripPoolId(weightData.asset),
     initialLTV:
       (
         (1 / Number(weightData.initialLiabilityWeight.replace("%", ""))) *
@@ -214,3 +214,9 @@ export default singletonHook(
   },
   useSubscribedCrossCollateralDepositsData
 );
+
+function stripPoolId(symbol: string): string {
+  return symbol.includes("-")
+    ? symbol.split("-").slice(0, -1).join("-")
+    : symbol;
+}
