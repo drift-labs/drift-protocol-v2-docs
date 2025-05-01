@@ -193,12 +193,16 @@ const getWeightDataFromAccount = (
 const getLTVDataWeightData = (weightData: AssetWeightsData): LTVsData => {
   return {
     asset: weightData.asset,
-    initialLTV: (
-      1 / Number(weightData.initialAssetWeight.replace("%", ""))
-    ).toFixed(2),
-    maxLTV: (
-      1 / Number(weightData.maintenanceAssetWeight.replace("%", ""))
-    ).toFixed(2),
+    initialLTV:
+      (
+        (1 / Number(weightData.initialLiabilityWeight.replace("%", ""))) *
+        10000
+      ).toFixed(2) + "%",
+    maxLTV:
+      (
+        (1 / Number(weightData.maintenanceLiabilityWeight.replace("%", ""))) *
+        10000
+      ).toFixed(2) + "%",
     poolId: weightData.poolId,
   };
 };
