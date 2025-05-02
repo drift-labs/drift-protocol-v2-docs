@@ -1,46 +1,10 @@
+import { useMemo } from "react";
 import { useData } from "nextra/data";
+import useSubscribedCrossCollateralDepositsData from "../../hooks/useSubscribedCrossCollatteralDepositsData";
+import modStyles from "./getting-started.module.css";
+import { decodeName } from "@drift-labs/sdk";
 
-export const getStaticProps = ({ params }) => {
-  return fetch(`https://mainnet-beta.api.drift.trade/stats/spotMarketAccounts`)
-    .then((res) => res.text())
-    .then((repo) => ({
-      props: {
-        // We add an `ssg` field to the page props,
-        // which will be provided to the Nextra `useData` hook.
-        ssg: {
-          weightData: JSON.parse(repo).result.map((account) => {
-            return [
-              // decode name from array of chars to string
-              account.name
-                .map((charCode) => String.fromCharCode(charCode))
-                .join("")
-                .trim(),
-              account.initialAssetWeight / 100 + '%',
-              account.maintenanceAssetWeight / 100  + '%',
-              account.initialLiabilityWeight / 100  + '%',
-              account.maintenanceLiabilityWeight / 100  + '%',
-              account.imfFactor / 1e6,
-            ];
-          }),
-          ltvData: JSON.parse(repo).result.map((account) => {
-            return [
-              // decode name from array of chars to string
-              account.name
-                .map((charCode) => String.fromCharCode(charCode))
-                .join("")
-                .trim(),
-              ((1 / account.initialLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
-              ((1 / account.maintenanceLiabilityWeight) * 1e4 * 100).toFixed(2) + '%',
-            ];
-          }),
-        },
-      },
-      // The page will be considered as stale and regenerated every 60 seconds.
-      revalidate: 60,
-    }));
-};
-
-export const AssetWeightsTable = () => {
+export const AssetWeightsTable = ({poolId}) => {
   // Get the data from SSG, and render it as a component.
   
   const headings = [
@@ -52,7 +16,9 @@ export const AssetWeightsTable = () => {
         "IMF Factor",
       ];
 
-const { weightData } = useData();
+const {weightData} = useSubscribedCrossCollateralDepositsData();
+
+const poolWeightData = useMemo(() => weightData?.filter((row) => row.poolId === poolId), [weightData, poolId]);
 
 return <table>
 
@@ -66,21 +32,24 @@ return <table>
     </tr>
   </thead>
   <tbody>
-    {weightData.map((row, i) => {
+    {poolWeightData && poolWeightData.length > 0 ? poolWeightData?.map((row, i) => {
       return (
-        <tr key={i}>
-          {row.map((cell, j) => {
-            return <td key={j}>{cell}</td>;
-          })}
+        <tr key={i} className={row.flashUpdate ? modStyles.flashUpdate : ""}>
+           <td key={`asset-${i}`}>{row.asset}</td>
+           <td key={`initial-asset-weight-${i}`}>{row.initialAssetWeight}</td>
+           <td key={`maintenance-asset-weight-${i}`}>{row.maintenanceAssetWeight}</td>
+           <td key={`initial-liability-weight-${i}`}>{row.initialLiabilityWeight}</td>
+           <td key={`maintenance-liability-weight-${i}`}>{row.maintenanceLiabilityWeight}</td>
+           <td key={`imf-factor-${i}`}>{row.imfFactor}</td>
         </tr>
       );
-    })}
+    }) : <tr><td colSpan={headings.length}><div className={modStyles.loading}>Loading...</div></td></tr>}
   </tbody>
 </table>
 
 };
 
-export const LTVTable = () => {
+export const LTVTable = ({poolId}) => {
   // Get the data from SSG, and render it as a component.
   
   const headings = [
@@ -89,7 +58,8 @@ export const LTVTable = () => {
         "Max LTV",
       ];
 
-const { ltvData } = useData();
+const { ltvData } = useSubscribedCrossCollateralDepositsData();
+const poolLTVData = useMemo(() => ltvData?.filter((row) => row.poolId === poolId), [ltvData, poolId]);
 
 return <table>
 
@@ -103,15 +73,15 @@ return <table>
     </tr>
   </thead>
   <tbody>
-    {ltvData.map((row, i) => {
+    {poolLTVData && poolLTVData.length > 0 ? poolLTVData?.map((row, i) => {
       return (
-        <tr key={i}>
-          {row.map((cell, j) => {
-            return <td key={j}>{cell}</td>;
-          })}
+        <tr key={i} className={row.flashUpdate ? modStyles.flashUpdate : ""}>
+          <td key={`asset-${i}`}>{row.asset}</td>
+          <td key={`initial-ltv-${i}`}>{row.initialLTV}</td>
+          <td key={`max-ltv-${i}`}>{row.maxLTV}</td>
         </tr>
       );
-    })}
+    }) : <tr><td colSpan={headings.length}><div className={modStyles.loading}>Loading...</div></td></tr>}
   </tbody>
 </table>
 
@@ -127,9 +97,19 @@ Each asset counts towards margin for derivatives trading and has a weight applie
 
 > For instance, depositing USDC gives users a 1:1 margin for derivatives trading, but depositing SOL (80% asset weight) means that 80% of the value of your SOL at the opening of your position will be available as margin for perpetual futures trading.
 
-**Margin Parameters**
+## Margin Parameters
 
-<AssetWeightsTable />
+**Main Pool Asset Weights**
+
+<AssetWeightsTable poolId={0} />
+
+**JLP Pool Asset Weights**
+
+<AssetWeightsTable poolId={1} />
+
+**Exponent Pool Asset Weights**
+
+<AssetWeightsTable poolId={3} />
 
 Initial Asset Weights are also scaled lower based on notional value of total deposits. As a reference, you can check out UI or the SpotMarket `get_scaled_initial_weight_asset` for this scale factor.
 
@@ -145,6 +125,14 @@ An asset's liability weight can be converted into an LTV ratio using:
 
 `ltv = 1 / liability weight`
 
-**Asset LTVs**
+**Main Pool LTVs**
 
-<LTVTable />
+<LTVTable poolId={0} />
+
+**JLP Pool LTVs**
+
+<LTVTable poolId={1} />
+
+**Exponent Pool LTVs**
+
+<LTVTable poolId={3} />
