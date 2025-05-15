@@ -2,21 +2,21 @@
 
 Drift's lending pools work similarly to the lending pools of [Aave](https://app.aave.com/reserve-overview/?underlyingAsset=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&marketName=proto_mainnet).
 
-Each market has an optimal borrow rate and max borrow rate and uses this piecewise function based on the Utilisation Rate (U).*
+Each market has an optimal borrow rate and max borrow rate and uses this piecewise function based on the Utilisation Rate (U).\*
 
-The Utilisation Rate represents the availability of capital within the system.  
+The Utilisation Rate represents the availability of capital within the system.
 
--   If **_U_** is high -- there is abundant capital within the system and the protocol users are given incentives in the form of low-interest rates to encourage borrowing;  
+-   If **_U_** is high -- there is abundant capital within the system and the protocol users are given incentives in the form of low-interest rates to encourage borrowing;
 
--   If **_U_** is low -- capital within the system is scarce and the protocol will increase interest rates to incentivise more capital supply and repayment of debt.  
+-   If **_U_** is low -- capital within the system is scarce and the protocol will increase interest rates to incentivise more capital supply and repayment of debt.
 
 #
 
 _Note: this model has been adapted from Aave's _[_interest rate model_](https://docs.aave.com/risk/liquidity-risk/borrow-interest-rate)_. The parameters and model will be iterated and improved as Drift's borrow lend engine grows. Last Updated: 21 October 2022_.
 
-The interest rate is based on the [borrow utilisation](https://github.com/drift-labs/protocol-v2/blob/master/programs/drift/src/math/spot_balance.rs#L124).  
+The interest rate is based on the [borrow utilisation](https://github.com/drift-labs/protocol-v2/blob/master/programs/drift/src/math/spot_balance.rs#L124).
 
-Liquidity risk materialises when utilisation is high and this becomes more problematic as **_U_** gets closer to 100%.  
+Liquidity risk materialises when utilisation is high and this becomes more problematic as **_U_** gets closer to 100%.
 
 To tailor the model to this constraint, the interest rate curve is split into two parts around an optimal utilisation rate **_Uo_**. Before **_Uo_** the slope is small, after it begins rising sharply.
 
@@ -24,6 +24,48 @@ The interest rate (`InterestRate`) model:
 
 ![](public/assets/MSvRPknbmzxMycrtC1zch_image.png)
 
-The resulting model produces the following graph:  
+The resulting model produces the following graph:
 
 ![](public/assets/2w-6cQt10OwriM7aGzbKN_drift-graph-utilisationrate-1.png)
+
+## Multi-kink Borrow Interest Rate Curve
+
+Same logic as abbove for low, predictable rates up to “optimal”. After optimal the penalty jumps at 85 % / 90 % / 95 % / 99 % / 99.5 % utilization. This design allows for more aggressive max utilization rates while not adding too much rate volatility near optimal rate.
+
+$$
+\begin{aligned}
+&U^*=\frac{\mathrm{optimalUtilization}}{\mathrm{SPOT\_MARKET\_UTILIZATION\_PRECISION}},\quad
+\Delta R = R_{\max} - R_{\rm opt},\\[0.5em]
+&R(U)=\max\{R_{\min},\,R_{\rm raw}(U)\},\\[0.5em]
+&R_{\rm raw}(U)=
+\begin{cases}
+\displaystyle
+R_{\rm opt}\,\frac{U}{U^*},
+&U\le U^*,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50}{1000}\,\frac{U - U^*}{0.85 - U^*},
+&U^*<U\le0.85,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50 + 100\,\frac{U - 0.85}{0.05}}{1000},
+&0.85<U\le0.90,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50 + 100 + 150\,\frac{U - 0.90}{0.05}}{1000},
+&0.90<U\le0.95,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50 + 100 + 150 + 200\,\frac{U - 0.95}{0.04}}{1000},
+&0.95<U\le0.99,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50 + 100 + 150 + 200 + 250\,\frac{U - 0.99}{0.005}}{1000},
+&0.99<U\le0.995,\\[1em]
+\displaystyle
+R_{\rm opt}
++\Delta R\,\frac{50 + 100 + 150 + 200 + 250 + 250\,\frac{U - 0.995}{0.005}}{1000},
+&0.995<U\le1.
+\end{cases}
+\end{aligned}
+$$
