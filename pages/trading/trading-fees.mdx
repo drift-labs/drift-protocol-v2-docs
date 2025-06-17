@@ -72,7 +72,7 @@ driftStaked: 10 + "K",
 {
 tier: 4,
 volume: 10 + "M",
-driftStaked: 50 + "K",
+driftStaked: 25 + "K",
 },
 {
 tier: 5,
@@ -255,7 +255,6 @@ export const FeeTiersTable = () => {
   const headings = [
        "Tier",
        "Required DRIFT Insurance Fund Staked Amount",
-       "Required 30D Volume",
       ];
 
 const { feeTiers } = useData();
@@ -278,7 +277,6 @@ return <table>
           <>
             <td key={`${i}_0`}>{row.tier}</td>
             <td key={`${i}_1`}>{row.driftStaked}</td>
-            <td key={`${i}_2`}>{row.volume}</td>
           </>
         </tr>
       );
@@ -390,7 +388,7 @@ _To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of 
 
 _Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
 
-_Note: DRIFT Staking Fee Tiers shown below will go into effect 8/10/2024. USDC Staking Fee Tiers will be removed 9/6/2024._
+_Note: DRIFT Staking Fee Tiers went into effect on August 10, 2024._
 
 <FeeTiersTable />
 
