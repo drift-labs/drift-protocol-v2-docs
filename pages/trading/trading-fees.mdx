@@ -255,6 +255,7 @@ export const FeeTiersTable = () => {
   const headings = [
        "Tier",
        "Required DRIFT Insurance Fund Staked Amount",
+       "Required 30D Volume",
       ];
 
 const { feeTiers } = useData();
@@ -277,6 +278,7 @@ return <table>
           <>
             <td key={`${i}_0`}>{row.tier}</td>
             <td key={`${i}_1`}>{row.driftStaked}</td>
+            <td key={`${i}_2`}>{row.volume}</td>
           </>
         </tr>
       );
