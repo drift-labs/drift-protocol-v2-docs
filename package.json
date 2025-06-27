@@ -1,6 +1,6 @@
 {
   "name": "drift-protocol-v2-docs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Drift Protocol V2 Documentation",
   "scripts": {
     "dev": "next dev",
