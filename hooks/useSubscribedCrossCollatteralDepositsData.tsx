@@ -91,7 +91,7 @@ export const useSubscribedCrossCollateralDepositsData =
             if (!weightData || !ltvData) return;
             const marketName = decodeName(account.name);
             const assetIndex = weightData.findIndex(
-              (weight) => weight[0] === marketName
+              (weight) => weight.asset === marketName
             );
             if (assetIndex !== -1) {
               const newValues = getWeightDataFromAccount(
@@ -108,7 +108,7 @@ export const useSubscribedCrossCollateralDepositsData =
                 };
                 setWeightData([...weightData]);
                 setTimeout(() => {
-                  weightData[assetIndex][6] = false;
+                  weightData[assetIndex].flashUpdate = false;
                   setWeightData([...weightData]);
                 }, 1000);
                 const newltvValue = getLTVDataWeightData(newValues);
