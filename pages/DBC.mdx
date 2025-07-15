@@ -1,0 +1,31 @@
+# Drift Builder Codes
+
+### Overview:
+
+Drift’s Builder Code (DBC) system enables any builder to build on top of Drift **while earning fees** for routing trades. Fees are received on a per-fill basis that a builder sends on behalf of a user. 
+
+Drift Builder Codes establish the financial infrastructure layer on Solana, by allowing anyone tap into Drift’s deep liquidity and efficient execution, without building their own backend. This enables a fully open, composable UI layer for perps and spot on Solana.
+
+This Builder Code system makes Drift the first on-chain DEX on Solana to offer **per order monetization** for third-party frontends, setting the stage for a permissionless ecosystem of apps, bots, and aggregators all aligned with Drift and Solana’s liquidity growth. 
+
+### **DBC Features:**
+Drift builder codes are essentially an extension of the Drift [referral](https://docs.drift.trade/referral-link) system, leveraging the same infrastructure for user linking, fee calculation, and reward distribution. 
+
+**Per-Order Flexibility**: Builders can attach their code to each individual order they route, with customizable fees.
+
+**User-Approved**: Traders must explicitly approve a builder and set a maximum fee (in basis points), which can be revoked at any time. This approval is stored onchain via a `BuilderApproval` PDA unique to each user-builder pair.
+
+**Security**: Builder fees are enforced and processed fully onchain, and subject to a globally set `max_builder_fee`, with user safety being top priority.
+
+### Getting started with DBC
+
+**Builder Registration:** To be eligible for a builder account, Builders are required to hold a minimum asset balance of 1 dSol or 250 Drift.
+
+**User registration:** Users approve builders via the `approve_builder_code` instruction. This stores the builder code within a user's `UserStats` account. Users are therefore required to either have an existing Drift account, or create one on first use of the builder code.
+
+**Fee accrual:** The separately created builder account accrues fees in the following way:
+
+- Perpetual contract fees are credited to the builder's `quote_asset_amount` and unrealizedPnL
+
+- Spot fees are credited to the builder's spot balance
+
