@@ -11,7 +11,7 @@ This Builder Code system makes Drift the first on-chain DEX on Solana to offer *
 ### **DBC Features:**
 Drift builder codes are essentially an extension of the Drift [referral](https://docs.drift.trade/referral-link) system, leveraging the same infrastructure for user linking, fee calculation, and reward distribution. 
 
-**User-Approved**: Traders must explicitly approve a builder and set a maximum fee (in basis points), which can be revoked at any time. This approval is stored onchain via a `BuilderApproval` PDA unique to each user-builder pair.
+**User-Approved**: Traders must explicitly approve a builder and set a maximum fee (in basis points), which can be revoked at any time. This approval is stored onchain through the existing referral infrastructure, in `UserStats`
 
 **Security**: Builder fees are enforced and processed fully onchain, and subject to a globally set `max_builder_fee`, with user safety being top priority.
 
