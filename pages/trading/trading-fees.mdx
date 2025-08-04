@@ -61,27 +61,27 @@ driftStaked: 0,
 },
 {
 tier: 2,
-volume: 1 + "M",
+volume: 2 + "M",
 driftStaked: 1 + "K",
 },
 {
 tier: 3,
-volume: 5 + "M",
+volume: 10 + "M",
 driftStaked: 10 + "K",
 },
 {
 tier: 4,
-volume: 10 + "M",
+volume: 20 + "M",
 driftStaked: 25 + "K",
 },
 {
 tier: 5,
-volume: 50 + "M",
+volume: 80 + "M",
 driftStaked: 100 + "K",
 },
 {
 tier: "VIP",
-volume: 100 + "M",
+volume: 200 + "M",
 driftStaked: 120 + "K",
 },
 ];
@@ -254,7 +254,6 @@ export const FeeTiersTable = () => {
   
   const headings = [
        "Tier",
-       "Required DRIFT Insurance Fund Staked Amount",
        "Required 30D Volume",
       ];
 
@@ -277,7 +276,6 @@ return <table>
         <tr key={i}>
           <>
             <td key={`${i}_0`}>{row.tier}</td>
-            <td key={`${i}_1`}>{row.driftStaked}</td>
             <td key={`${i}_2`}>{row.volume}</td>
           </>
         </tr>
@@ -362,41 +360,220 @@ return <table>
 
 # Trading Fees
 
-Drift offers a highly competitive fee structure with low taker fees and maker rebates across all tiers, with the potential for even lower fees as trading volume increases. Fees are calculated per trade based on the filled notional position size and are charged in the market's quote asset (USDC), affecting the position's cost basis.
-
-**High-volume markets benefit from a 75% fee reduction, with rates starting as low as 2.5 bps. [See Fee-Adjusted Markets](#fee-adjusted-markets)**
+Drift offers a highly competitive fee structure with low taker fees and attractive maker rebates across all tiers, with the potential for even lower fees as trading volume increases. Fees are calculated per trade based on the filled notional position size and are charged in the market's quote asset (USDC), affecting the position's cost basis.
 
 If a user holds only non-USDC assets, a USDC borrow may be triggered upon settlement of a loss in perpetual markets (see [P&L](/profit-loss/profit-loss-intro)).
 
-Drift's tiered fees for futures markets are based on an on-chain calculation of 30-Day Volume or Insurance Fund Stake*.
+Drift's tiered fees for futures markets are based on an on-chain calculation of **30-Day Volume**. You can earn discounts on taker fees and extra rebates on maker fees by staking
+DRIFT. These apply *on top* of your volume tier.
 
----
+## Perp Market Fees
 
-## Fee Structures
+<div style={{ marginTop: '1.5em', overflowX: 'auto' }}>
+  <style>
+    {`
+      table.fees th, table.fees td {
+        border: 1px solid #e5e7eb;
+        padding: 8px 6px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      table.fees th {
+        background: #f5f7fa;
+        color: #1a2233;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.95em;
+        white-space: nowrap;
+      }
+      table.fees tr:nth-child(even) { background: #f9f9fb; }
+      table.fees td:first-child, table.fees th:first-child {
+        text-align: left;
+        white-space: nowrap;
+      }
+    `}
+  </style>
+<table class="fees">
+  <thead>
+    <tr>
+      <th>Tier</th>
+      <th>Rookie Taker</th>
+      <th>Rookie Maker</th>
+      <th>Kickstarter Taker</th>
+      <th>Kickstarter Maker</th>
+      <th>Racer Taker</th>
+      <th>Racer Maker</th>
+      <th>Elite Taker</th>
+      <th>Elite Maker</th>
+      <th>Master Taker</th>
+      <th>Master Maker</th>
+      <th>Champion Taker</th>
+      <th>Champion Maker</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>≤ $2M</td>
+      <td>0.0350%</td>
+      <td>-0.0025%</td>
+      <td>0.0333%</td>
+      <td>-0.0026%</td>
+      <td>0.0315%</td>
+      <td>-0.0028%</td>
+      <td>0.0280%</td>
+      <td>-0.0030%</td>
+      <td>0.0245%</td>
+      <td>-0.0033%</td>
+      <td>0.0210%</td>
+      <td>-0.0035%</td>
+    </tr>
+    <tr>
+      <td>&gt; $2M</td>
+      <td>0.0300%</td>
+      <td>-0.0025%</td>
+      <td>0.0285%</td>
+      <td>-0.0026%</td>
+      <td>0.0270%</td>
+      <td>-0.0028%</td>
+      <td>0.0240%</td>
+      <td>-0.0030%</td>
+      <td>0.0210%</td>
+      <td>-0.0033%</td>
+      <td>0.0180%</td>
+      <td>-0.0035%</td>
+    </tr>
+    <tr>
+      <td>&gt; $10M</td>
+      <td>0.0275%</td>
+      <td>-0.0025%</td>
+      <td>0.0261%</td>
+      <td>-0.0026%</td>
+      <td>0.0248%</td>
+      <td>-0.0028%</td>
+      <td>0.0220%</td>
+      <td>-0.0030%</td>
+      <td>0.0193%</td>
+      <td>-0.0033%</td>
+      <td>0.0165%</td>
+      <td>-0.0035%</td>
+    </tr>
+    <tr>
+      <td>&gt; $20M</td>
+      <td>0.0250%</td>
+      <td>-0.0025%</td>
+      <td>0.0238%</td>
+      <td>-0.0026%</td>
+      <td>0.0225%</td>
+      <td>-0.0028%</td>
+      <td>0.0200%</td>
+      <td>-0.0030%</td>
+      <td>0.0175%</td>
+      <td>-0.0033%</td>
+      <td>0.0150%</td>
+      <td>-0.0035%</td>
+    </tr>
+    <tr>
+      <td>&gt; $80M</td>
+      <td>0.0225%</td>
+      <td>-0.0025%</td>
+      <td>0.0214%</td>
+      <td>-0.0026%</td>
+      <td>0.0203%</td>
+      <td>-0.0028%</td>
+      <td>0.0180%</td>
+      <td>-0.0030%</td>
+      <td>0.0158%</td>
+      <td>-0.0033%</td>
+      <td>0.0135%</td>
+      <td>-0.0035%</td>
+    </tr>
+    <tr>
+      <td>&gt; $200M (VIP)</td>
+      <td>0.0200%</td>
+      <td>-0.0025%</td>
+      <td>0.0190%</td>
+      <td>-0.0026%</td>
+      <td>0.0180%</td>
+      <td>-0.0028%</td>
+      <td>0.0160%</td>
+      <td>-0.0030%</td>
+      <td>0.0140%</td>
+      <td>-0.0033%</td>
+      <td>0.0120%</td>
+      <td>-0.0035%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-_Some markets can have discounted or increased fees_ [See Fee-Adjusted Markets](#fee-adjusted-markets)
+### Fee Benefits via DRIFT Staking
+Earn **additional discounts on taker fees** and **extra rebates on maker fees** by staking DRIFT.
+These stack on top of your volume tier. These benefits only apply to perp fees.
 
-### Perp Market Fees
+<div style={{ marginTop: '1.5em', overflowX: 'auto' }}>
+<table class="fees">
+  <thead>
+    <tr>
+      <th>Tier</th>
+      <th>DRIFT Staked</th>
+      <th>Taker Fee Discount</th>
+      <th>Maker Fee Rebate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rookie</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>0%</td>
+    </tr>
+    <tr>
+      <td>Kickstarter</td>
+      <td>1,000</td>
+      <td>–5%</td>
+      <td>+5%</td>
+    </tr>
+    <tr>
+      <td>Racer</td>
+      <td>10,000</td>
+      <td>–10%</td>
+      <td>+10%</td>
+    </tr>
+    <tr>
+      <td>Elite</td>
+      <td>50,000</td>
+      <td>–20%</td>
+      <td>+20%</td>
+    </tr>
+    <tr>
+      <td>Master</td>
+      <td>100,000</td>
+      <td>–30%</td>
+      <td>+30%</td>
+    </tr>
+    <tr>
+      <td>Champion</td>
+      <td>250,000</td>
+      <td>–40%</td>
+      <td>+40%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-<PerpFeeStructureTable />
 
-### Spot Market Fees
+**Examples:**  
+- *A Tier 3 taker (0.0275%) with 20% staking discount pays 0.022% effective fee.*  
+- *A maker (–0.0025% rebate) with 20% staking gets –0.003% rebate.*
+
+## Spot Market Fees
 
 <SpotFeeStructureTable />
 
-## Fee Tiers
-
-_To qualify for a fee tier you only need to hit one of the cut-offs, not ALL of them. E.g. just meeting the minimum volume quota will qualify you, without needing the Insurance Fund Stake as well._
-
-_Maker/Taker 30-Day Volume is tracked on-chain. The calculation uses an aggregate rolling sum estimate across all the user's subaccounts._
-
-_Note: DRIFT Staking Fee Tiers went into effect on August 10, 2024._
-
-<FeeTiersTable />
-
 ## Fee-Adjusted Markets
 
-_These markets have a flat adjustment to all fees_
+_Some markets offer additional discounts, these are part of a temporary
+campaign, and be will subject to change in the future._
 
 ### Perp Markets
 
@@ -408,17 +585,13 @@ _These markets have a flat adjustment to all fees_
 
 ---
 
-### Taker Fees
+### Drift staking benefits
 
-Takers are charged a variable Taker Fee depending on which Tier they belong to. ([See PERP/SPOT Fee Structures](#fee-structures))
+The fee benefits via DRIFT staking only apply to perpetual contract fees.
 
 ### Taker Fees (High Leverage Mode)
 
 If a user has High Leverage Mode turned on, taker trading fees for all perp markets will be 2x the bottom fee tier.
-
-### Maker Fees
-
-Makers are provided with a flat 1bps rebate regardless of the Taker Fee paid.
 
 ### Referee Discount / Referer Reward
 
@@ -427,10 +600,6 @@ These apply to accounts that were signed up using a referred account. These perc
 ### Filler Reward
 
 Filler rewards are variable but up to 10% of the effective taker fee paid by the user. See [Keeper Incentives](/about-v2/keeper-incentives).
-
-### Spot Fees
-
-Spot Fees are set per market. Most major markets have 5 bps taker and 1bps rebate for maker.
 
 ### Fee Adjustments
 
