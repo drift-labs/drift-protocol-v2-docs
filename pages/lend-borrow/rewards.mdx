@@ -1,3 +1,36 @@
-### Active Deposit Rewards
+import { Callout } from "nextra-theme-docs";
 
-- syrupUSDC – Use this asset as collateral for an active perpetual position and earn periodic rewards. Your share is based on your pro-rata portion of min(deposits, open perpetual notional).
+# Drift Collateral Rewards
+
+At Drift, we're exploring a new approach to incentives. 
+
+Starting with syrupUSDC, we incentivize **traders who open perp positions using their deposited collateral**. This ensures rewards are tied to both providing liquidity and taking active trading positions.
+For additional details on the campaign, please see the [Maple blogpost](https://maple.finance/insights/syrupusdc-drift-protocol-perps-collateral-yield-bearing-margin)
+
+## How Rewards Work
+
+<Callout type="warning" emoji="⚠️">
+**Note:** We use syrupUSDC to illustrate the incentive structure. The same rules, mechanics, and reward calculations apply to any future promotions unless stated otherwise.
+</Callout>
+
+**Deposit syrupUSDC as collateral** for an active perpetual position to start earning rewards.
+
+- Incentives accrue continuously and are distributed among participants who meet **both** criteria:
+  1. Have syrupUSDC deposited as collateral.
+  2. Maintain an active perpetual position.
+
+Your share of rewards is based on:
+
+```
+min(deposited syrupUSDC, open perp notional)
+```
+
+This means rewards are aligned with both your syrupUSDC balance and your trading activity.
+
+## Maximizing Rewards
+
+To earn the most from incentives:
+
+- Keep your **open interest (OI)** in perpetuals **higher** than your deposited syrupUSDC balance.
+- Maintain active positions during the reward cycle to maximize accrual.
+- Monitor your collateral and notional exposure to avoid being capped by the `min()` rule above.
