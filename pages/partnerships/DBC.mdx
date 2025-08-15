@@ -30,7 +30,7 @@ This approval is stored directly inside the `RevenueShareEscrow` account.
    The `RevenueShareEscrow` account is included in the transaction so the program can validate and record the order.
 
 2. **Fee Accrual (Per Order)**  
-   When an order is filled, the fee is credited to the user’s `RevenueShareEscrow` as a `RevenueShareOrder`:
+When an order is filled, the fee is credited to the user’s `RevenueShareEscrow` as a `RevenueShareOrder`:
    - This tracks builder’s pubkey, `feesAccrued`, `orderId`, `feeBps`, market type (spot or perp), and completion status.
    - Fees remain in escrow until settlement.
 
