@@ -1,107 +1,51 @@
-import { Callout } from "nextra-theme-docs";
 
-# All Order Types
+# All Order types
 
-## Advanced Orders
+Drift supports several advanced order types:
 
-### Stop Market
+#### Trigger Market
+A market order that activates when the trigger price condition is met. Used for Stop Loss (Stop Market) and Take Profit orders.
 
-A Stop Market Order is an order to close the position of a given asset if its Oracle Price reaches the specified Trigger Price. If this happens, the position is closed at Market Price.
+- Triggers on the configured reference price (see *trigger mechanics* below).
+- Once triggered, it behaves like a market order.
 
-Users can specify a Trigger Price, and once (or if) the of the asset reaches the specified Trigger Price and a keeper executes it, a Market Order to sell the asset will be executed.
+#### Trigger Limit
+A limit order that activates when the trigger price condition is met. Used for Stop Limit and Take Profit Limit orders.
 
-### Stop Limit
+- Lets you specify trigger price and limit price separately.
+- Fill is not guaranteed if the market trades through and never touches the limit.
 
-A Stop Limit Order will only execute where the Oracle Price of a given asset reaches the Trigger Price. If this happens, a Limit Order at the specified Limit Price will be placed. Once triggered, the resulting Limit Order may be immediately filled or may rest until the specified Limit Price is reached and executed by a decentralised keeper.
+#### Trigger Order mechanics
 
-Users can specify a Trigger Price and a Limit Price, and once (or if) the mark price of the asset reaches the specified Trigger Price and a keeper executes it, a Limit Order will be placed at the specified Limit Price.
+Trigger orders (Stop Market / Stop Limit / Take profit market / Take profit limit) activate off a **trigger price**.
 
-Stop Limit Orders also serve as a maximum slippage tolerance for the Stop Order.
+The trigger price is computed as the median of the following three values:
 
-| Current Position | Order Type             | Trade Direction | Trigger Condition | Reduce Only    |
-| ---------------- | ---------------------- | --------------- | ----------------- | -------------- |
-| Long             | Stop (Market If Touch) | Buy             | Below             | False          |
-| **Long**         | **Stop**               | **Sell**        | **Below**         | **True/False** |
-| **Short**        | **Stop**               | **Buy**         | **Above**         | **True/False** |
-| Short            | Stop (Market If Touch) | Sell            | Above             | False          |
+1. **Oracle Price Adjustment**  
+   `Oracle Price + (Mark Price 5min TWAP − Oracle Price 5min TWAP)`
 
-### Take Profit Market
+2. **Last Trade Price**
 
-A Take Profit Order is an order to close the position of a given asset if its Oracle Price reaches the specified Trigger Price. If this happens, the position is closed at Market Price.
+3. **Oracle Price with Funding Adjustment**  
+   `Oracle Price × (1 + Last Funding Rate × (Time Until Next Funding / Funding Period))`
 
-Users can specify a Trigger Price, and once (or if) the oracle price of the asset reaches the specified Trigger Price and a keeper executes it, a Market Order to sell the asset will be executed.
+The **median** of these three values is used as the trigger price.
 
-### Take Profit Limit
-
-A Take Profit Limit Order will only execute where the Oracle Price of a given asset reaches the Trigger Price. If this happens, a Limit Order at the specified Limit Price will be placed. Once triggered, the resulting Limit Order may be immediately filled or may rest until the specified Limit Price is reached and executed by a decentralised keeper.
-
-Users can specify a Trigger Price and a Limit Price, and once (or if) the oracle price of the asset reaches the specified Trigger Price and a keeper executes it, a Limit Order will be placed at the specified Limit Price.
-
-Take Profit Limit Orders also serve as a max slippage tolerance for the Stop Order.
-
-| Current Position | Order Type                    | Trade Direction | Trigger Condition | Reduce Only    |
-| ---------------- | ----------------------------- | --------------- | ----------------- | -------------- |
-| Long             | Take Profit (Market If Touch) | Buy             | Above             | False          |
-| **Long**         | **Take Profit**               | **Sell**        | **Above**         | **True/False** |
-| **Short**        | **Take Profit**               | **Buy**         | **Below**         | **True/False** |
-| Short            | Take Profit (Market If Touch) | Sell            | Below             | False          |
+> **Example:** If the three calculated prices are 100.2, 100.5, and 100.1, the trigger will use **100.2** as the median.
 
 
-<Callout type="warning" emoji="⚠️">
+#### Oracle Limit
+An Oracle Limit Order allows you to specify an offset rather than limit price to execute your order. The offset represents the price above/below the current Oracle Price you want to be filled at. It's important to note that these orders can fill at any time the offset is met, so long as the account collateral is sufficient.
 
-**If Trigger Price < Limit Price:** order starts getting filled once the price is below the trigger price.
+#### Scale
+Submit multiple limit orders across a user‑defined price range to build or unwind a position gradually.
 
-**If Limit Price < Trigger Price:** order starts getting filled once the price is below the limit price.
+- You define range, number of orders, and size distribution.
 
-</Callout>
+#### Order flags
 
-One limitation is that the protocol can only detect that a Trigger Price has been hit if the order has already been or can be partially filled. This means it does not allow for some order configurations to be placed:
+These flags can be combined with the order types above.
 
-| TriggerIsAbove | DirectionIsLong | LimitPrice            |
-| -------------- | --------------- | --------------------- |
-| True           | True            | Must be above trigger |
-| True           | False           | Ok                    |
-| False          | True            | Ok                    |
-| False          | False           | Must be below trigger |
-
-<Callout type="info" emoji="⬇️">
-
-**Example:**
-
-If Trigger Price is >\$140 and a Long is placed with a Limit Price = \$135, there is no way the order can know that \$140 was hit before you try to long when the price falls \$5.
-
-In the other scenario, if Trigger Price is < \$140 and a Long is placed with a Limit Price = \$135, we will know that \$140 (AND \$135) must have been hit since you were partially filled.
-
-</Callout>
-
-### Oracle Limit
-
-An Oracle Limit Order allows you to specify an **offset** rather than limit price to execute your order. The offset represents the price above/below the current **Oracle Price** you want to be filled at.
-
-For example, if you place a **Long Oracle Limit Order** on SOL-PERP with an offset of -1, you are saying you want to be filled at 1 dollar below the oracle price, if possible. In this case, you can be filled at 99 with SOL oracle price at 100, 98 with SOL oracle price at 99, etc. For a short order, you would typically want to use a positive offset instead. The idea is that these orders can be profitable as the market price on Drift trends back towards the oracle price.
-
-It's important to note that these orders can fill at any time the offset is met, so long as the account collateral is sufficient, regardless of how far the price is from what it was at the time of order placement.
-
-
-### Order Flags
-
-Additionally, orders can include flags that specify execution parameters. The protocol allows for three additional order flags, as written below:
-
-- **Reduce-Only:** Enforces that the order will never increase or reverse the current position (go from long to short, or short to long).
-
-- **Post-Only**: Enforces that the order is a maker order that can provide liquidity to the pool for a reduced exchange fee (0%). Without this flag, orders that don't execute immediately are not post-only.
-
-- **Immediate or cancel (IOC)**: An order that is placed and potentially partially filled. The remainder that is not filled immediately is then cancelled.
-
-
-### Protected Maker Mode
-When a user's account is set to Protected Market Maker mode, more strigent checks are applied to filling their limit orders. These orders can only be filled at the quoted price under the following conditions:
-
-- And at least one of these criteria is met:
-  - The taker's order qualifies for instant fills against the AMM (order counts below whats typical of latency arbitrageurs).
-  - The taker's order has been resting for at least 10 slots, preventing latency arbitrage race against the quote price.
-
-If the above is not met, the maker will automatically update their quotes an additional 10 bps in favor (e.g. lower for bids, higher for asks) vs the current price. By doing so, this mode provides partial protection for resting liqudity orders on-chain, providing the best prices only upon timely oracle updates and non-latency-arbitrage activity.
-
-Like other special user margin modes, enabling Protected Maker Mode is permissionless but has limited slot availability.
-
+- **Reduce‑Only**: Enforces that the order will never increase or reverse the current position (go from long to short, or short to long).
+- **Post‑Only**: : Enforces that the order is a maker order that can provide liquidity to the pool for a reduced exchange fee (0%). Without this flag, orders that don't execute immediately are not post-only.
+- **Immediate‑or‑Cancel (IOC)**: An order that is placed and potentially partially filled. The remainder that is not filled immediately is then cancelled.
