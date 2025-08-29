@@ -2,17 +2,7 @@ import { Callout } from "nextra-theme-docs";
 
 # Drift Rewards
 
-#### Deposit rewards
-**Earn extra yield** just by depositing supported assets on Drift.
-
-Current assets eligible for rewards: **USDS**
-
-#### Borrow rewards
-Get rewarded for borrowing assets, effectively **borrowing at a cheaper rate.**
-
-Current assets eligible for rewards: **EURC**
-
-#### Collateral rewards
+## Collateral rewards
 We incentivize **traders who open perp positions using their deposited collateral**. This ensures rewards are tied to both providing liquidity and taking active trading positions.
 
 **LBTC**
@@ -25,7 +15,7 @@ Trade using LBTC as collateral to earn yield on Bitcoin + up to $20,000 in month
 SyrupUSDC is Maple Finance's yield-bearing stablecoin. Trade using SyrupUSDC as collateral to enter into the $100,000 total rewards pool.
 For additional details on the campaign, please see the [Maple blogpost](https://maple.finance/insights/syrupusdc-drift-protocol-perps-collateral-yield-bearing-margin)
 
-## How Rewards Work
+### How Collateral Rewards Work
 
 <Callout type="warning" emoji="⚠️">
 **Note:** We use syrupUSDC to illustrate the incentive structure. The same rules, mechanics, and reward calculations apply to any future promotions unless stated otherwise.
@@ -45,10 +35,20 @@ min(deposited syrupUSDC, open perp notional)
 
 This means rewards are aligned with both your syrupUSDC balance and your trading activity.
 
-## Maximizing Rewards
+### Maximizing Collateral Rewards
 
 To earn the most from incentives:
 
 - Keep your **open interest (OI)** in perpetuals **higher** than your deposited syrupUSDC balance.
 - Maintain active positions during the reward cycle to maximize accrual.
 - Monitor your collateral and notional exposure to avoid being capped by the `min()` rule above.
+
+## Deposit rewards
+Earn yield just by depositing supported stablecoins on Drift.
+
+Current assets eligible for rewards: **USDS**
+
+## Borrow rewards
+Get rewarded for borrowing assets, effectively borrowing at a cheaper rate.
+
+Current assets eligible for rewards: **EURC**
