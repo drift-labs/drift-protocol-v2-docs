@@ -37,6 +37,8 @@ When an order is filled, the fee is credited to the user’s `RevenueShareEscrow
 3. **Settlement**  
    On `settle_pnl`, any accrued fees in the escrow are swept to the builder’s `RevenueShareAccount`:
 
+Code examples can be found in the API [docs](https://drift-labs.github.io/v2-teacher/#buildercodes)
+
 ### Notes on builder codes for MM’s
 
 **RevenueShareEscrow Inclusion:**  Fillers and market makers must include the user’s `RevenueShareEscrow` account in every order fill transaction. This PDA is derived from the user’s pubkey (requires no additional RPC calls).
