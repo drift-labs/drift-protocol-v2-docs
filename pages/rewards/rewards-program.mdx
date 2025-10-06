@@ -1,0 +1,76 @@
+import { Callout } from "nextra-theme-docs";
+
+# Drift Market Maker Reward Program 
+
+Drift launched a **Market Maker Rewards Program** for qualified participants.
+
+#### Epoch 1 (September 1-30)
+
+- **Reward Pool:** **2,000,000 DRIFT**
+- **Epoch Length:** 1 calendar month 
+
+> ✅ This epoch has concluded
+
+
+#### Epoch 2 (Start: October)
+
+- **Reward Pool:** **1,000,000 DRIFT**
+- **Epoch Length:** 1 calendar month 
+
+> ⚠️ This epoch will start in October.
+
+
+### Reward Allocation
+
+Each listed market receives:
+
+1. **Minimum Reward**
+    - **XRP, FARTCOIN, WIF, BONK, PUMP, HYPE, SUI, DOGE, DRIFT, PENGU, and any new listings**
+        - **20,000 DRIFT** (1% of pool)
+    - **All other markets (~48 markets)**
+        - **5,000 DRIFT** (0.25% of pool)
+2. **Pro-Rata Volume Bonus**
+    - Remaining pool (after minimums per market) is distributed across markets based on the share of total maker volume across protocol from the prior epoch.
+    - With 10 markets at 1% minimum and remaining 48 active markets at .25% minimum, **this leaves 78% of rewards distributed pro-rata on total maker volume**.
+
+<Callout type="warning" emoji="⚠️">
+Please note, BTC-PERP, ETH-PERP and SOL-PERP are excluded from total maker volume.
+</Callout>
+
+The set of markets and minimums may change each epoch. A full schedule of trading fees and rebates per market can be found [here](https://docs.drift.trade/trading-fees).
+
+### Example Calculation
+
+**Maker Volumes for Epoch 1:**
+
+- Maker 1: 100M SUI-PERP, 5M DOGE-PERP → Total: 105M
+- Maker 2: 50M SUI-PERP, 20M DOGE-PERP → Total: 70M
+- **Total Maker Volume:** 175M
+
+**Step 1 - Remaining Pro-rata Volume Pool:**
+
+2,000,000 – (20,000 × 2) = **1,960,000 DRIFT**
+
+**Step 2 - Market Rewards:**
+
+- DOGE-PERP: 20,000 + (1,960,000 × 25/175) = **300,000 DRIFT**
+- SUI-PERP: 20,000 + (1,960,000 × 150/175) = **1,700,000 DRIFT**
+
+**Step 3 - Maker Rewards:**
+
+- Maker 1: (300,000 x 5/25) + (1,700,000 x 100/150) = **1,193,333.33 DRIFT**
+- Maker 2: (300,000 x 20/25) + (1,700,000 x 50/150) = **806,666.67 DRIFT**
+
+### Leaderboard & Reward Estimates
+
+The live [leaderboard](https://app.drift.trade/leaderboard/maker) displays:
+
+- Current ranking of all qualifying market makers.
+- Maker-specific share of market volume.
+- Estimated DRIFT rewards earned to date (based on current volumes and allocation formula).
+
+Estimates update in near real-time, giving makers visibility into their performance and potential payout before the epoch ends. Final rewards are calculated at epoch close.
+
+<Callout type="warning" emoji="⚠️">
+Participants must trade **≥$10K volume** in the monthly cycle **and** qualify for **≥1 DRIFT**. If either condition is not met, rewards are forfeited and redistributed **pro-rata** to eligible participants.
+</Callout>
