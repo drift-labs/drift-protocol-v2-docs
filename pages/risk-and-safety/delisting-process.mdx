@@ -17,7 +17,7 @@ The process is as follows:
 
 2.  After the expiry date, the market can lock in a settlement price
     *   must call the instruction: `settle_expired_market`
-        *   the target price is the amm's calculated 1-hour oracle twap but is altered such that it allows for full solvency across all users
+        *   the target price is the amm's calculated 5-min oracle twap but is altered such that it allows for full solvency across all users
 
 3.  After the expiry date + optional time buffer, users can settle their "expired positions" at the settlement price, which are closed
     *   the optional time buffer is the settlement duration, which acts as a buffer for liquidations
