@@ -15,6 +15,15 @@ const nextConfig = {
   ) {
     return defaultPathMap;
   },
+  async redirects() {
+    return [
+      {
+        source: "/about-v2/:path*",
+        destination: "/about-v3/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = withNextra({

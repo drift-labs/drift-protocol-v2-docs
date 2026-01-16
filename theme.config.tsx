@@ -264,7 +264,7 @@ const logo = (
       </defs>
     </svg>
 
-    <strong>Drift Protocol v2</strong>
+    <strong>Drift Protocol v3</strong>
   </>
 );
 
@@ -300,7 +300,8 @@ const config: DocsThemeConfig = {
   logo,
   head: function useHead() {
     const { title } = useConfig();
-    const socialCard = "public/assets/drift-v2.png";
+    // Avoid embedding versioned branding in OG image (GitHub repos may still be `*-v2`)
+    const socialCard = "public/assets/Hw-EeD1Xigo3jzRru1jQ__driftoverview.png";
 
     return (
       <>
