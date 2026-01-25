@@ -1,0 +1,61 @@
+import { Callout } from "nextra/components";
+
+# Drift Trader Rewards Program
+
+Drift is launching a **Trader Rewards Program** in addition to the Maker Rewards Program.
+
+#### Epoch 1 (October 1-31)
+
+- **Reward Pool:** **1,000,000 DRIFT**
+- **Epoch Length:** 1 calendar month 
+
+> ✅ This epoch has concluded
+
+#### Epoch 2 (Start: November)
+
+- **Reward Pool:** **1,000,000 DRIFT**
+- **Epoch Length:** 1 calendar month 
+
+### Reward Allocation
+
+Contrary to the Maker Rewards Program, the Traders Rewards Program will incentivize a few selected markets for their **taker** volume. For epoch 2 these include:
+
+> BTC-PERP, ETH-PERP, SOL-PERP
+
+**Rewards will be calculated along a Pro-Rata Volume Bonus**
+
+Rewards are distributed across markets based on the share of total taker volume across protocol during epoch, and are allocated linearly.
+
+The set of markets and minimums may change each epoch. A full schedule of trading fees and rebates per market can be found [here](https://docs.drift.trade/trading-fees).
+
+### Example Calculation
+
+**Taker Volumes for Epoch:**
+
+- Taker 1: 100M BTC-PERP, 10M SOL-PERP → Total: 110M
+- Taker 2: 50M BTC-PERP, 40M SOL-PERP → Total: 90M
+- **Total Taker Volume:** 200M
+
+**Step 1 - Market Rewards:**
+
+- SOL-PERP: 1,000,000 × 50/200 = **250,000** **DRIFT**
+- BTC-PERP: 1,000,000 × 150/200 =  **750,000 DRIFT**
+
+**Step 2 - Trader Rewards:**
+
+- Taker 1: (250,000 x 10/50) + (750,000 x 100/150) = **550,000 DRIFT**
+- Taker 2: (250,000 x 40/50) + (750,000 x 50/150) = **450,000 DRIFT**
+
+### Real-Time Leaderboard & Reward Estimates
+
+The [**live leaderboard**](https://app.drift.trade/leaderboard/taker) displays:
+
+- Current ranking of all qualifying participants.
+- Taker-specific share of market volume.
+- Estimated DRIFT rewards earned to date (based on current volumes and allocation formula).
+
+Estimates update in near real-time, giving makers visibility into their performance and potential payout before the epoch ends. Final rewards are calculated at epoch close.  And are to be distributed as Staked DRIFT within 7 working days after the epoch closes.
+
+<Callout type="warning" emoji="⚠️">
+Participants must trade **≥$10K volume** in the monthly cycle **and** qualify for **≥1 DRIFT**. If either condition is not met, rewards are forfeited and redistributed **pro-rata** to eligible participants.
+</Callout>

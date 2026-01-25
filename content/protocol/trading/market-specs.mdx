@@ -1,0 +1,85 @@
+# Perpetual Markets Specs
+
+## Contract Tier
+Contract tiers are used to categorically label and rank the risk of perpetual markets. There are five unique tiers:
+- A
+- B
+- C
+- Speculative
+- Highly Speculative
+- Isolated
+
+These ranked tiers are used for priority access to collateral in liquidations, max limits for insurance, determining acceptable range of oracle price divergence, and sanitization rules for twap / funding rate updates.
+
+Fundamentally, a market in Contract Tier B is in a 'safer' tranche vs Contract Tier C, Speculative, and Isolated. 
+
+As of this update, most markets are currently under 'Contract Tier C', with the following exceptions:
+A: BTC-PERP
+B: SOL-PERP, ETH-PERP
+Speculative: 1MBONK-PERP, 1MPEPE-PERP, WIF-PERP
+Highly Speculative: W-PERP
+
+#### Speculative
+Speculative tier has no access to external insurance funds (only the perpetual market's fee pool)
+
+#### Highly Speculative
+Same restrictions as Speculative, but sits a tranche below.
+
+#### Isolated
+Isolated tier requires the user account refrain / disable cross margin trading (on both perpetual and spot markets). 
+
+Users with 'Margin Trading' enabled, a non-USDC borrow, or another perpetual position will NOT be allowed to enter an Isolated Tier market
+
+If the account has liabilities beyond the perpetual market's quote asset and the isolated perpetual market, it is forced to enter Reduce Only mode.
+
+## Oracle Source
+The oracle provider which provides a price, confidence band, and timeliness information for the market.
+- Pyth
+- Switchboard
+- Prelaunch
+
+#### Pyth
+[Read more](https://docs.pyth.network/home)
+
+#### Switchboard
+[Read more](https://docs.switchboard.xyz/)
+
+#### Prelaunch
+
+"Prelaunch" is a custom internal oracle source for [Prelaunch Markets](/protocol/trading/prelaunch-markets) (markets without external oracle).
+
+For Prelaunch markets, given there is no spot reference price, that oracle sources uses the mark twap as the oracle price. The oracle is also configured with a custom maximum price to prevent price manipulation. 
+
+This self-referential and leads to funding payments that encourage price stability (those holding positions in trend will pay those holding against trend) and ultimately relies upon market participants anticipating a valid oracle in the future.
+
+Every Prelaunch oracle has an initial price AND max price. The oracle value cannot exceed the max price.
+
+### Max Open Interest
+A maximum amount of open interest that can exist within the perpetual market. Additional orders/fills that would breach this open interest limit are blocked.
+
+### IMF Factor
+A margin fraction factor. Used to increase liability weight and decrease asset weight for large positions
+
+
+# Spot Markets Specs
+
+### Asset Tier
+Asset tiers are used to categorically label and rank the risk of a spot markets. There are five unique tiers:
+
+ - Collateral:  full privilege
+ - Protected: collateral, but no borrow
+ - Cross: not collateral, allow multi-borrow
+ - Isolated: not collateral, only single borrow
+ - Unlisted: no privilege
+
+### Scale Initial Asset Weight Start
+The notional value of total user deposits needed to begin scaling down the initial asset weight
+
+### Max Token Deposits
+A maximum amount of tokens that can be added to collateral vault.
+
+### IMF Factor
+A margin fraction factor. Used to increase liability weight and decrease asset weight for large positions
+
+### Order Step/Tick Size
+Spot orders must have base lots which are a multiple of the step size and price lots which are a multiple of tick size
