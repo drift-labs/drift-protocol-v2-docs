@@ -1,0 +1,51 @@
+import { Callout } from "nextra/components";
+
+# Order Types
+
+Drift supports the following order types:
+
+-   market orders;
+
+-   limit orders; and
+
+-   advanced conditional orders.
+
+## Market Orders
+
+A **Market Order** is an order to buy or sell an asset immediately at the current Market Price.
+
+Users can set a maximum **slippage tolerance**. A slippage tolerance sets an upper bound for the price that the order can be filled at, which is effectively a limit price versus the current market price.
+
+For instance, if the mark price of SOL-PERP is \$100.00 and a user goes long, a user can set a maximum slippage tolerance of 0.1%. As such, the worst price that a user can fill at is \$100.10. The order will fail if the quoted price exceeds the limit price (with slippage tolerance) for makers.
+
+Market Orders will trigger a Just-In-Time auction, where market makers will be able to participate in a 5-second Dutch auction to fill the user's orders. As the 5-second JIT auction finishes, the user's orders will be completed if the price is within their slippage tolerance limit order. If no market maker steps in during the JIT Auction, the remaining order will be filled against Drift's AMM.
+
+Executing a Market Order does not mean the order will execute at exactly the price displayed as the mark price of an asset may change before the JIT Auction is complete. 
+
+<Callout type="warning" emoji="⚠️">
+The fee paid depends on whether the order is a taker order or a maker order.
+</Callout>
+
+Maker orders are Limit orders with a 'Post' flag.
+
+See [Trading Fees](/protocol/trading/trading-fees) and [Advanced Orders FAQ](/protocol/trading/advanced-orders-faq) for more information.
+
+
+## **Limit Orders**
+
+The Drift DEX supports a number of queued order types.
+
+These orders take against the AMM and are executed by a decentralised network of keepers, see [Decentralised Orderbook FAQ](/protocol/about-v3/keepers-decentralized-orderbook-faq), once certain conditions are met (i.e. the mark price crosses the specified trigger/limit price).
+
+These orders are executed **'best effort'** by the network with special economic incentives designed to mimic the typical execution order seen in a Centralised Limit Order Book (CLOB).
+
+A Limit Order is an order to buy or sell a given asset at a specified price.
+
+Users can specify a Limit Price they wish to be filled at.
+
+If or when the mark price of an asset moves to cross the Limit Price, the order will partially fill up to this Limit Price every time a keeper executes it.
+
+For taker orders, a user's resulting Entry Price is guaranteed to be equal to or better than the Limit Price specified.
+
+If the "Post" order flag is set, then the order will be filled at the specified limit price with a variable rebate. This variable rebate comes from the liquidity surplus from the taker fills that cross after accounting for the filler reward (which is capped at 5bps).
+
