@@ -1,3 +1,5 @@
+import { Steps } from 'nextra/components'
+
 # Drift AMM
 
 ## Introduction
@@ -32,6 +34,7 @@ The mechanics behind the dynamic spread and peg are:
 
 2.  Oracle live pricing/volatility
 
+<Steps>
 ### Inventory Adjusted Spreads
 
 In a typical constant product AMM, the AMM quotes the same price for buys/sells and charges a flat fee.
@@ -85,3 +88,4 @@ The sequence is:
 The overall spread will increase if the AMM is heavily levered or in debt. The oracle price and reservation price are always within this spread. Effective leverage is a function of many market stats, including Inventory P&L and collateral within the fee pool in the terminal state.
 
 The reservation (AMM) price is the `quote/base reserves * peg`.
+</Steps>

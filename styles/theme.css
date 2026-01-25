@@ -2,7 +2,7 @@
   /* Light theme tokens */
   --nextra-bg: 248 245 255;
   --nextra-primary-hue: 286;
-  --nextra-primary-saturation: 58%;
+  --nextra-primary-saturation: 50%;
   --nextra-primary-lightness: 44%;
 
   --x-color-gray-50: #f8f6fb;
@@ -20,9 +20,9 @@
 
 .dark {
   /* Dark theme tokens */
-  --nextra-bg: 13 10 20;
+  --nextra-bg: 10 6 20;
   --nextra-primary-hue: 286;
-  --nextra-primary-saturation: 60%;
+  --nextra-primary-saturation: 50%;
   --nextra-primary-lightness: 55%;
 
   --x-color-gray-50: #837b90;
@@ -42,6 +42,7 @@ footer {
   background-color: rgb(var(--nextra-bg));
 }
 
+/* Top level tabs */
 header>nav {
   display: flex;
   flex-wrap: wrap;
