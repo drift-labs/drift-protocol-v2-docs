@@ -1,5 +1,5 @@
 import { Callout } from "nextra/components";
-
+ 
 # Drift for developers
 
 Drift Protocol is an [open-sourced](https://github.com/drift-labs/protocol-v2/), decentralised exchange built on the Solana blockchain, enabling transparent and non-custodial trading on cryptocurrencies.
@@ -28,4 +28,61 @@ DriftPy step-by-step guide:
 # Building on Drift
 Drift’s Builder Code (DBC) system enables any builder to build on top of Drift while earning fees for routing trades. More info can be found [here](https://docs.drift.trade/partnerships/DBC)
 
+## Static function
 
+Explain what we are trying to achieve through this flow.
+
+<SDKDoc>
+  <TypeScript name="calculateReservePrice" type="function">
+```js
+import { calculateReservePrice } from "@drift-labs/sdk"
+
+const price = calculateReservePrice(market, oraclePrice)
+console.log(price.toString())
+```
+  </TypeScript>
+  <Python name="calculate_reserve_price" type="function">
+```python
+Example coming soon
+```
+  </Python>
+</SDKDoc>
+
+## Class Method
+
+Explain what we are trying to achieve through this flow.
+
+<SDKDoc>
+  <TypeScript name="getHealth" type="method" owner="User">
+```js
+import { User } from "@drift-labs/sdk"
+
+const health = User.getHealth(1)
+console.log(health.toString())
+```
+  </TypeScript>
+</SDKDoc>
+
+## Variable
+
+Explain what we are trying to achieve through this flow.
+
+<SDKDoc>
+  <TypeScript name="AMM" type="variable">
+```js
+import { AMM } from "@drift-labs/sdk"
+```
+  </TypeScript>
+</SDKDoc>
+
+## Enum
+
+Explain what we are trying to achieve through this flow.
+
+<SDKDoc>
+  <TypeScript name="TradeSide" type="enum">
+```js
+import { TradeSide } from "@drift-labs/sdk"
+```
+  </TypeScript>
+</SDKDoc>
