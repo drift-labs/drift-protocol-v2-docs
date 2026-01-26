@@ -15,6 +15,7 @@ import {
   AssetWeightsTable,
   LTVTable,
 } from "./components/data/CrossCollateralTables";
+import { Api, Python, Rust, SDKDoc, TypeScript } from "./components/SDKDoc";
 
 export function useMDXComponents(components?: Record<string, unknown>) {
   return useDocsMDXComponents({
@@ -29,6 +30,11 @@ export function useMDXComponents(components?: Record<string, unknown>) {
     OtherSpotFeesTable,
     AssetWeightsTable,
     LTVTable,
+    SDKDoc,
+    TypeScript,
+    Python,
+    Rust,
+    Api,
     ...components,
   });
 }
