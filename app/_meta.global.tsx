@@ -5,17 +5,25 @@ const META: MetaRecord = {
     "title": "Drift Protocol",
     "type": "page",
     "items": {
-      "index": "Welcome to Drift Protocol",
-      "rewards": {
-        "title": "Active promotions",
-        "items": {
-          "traderrewards": "Trader Rewards Program",
-          "rewards-program": "Market Maker Reward Program"
-        }
-      },
+      "index": "Drift Overview",
       "about-v3": {
         "title": "About Drift v3",
-        "items": {}
+        "items": {
+          "understanding-drift": "Understanding Drift",
+          "drift-amm": "Drift AMM",
+          "decentralized-orderbook": "Decentralized Orderbook",
+          "keepers": {
+            "title": "Keepers",
+            "items": {
+              "keepers-dlob-faq": "Keepers & DLOB FAQ",
+              "keeper-incentives": "Keeper Incentives",
+            },
+          },
+          "matching-engine": "Matching Engine",
+          "jit-faq": "Just-in-Time (JIT) FAQ",
+          "revenue-pool": "Revenue Pool",
+          "optimizations": "Optimizations",
+        }
       },
       "getting-started": {
         "title": "Getting Started",

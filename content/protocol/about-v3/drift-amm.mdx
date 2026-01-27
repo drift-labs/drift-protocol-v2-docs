@@ -1,5 +1,3 @@
-import { Steps } from 'nextra/components'
-
 # Drift AMM
 
 ## Introduction
@@ -43,7 +41,7 @@ To implicitly utilise a dynamic fee, Drift v3's AMM quotes different prices for 
 
 To do so, there will be 3 points tracked on the constant product curve: the bid price and ask price, and a point between the reservation price.
 
-![](/assets/K7PAJRkd_-P-t8v6RQ_nI_drift-amm-bid-ask-spreads.png)
+![](/assets/drift-amm.png)
 
 Base long spread and short spread are currently set as:
 
@@ -70,22 +68,31 @@ This pricing mechanism updates an asset's mark price towards its oracle price, a
 - better entries and exits closer to oracle price.
 
 The mark price is updated each time the oracle updates its price and when the contract is interacted with.
+</Steps>
 
-Oracle Live Pricing Sequence
+### Oracle Live Pricing Sequence
 
-Every time a trader wants to fill against the AMM, the AMM will be updated in the same slot with a valid oracle price (see [Oracles](/protocol/trading/oracles)).
+Every time a trader wants to fill against the AMM, the AMM will be updated in the same slot with a valid oracle price (see [Oracles](file:///trading/oracles)).
 
-The sequence is:
+<Steps>
+### Step: Check the oracle price
 
-1.  The AMM checks the oracle price
+The AMM checks the oracle price.
 
-2.  The AMM move its peg toward the oracle price
+### Step: Move peg toward oracle
 
-3.  The AMM sets its bid/ask spread versus its reservation price
+The AMM moves its peg toward the oracle price.
 
-4.  The order will fill according to the bid/ask price if the order has lived longer than the minimum duration for AMM fills (10 slots)
+### Step: Set bid/ask spread
 
-The overall spread will increase if the AMM is heavily levered or in debt. The oracle price and reservation price are always within this spread. Effective leverage is a function of many market stats, including Inventory P&L and collateral within the fee pool in the terminal state.
+The AMM sets its bid/ask spread versus its reservation price.
+
+### Step: Fill order
+
+The order will fill according to the bid/ask price if the order has lived longer than the minimum duration for AMM fills (10 slots).
+
+</Steps>
+
+The overall spread will increase if the AMM is heavily levered or in debt. The oracle price and reservation price are always within this spread. Effective leverage is a function of many market stats, including Inventory P\&L and collateral within the fee pool in the terminal state.
 
 The reservation (AMM) price is the `quote/base reserves * peg`.
-</Steps>
