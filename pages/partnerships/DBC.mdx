@@ -1,12 +1,4 @@
-import { Callout } from "nextra-theme-docs";
-
 # Drift Builder Codes
-
-<Callout type="info" emoji="ℹ️">
-Drift Builder Codes are currently in **private beta**. If you're interested in participating or learning more, please reach out to the Drift team.
-</Callout>
-
-## Overview
 
 Drift’s Builder Code (DBC) system enables any builder to build on top of Drift **while earning fees** for routing trades.
 
@@ -14,7 +6,7 @@ Drift Builder Codes establish the financial infrastructure layer on Solana, by a
 
 This Builder Code system makes Drift the first on-chain DEX on Solana to offer **per order monetization** for third-party frontends, setting the stage for a permissionless ecosystem of apps, bots, and aggregators all aligned with Drift and Solana’s liquidity growth. 
 
-### Getting started with DBC
+## Getting started with DBC
 
 - **Builder Registration:**
 In order to receive fees, builders are required to have an existing Drift account, as well as set up a `RevenueShareAccount`
@@ -23,7 +15,7 @@ In order to receive fees, builders are required to have an existing Drift accoun
 Before placing any orders, users must approve the builder and the maximum allowed builder fee.  
 This approval is stored directly inside the `RevenueShareEscrow` account.
 
-### How Builder Codes Work
+## How Builder Codes Work
 
 1. **Order Placement**  
    The builder’s app constructs a `place_order` transaction, which includes their `builderIdx` and `builderFee` in the signed order params 
@@ -39,7 +31,7 @@ When an order is filled, the fee is credited to the user’s `RevenueShareEscrow
 
 Code examples can be found in the API [docs](https://drift-labs.github.io/v2-teacher/#buildercodes)
 
-### Notes on builder codes for MM’s
+## Notes on builder codes for MM’s
 
 **RevenueShareEscrow Inclusion:**  Fillers and market makers must include the user’s `RevenueShareEscrow` account in every order fill transaction. This PDA is derived from the user’s pubkey (requires no additional RPC calls).
 
@@ -47,7 +39,7 @@ Code examples can be found in the API [docs](https://drift-labs.github.io/v2-tea
 
 **Error Handling:**  If a required escrow account isn’t included, the program will throw. Therefore it's recommended to always include it.
 
-### FAQ
+## FAQ
 
 **Q: Can a user approve multiple builders?**  
 A: Yes. Each builder entry in `approvedBuilders` has its own max fee bps.
