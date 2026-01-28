@@ -1,0 +1,52 @@
+# Per-Market Leverage
+
+Per-Market leverage introduces **market specific leverage limits**, giving traders finer control over their positions while improving account safety.
+
+Instead of every position sharing a single account level limit, each perpetual market now defines its own **maximum leverage cap**.
+
+This allows higher leverage on stable assets and stricter limits on more volatile ones.
+
+## How Per-Market Leverage Works
+
+Each perpetual position stores its own `max_margin_ratio`, which defines the maximum leverage allowed for that market.
+
+When checking a position, Drift compares:
+
+```
+effective_margin_ratio = min(position.max_margin_ratio, account.max_margin_ratio)
+```
+
+| Market    | Account Limit | Market Limit | Effective Leverage | Result                |
+| --------- | ------------: | -----------: | -----------------: | --------------------- |
+| BTC-PERP  |           10x |          20x |            **10x** | Account limit applies |
+| PUMP-PERP |           10x |           5x |             **5x** | Market limit applies  |
+
+The lower value is always used, ensuring positions can’t exceed the most conservative limit.
+
+From this ratio, the protocol calculates the **maximum position size** a trader can open with their available collateral, and the **liquidation threshold** for that specific position.
+
+## Risk and Control
+
+Previously, all risk was managed at the account level, which meant that a large loss in one market could impact every position.
+
+With per-market leverage, each market is evaluated independently. Furthermore, per-market leverage gives traders more flexibility and control:
+
+* Apply different leverage levels for different strategies or market conditions.
+* High-risk markets can be capped without restricting more stable ones.
+* Because risk is contained at the market level, traders eliminate the chance of cascading liquidations.
+* Each market’s leverage and liquidation levels are clear and more predictable.
+
+<Callout type="info">
+Example: A trader runs 10x leverage on BTC-PERP and 5x leverage on PUMP-PERP. If PUMP-PERP is liquidated, BTC-PERP remains unaffected, keeping the rest of the account stable.
+</Callout>
+
+## Code Implementation
+
+### Files and functions
+
+Per-market leverage logic is implemented in:
+
+* `perp_positions.rs` stores `max_margin_ratio`
+* `updateUserPerpPositionCustomMarginRatio` updates per position settings
+
+Implementation can be found [here](https://github.com/drift-labs/protocol-v2/blob/3bb3d407146408a9e08816bcc72a903560013eb7/sdk/src/driftClient.ts#L1541)

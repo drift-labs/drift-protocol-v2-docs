@@ -8,14 +8,25 @@ Drift utilises as an oracle source.  The protocol has the flexibility to update 
 
 For robustness, Drift's program checks oracle validity. The validity is evaluated on a per-check and action basis to determine whether to block actions. See [Protocol Guard Rails](/protocol/risk-and-safety/protocol-guard-rails) for more details.
 
-1\. Stale(ForAmm/ForMargin): (last slot update too far behind the current slot, **10/120 slots**)
+<Steps>
+### Stale(ForAmm/ForMargin)
+Last slot update too far behind the current slot -- 10/120 slots
 
-2\. InvalidPrice: Negative price (any price field **< 0**)
+### InvalidPrice
+Negative price (any price field **< 0**)
 
-3\. TooVolatile: (TWAP / price ratio out of bounds, **5x or 1/5x**)
+### TooVolatile
+TWAP / price ratio out of bounds -- **5x or 1/5x**
 
-4\. TooUncertain: Confidence interval is too large (confidence if a very large percentage of the price, **>10%**)
+### TooUncertain
+Confidence interval is too large (confidence if a very large percentage of the price, **>10%**)
 
-**When the oracle for a Perpetuals Market is deemed invalid, the market can block some order fills, withdraws, liquidations, and funding rate updates (if they increase protocol risk).**
+</Steps>
 
-**For the duration of the invalid period, on-chain oracle TWAP calculation aims to shrink toward mark TWAP to avoid erroneous funding payment magnitudes.**
+<Callout type="warning">
+When the oracle for a Perpetuals Market is deemed invalid, the market can block some order fills, withdraws, liquidations, and funding rate updates (if they increase protocol risk).
+</Callout>
+
+<Callout type="info">
+For the duration of the invalid period, on-chain oracle TWAP calculation aims to shrink toward mark TWAP to avoid erroneous funding payment magnitudes.
+</Callout>

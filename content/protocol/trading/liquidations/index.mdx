@@ -1,12 +1,12 @@
 # Liquidations
 
 
-<Callout type="warning" emoji="⚠️">
+<Callout type="warning">
 Trading on leverage can be risky. Make sure you are aware of the liquidation rules outlined below before applying margin.
 </Callout>
 
 
-## What are Liquidations?  
+## What is Liquidation?  
 
 Liquidations are a part of leveraged trading. Traders that elect to use leverage are using the collateral they deposited as margin to borrow money from the protocol. Traders may choose to do this in order to open a larger position and have more exposure to a particular asset, i.e. *leveraged exposure*.  
 
@@ -14,7 +14,7 @@ When this occurs, the protocol must protect itself by ensuring that there is eno
 
 If a position drops below its Minimum Maintenance Margin, liquidators are incentivized by the protocol to take over positions so a user's remaining collateral may settle the losses that have occurred. Read [Insurance Fund](/protocol/insurance-fund/insurance-fund-intro) for what happens when prices move rapidly and/or liquidations don't happen in time.  
 
-# How do Liquidations work?  
+## How do Liquidations work?  
 
 In the Drift v3 margin system, all positions within a subaccount (deposits, borrows, and perpetuals positions) are cross-margined.
 
@@ -32,27 +32,33 @@ The user's trade price at liquidation for a perpetual position will be based on 
 
 Liquidations triggered and positions will be liquidated using margin engine prices.
 
-<Callout type="error" emoji="🚫">
+<Callout type="error">
 **In the case of an extreme oracle error: the market will pause most fills, liquidations, and funding rate updates.**
 </Callout>
 
-<Callout type="info" emoji="⬇️">
+<Callout type="info">
+Example:
 
+You deposit 500 USDC and you long 200 SOL-PERP at $25.
 
-**Example:**
+* Your position value is $5000 USDC and your margin/collateral is $500 USDC, you have 10x leverage.
+* Note that the Minimum Maintenance Margin for a SOL-PERP is 3% (see Minimum Maintenance Margin for assets here: [Margin](/broken/pages/91e420bf7d9cbd34cab27d84e6640ec942662a06)).
 
-You deposit 500 USDC and you long 200 SOL-PERP at \$25
+Calculations:
 
-Your position value is \$5000 USDC and your margin/collateral is $500 USDC, you have 10x leverage
+* Total collateral = `500 * 1.00 = 500`
+* Margin requirement = `5000 * .05 = 250`
 
-Note that the Minimum Maintenance Margin for a SOL-PERP is 3% (see Minimum Maintenance Margin for assets here: [Margin](/protocol/trading/margin))
+You are liquidated if the price of SOL decreases by 5.28% to $23.6825. This is because:
 
-Your total collateral is `$500 * 1.00 = $500` and your margin requirement is `$5000 * .05 = 250`
+* Perp PnL = `200 * $25 * -0.0527 = -263.5`
+* New total collateral = `500 - 263.5 = 236.5`
+* New margin requirement = `23.6825 * 200 * .05 = 236.825`
 
-You are liquidated if the price of SOL decreases by 5.28% to \$23.6825. This is because your perp pnl is `200 * $25 * -.0527 = -263.5` and thus your total collateral is `$500 - 263.5 = $236.5`while your margin requirement is `$23.6825 * 200 * .05 = $236.825`.
+At that point your total collateral is less than your margin requirement and liquidation is triggered.
 </Callout>
 
-# Being a Liquidator
+## Being a Liquidator
 
 Read [Liquidators](/protocol/liquidations/liquidators) if you want to learn more about being a liquidator on the platform. Liquidators earn a fee for their services.  
 
