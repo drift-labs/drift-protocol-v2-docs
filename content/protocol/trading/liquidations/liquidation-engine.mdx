@@ -8,17 +8,13 @@ In a volatile market, bad oracle data or sudden price wicks can create sudden cr
 
 By design, **Drift’s liquidation engine** revolves around 3 key areas:
 
-1. **Partial liquidation**, breaking liquidations into multiple steps.
-2. **Speed**, adjusting liquidation speed based on account health.
-3. **Price**, filters extreme wicks through oracle based guardrails.
-
-### Partial Liquidations
+<Steps>
+### Partial liquidation
 To limit risk and reduce the severity of liquidation events, Drift uses **partial liquidation**. Instead of closing an entire position at once, the system liquidates portions over time, throttled across multiple slots. This gives the account a chance to recover as new oracle prices arrive, while ensuring the system remains solvent.
 
 The buffer system ensures that users aren’t liquidated right back at maintenance margin. Instead, Drift places liquidated accounts slightly behind a safe margin buffer, far enough to reduce immediate risk but close enough to stay competitive for traders using leverage.
 
-### How Drift handles speed
-
+### Speed
 Drift’s liquidation engine liquidates progressively, adjusting speed based on how “unhealthy” the user’s account is and how the price evolves after the liquidation starts.
 
 When a liquidation begins, Drift records how much margin has already been freed. From that point:
@@ -29,11 +25,12 @@ When a liquidation begins, Drift records how much margin has already been freed.
 
 From empirical data, even a few slots of delay can prevent unnecessary liquidations during a temporary wick. The goal isn’t to pause liquidation, but to make it responsive, reacting quickly when needed and backing off when conditions improve.
 
-### How Drift handles price
-
+### Price
 Liquidations on Drift aren’t triggered directly by the mark price, instead, the engine references the oracle price for liquidation thresholds. The engine compares the current oracle price with the five-minute average oracle price(TWAP) to detect outliers.
 
 If the oracle price deviates 50% or more from the 5min TWAP, liquidations are **temporarily blocked**. This gives time for additional oracle updates to confirm whether the move is real. Once the deviation narrows, normal liquidation resumes, following the same pacing described above.
+
+</Steps>
 
 ## Insurance Fund as a safety net
 
@@ -52,10 +49,15 @@ Each asset has its own Insurance Fund. For example, the USDC fund backs both per
 
 ## How Perp Bankruptcy Resolution Works
 
-Drift follows a clear hierarchy:
+Drift follows a clear hierarchy for resolving perp market insolvency:
 
-1. **External Insurance Fund** (USDC) covers the debt up to its per market limit.
-2. **Internal Insurance** (the vAMM’s lifetime profit for that market) covers remaining losses.
-3. If both are exhausted, **socialized loss** applies pro rata across all open positions within that market.
+<Steps>
+### External Insurance Fund
+The external Insurance Fund (USDC) covers the debt up to its per-market limit.
+### Internal Insurance
+If the external fund is insufficient, the vAMM’s lifetime profit for that market (internal insurance) covers remaining losses.
+### Socialized loss
+If both are exhausted, **socialized loss** applies pro rata across all open positions within that market.
+</Steps>
 
 This structure ensures that insolvency events are handled fairly and predictably. The system aims to keep socialized losses as close to zero as possible.

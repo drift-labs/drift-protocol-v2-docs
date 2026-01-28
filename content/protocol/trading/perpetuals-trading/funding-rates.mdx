@@ -6,28 +6,32 @@ Perpetuals futures have no expiry date, final settlement, or delivery. As such, 
 
 | Field               | Description                                     |
 | ------------------- | ----------------------------------------------- |
-| Funding Rate % Calc | 1/24 \* (market_twap - oracle_twap)/oracle_twap |
+| Funding Rate % Calc | `1/24 \* (market_twap - oracle_twap)/oracle_twap` |
 | TWAP Parameters     | EMA with span = 1 hour                          |
-| Mark TWAP Calc      | (bid TWAP + ask TWAP) / 2                       |
+| Mark TWAP Calc      | `(bid TWAP + ask TWAP) / 2`                       |
 | Frequency           | End of Hour\* (9:00 AM, 10:00 AM, ...)          |
 
+<Callout type="important">
 Note: Funding rate hourly magnitudes are clamped according to the market's Contract Tier (B or greater: 0.125%, C: 0.208%, lower than C: 0.4167%) and can be delayed at large divergences (see [Oracles](/protocol/trading/oracles)). Individual Market TWAP updates utilize the side of the book for trade executions, Bid and Ask TWAPs in the market are calculated and/or estimated on every trade.
+</Callout>
+
+<Callout type="warning">
+\*If no market trades and/or funding update calls occur within the first ~20 minutes of the hour, the next funding update will be delayed an additional hour.
+</Callout>
 
 ### Unrealised -> Realised Funding
 
-Funding rates are updated _lazily_ every hour\*.
+- Funding rates are updated _lazily_ every hour.
 
-Any time a user opens or closes a position, the exchange tries to update the funding rate.
+- Any time a user opens or closes a position, the exchange tries to update the funding rate.
 
-The funding rate will still be updated if enough time has passed and no position has been opened or closed.
+- The funding rate will still be updated if enough time has passed and no position has been opened or closed.
 
-The update will reflect the premium or discount between the AMM’s mark price and the oracle’s price TWAP over the previous hour.
+- The update will reflect the premium or discount between the AMM’s mark price and the oracle’s price TWAP over the previous hour.
 
-The cumulative funding rate is checked against user positions in case the off-chain funding rate bot does not trigger on the hour. This will show up as "Unrealised P&L" until your next user action within the market (such as a trade, deposit, withdraw etc.), see also [P&L](/protocol/profit-loss/profit-loss-intro).
+- The cumulative funding rate is checked against user positions in case the off-chain funding rate bot does not trigger on the hour. This will show up as "Unrealised P&L" until your next user action within the market (such as a trade, deposit, withdraw etc.), see also [P&L](/protocol/profit-loss/profit-loss-intro).
 
-\* _if no market trades and/or funding update calls occur within the first ~20 minutes of the hour, the next funding update will be delayed an additional hour._
-
-Funding payments may not pay out for markets that trade infrequently.
+- Funding payments may not pay out for markets that trade infrequently.
 
 ### Capped Symmetric Funding
 
@@ -39,7 +43,7 @@ See [Rebates](/protocol/market-makers/maker-rebate-fees) for funding pool sizes 
 
 Over the hour, the amount available in the Rebate Pool will increase from fees as trades occur, so any existing predicted capped rate should move closer to being balanced.
 
-<Callout type="info" emoji="⬇️">
+<Callout type="info">
 
 **Example:**
 
@@ -59,11 +63,17 @@ Read more about protective checks in [Oracles](/protocol/trading/oracles).
 
 Funding rates can be showcased in annual terms for easier comparison.
 
-**APR (annual percentage rate)** is calculated `rate x 24 x 365.25`
+- **APR (annual percentage rate)** is calculated
+  ```
+  rate x 24 x 365.25
+  ```
 
-**APY** would be: `(1 + rate) ^ (24 x 365.25) - 1`
+- **APY** is calculated
+  ```
+  (1 + rate) ^ (24 x 365.25) - 1
+  ```
 
-<Callout type="info" emoji="💡">
+<Callout type="important">
 One can approximately track **APY** by allocating funding receipts back into the position (excluding fees/rebates).
 </Callout>
 

@@ -1,5 +1,5 @@
 
-# All Order types
+# Advanced Order types
 
 Drift supports several advanced order types:
 
@@ -21,13 +21,16 @@ Trigger orders (Stop Market / Stop Limit / Take profit market / Take profit limi
 
 The trigger price is computed as the median of the following three values:
 
-1. **Oracle Price Adjustment**  
-   `Oracle Price + (Mark Price 5min TWAP − Oracle Price 5min TWAP)`
+<Steps>
+### Oracle Price Adjustment
+`Oracle Price + (Mark Price 5min TWAP − Oracle Price 5min TWAP)`
 
-2. **Last Trade Price**
+### Last Trade Price
 
-3. **Oracle Price with Funding Adjustment**  
-   `Oracle Price × (1 + Last Funding Rate × (Time Until Next Funding / Funding Period))`
+### Oracle Price with Funding Adjustment
+`Oracle Price × (1 + Last Funding Rate × (Time Until Next Funding / Funding Period))`
+
+</Steps>
 
 The **median** of these three values is used as the trigger price.
 
@@ -46,6 +49,8 @@ Submit multiple limit orders across a user‑defined price range to build or unw
 
 These flags can be combined with the order types above.
 
-- **Reduce‑Only**: Enforces that the order will never increase or reverse the current position (go from long to short, or short to long).
-- **Post‑Only**: : Enforces that the order is a maker order that can provide liquidity to the pool for a reduced exchange fee (0%). Without this flag, orders that don't execute immediately are not post-only.
-- **Immediate‑or‑Cancel (IOC)**: An order that is placed and potentially partially filled. The remainder that is not filled immediately is then cancelled.
+| Flag | Description
+| -- | --
+| Reduce‑Only | Enforces that the order will never increase or reverse the current position (go from long to short, or short to long).
+| Post‑Only | Enforces that the order is a maker order that can provide liquidity to the pool for a reduced exchange fee (0%). Without this flag, orders that don't execute immediately are not post-only.
+| Immediate‑or‑Cancel (IOC) | An order that is placed and potentially partially filled. The remainder that is not filled immediately is then cancelled.

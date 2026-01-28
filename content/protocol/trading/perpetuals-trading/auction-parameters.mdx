@@ -4,7 +4,7 @@ Drift Protocol allows orders to set custom auction parameters.
 
 These settings allow users to customize how their orders are executed on the Drift Protocol by setting specific auction parameters. You can see the implementation of these auction settings [here](https://github.com/drift-labs/drift-common/blob/master/common-ts/src/common-ui-utils/commonUiUtils.ts#L374).
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="important">
 
 **Double Check:** One can always review their Auction Parameters for a particular order in the Confirmation Modal before submitting.
 (you can expand details with "Advanced" checked)
@@ -14,15 +14,14 @@ These settings allow users to customize how their orders are executed on the Dri
 
 **Start Price Fields:**
 
-1.  Oracle Price (current oracle price of the market)
+| Field | Description
+| ----- | ------
+| Oracle Price | Current oracle price of the market
+| Best Bid/Ask | Use best bid/ask price
+| Est. Entry Price | Price includes estimated price impact on DLOB/AMM)
+| Best Overall | Select best price of all of the above
 
-2.  Best Bid/Ask (use best bid/ask price)
-
-3.  Est. Entry Price (price includes estimated price impact on DLOB/AMM)
-
-4.  Best Overall (select best price of all of the above)
-
-<Callout type="warning" emoji="⚠️">
+<Callout type="warning">
 **For Large Size:** It's recommended to set a longer duration, "Use Oracle Offset", and wider start, end buffers.
 </Callout>
 
@@ -50,4 +49,4 @@ When submitted limit orders crosses local DLOB and/or AMM, a limit order without
 
 ### Atomic Fills against Resting Liquidity
 
-When 'Fill against resting liquidity first' is enabled, placed orders will go through the 'place_and_take' instruction. In Place And Take, a list of makers can be passed in with the user's order and if the user's *auction END price* crosses the makers' limit price(s), the order will match. Any remaining amount of the order after this step will go through a typical auction (from start to end), unless IOC is enabled (in which case the order will cancel after attempting to fill vs makers). Note than Drift's AMM will not provide liquidity to takers atomically in the first step.
+When 'Fill against resting liquidity first' is enabled, placed orders will go through the `place_and_take` instruction. In Place And Take, a list of makers can be passed in with the user's order and if the user's *auction END price* crosses the makers' limit price(s), the order will match. Any remaining amount of the order after this step will go through a typical auction (from start to end), unless IOC is enabled (in which case the order will cancel after attempting to fill vs makers). Note than Drift's AMM will not provide liquidity to takers atomically in the first step.

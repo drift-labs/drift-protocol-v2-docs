@@ -15,6 +15,7 @@ const META: MetaRecord = {
           "keepers": {
             "title": "Keepers",
             "items": {
+              "index": "What are Keepers?",
               "keepers-dlob-faq": "Keepers & DLOB FAQ",
               "keeper-incentives": "Keeper Incentives",
             },
@@ -50,62 +51,83 @@ const META: MetaRecord = {
         "items": {
           "market-specs": "Market Specs",
           "prelaunch-markets": "Prelaunch Markets",
-          "perpetuals-trading": "Perpetuals Trading",
-          "what-are-perpetual-futures": "What are Perpetual Futures?",
-          "funding-rates": "Funding Rates",
-          "spot-margin-trading": "What is Spot Margin Trading?",
-          "spot-faq": "Spot FAQ",
-          "margin": "Margin",
-          "order-types": "Order Types",
-          "all-order-types": "All Order Types",
-          "advanced-orders-faq": "Advanced Orders FAQ",
-          "account-health": "Health Breakdown",
-          "auction-parameters": "Auction Parameters",
-          "trading-fees": "Trading Fees",
-          "other-trading-fees": "Other Trading Fees",
-          "fee-pool": "Fee Pool",
+          "perpetuals-trading": {
+            "title": "Perpetuals Trading",
+            "items": {
+              "index": "What are Perpetual Futures?",
+              "perpetuals-trading": "Perpetuals Trading",
+              "auction-parameters": "Auction Parameters",
+              "funding-rates": "Funding Rates",
+            }
+          },
+          "spot-trading": "Spot Trading",
+          "margin": {
+            "title": "Margin",
+            "items": {
+              "index": "Margin",
+              "per-market-leverage": "Per-Market Leverage",
+              "account-health": "Account Health",
+            },
+          },
+          "profit-loss": {
+            "title": "Profit & Loss (P&L)",
+            "items": {
+              "index": "Introduction to Profit & Loss",
+              "accounting-settlement": "Accounting and Settlement",
+              "what-is-unsettled-profit-loss": "What is unsettled P&L?",
+              "profit-loss-pool": "P&L Pool"
+            }
+          },
+          "order-types": {
+            "title": "Order Types",
+            "items": {
+              "index": "Basic Order Types",
+              "advanced-order-types": "Advanced Order Types",
+              "advanced-orders-faq": "Advanced Orders FAQ",
+            },
+          },
+          "liquidations": {
+            "title": "Liquidations",
+            "items": {
+              "index": "What is Liquidation?",
+              "liquidation-engine": "Liquidation Engine",
+              "liquidators": "Liquidators"
+            }
+          },
+          "trading-fees": {
+            "title": "Trading Fees",
+            "items": {
+              "index": "Fee Structure",
+              "fee-pool": "Fee Pool",
+              "other-trading-fees": "Other Trading Fees",
+            }
+          },
           "versioned-transactions": "Versioned Transactions",
+          "oracles": "Oracles",
           "block-conditions": "Block Conditions",
-          "oracles": "Oracles"
         }
       },
-      "profit-loss": {
-        "title": "Profit & Loss (P&L)",
+      "borrow-lend": {
+        "title": "Borrow & Lend",
         "items": {
-          "profit-loss-intro": "Introduction to Profit & Loss",
-          "accounting-settlement": "Accounting and Settlement",
-          "what-is-unsettled-profit-loss": "What is unsettled P&L?",
-          "profit-loss-pool": "P&L Pool"
-        }
-      },
-      "liquidations": {
-        "title": "Liquidations",
-        "items": {
-          "liquidations": "What is Liquidation?",
-          "liquidation-engine": "Liquidation Engine",
-          "liquidators": "Liquidators"
-        }
-      },
-      "lend-borrow": {
-        "title": "Lend & Borrow",
-        "items": {
-          "what-is-lend-borrow": "What is lending and borrowing?",
+          "what-is-borrow-lend": "What is Borrow & Lend?",
           "supply-borrow-apy": "Supply & Borrow APY",
           "borrow-interest-rate": "Borrow Interest Rate",
-          "lend-borrow-faq": "Lend & Borrow FAQ",
-          "rewards": "Collateral Rewards"
+          "borrow-lend-faq": "Borrow & Lend FAQ",
+          "rewards": "Collateral Rewards",
+          "amplify": {
+            "title": "Amplify",
+            "items": {
+              "how-it-works": "How it Works",
+              "opening-a-position": "Opening a Position",
+              "monitoring-a-position": "Monitoring a Position",
+              "closing-a-position": "Closing a Position",
+              "risk": "Risk"
+            }
+          },
         }
       },
-      "amplify": {
-        "title": "Amplify",
-        "items": {
-          "how-it-works": "How it Works",
-          "opening-a-position": "Opening a Position",
-          "monitoring-a-position": "Monitoring a Position",
-          "closing-a-position": "Closing a Position",
-          "risk": "Risk"
-        }
-      },
+
       "market-makers": {
         "title": "Market Makers",
         "items": {

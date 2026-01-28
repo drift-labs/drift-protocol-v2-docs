@@ -24,7 +24,7 @@ $f_{\text{user}}$ is the taker fee paid by the user who placed the order
 
 This reward is subject to evolve to incentivise CLOB-like execution ordering. See [source code](https://github.com/drift-labs/protocol-v1/blob/c748c64fcfa6d7fd5aba72f7021218dd6aaa02f0/programs/clearing_house/src/math/fees.rs#L257) for the on-chain calculation.
 
-<Callout type="info">
+<Callout type="important">
 A Keeper reward multiplier (for taker price improvement) is applied to the keeper's minimum time-based reward component in the function above. Any percent improvement versus the baseline `oracle +/- 10bps`, increases this multiplier.
 </Callout>
 
