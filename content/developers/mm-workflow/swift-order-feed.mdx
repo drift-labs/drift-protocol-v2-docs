@@ -1,0 +1,36 @@
+## Swift order feed
+
+**Swift MM:** receive signed taker orders off-chain over this websocket feed (before the order hits the [JIT auction](/protocol/about-v3/jit-faq)), then [place-and-make](/developers/mm-workflow/swift-place-and-make) on-chain. Makers can inspect the order (direction/size/auction params) and decide how to fill it.
+
+### Subscribe to Swift orders
+
+<SDKDoc>
+  <TypeScript name="SwiftOrderSubscriber" type="class">
+```js
+import { SwiftOrderSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="subscribe" type="method" owner="SwiftOrderSubscriber">
+```js
+await swiftOrderSubscriber.subscribe(async (orderMessageRaw, signedMessage, isDelegateSigner) => {
+  // inspect signedMessage.signedMsgOrderParams
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Account getter (optional)
+
+If you want to derive the taker’s `UserAccount` for downstream instructions, you can provide a `userAccountGetter` implementation to the subscriber (e.g. backed by `UserMap`).
+
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
+```js
+import { UserMap } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+

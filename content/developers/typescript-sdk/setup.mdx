@@ -1,0 +1,113 @@
+## Setup
+
+Install the SDK and create a client connected to the cluster. The examples below use placeholders like `<RPC_URL>` and `<KEYPAIR_PATH>` — replace them with your own values.
+
+### Program addresses
+
+The Drift program id is environment-specific. In most cases you’ll use the default program id baked into the SDK config for `devnet` or `mainnet-beta`.
+
+### Wallet / authentication
+
+To interact with Solana you need a keypair. One common approach for bots is to point `ANCHOR_WALLET` (or your own env var) at a JSON keypair file.
+
+```bash
+solana-keygen new --outfile ~/.config/solana/my-keypair.json
+export ANCHOR_WALLET=~/.config/solana/my-keypair.json
+```
+
+### Install
+
+```bash
+npm i @drift-labs/sdk
+```
+
+### Numeric types (BN) and precision helpers
+
+The SDK represents most on-chain numbers as integers using BN-style big numbers. Use helper functions + precision constants to convert into human units when needed.
+
+<SDKDoc>
+  <TypeScript name="convertToNumber" type="function">
+```js
+import { BN, PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const raw = new BN(10_500_000); // e.g. 10.5 with 1e6 precision
+const human = convertToNumber(raw, PRICE_PRECISION);
+console.log(human);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="PRICE_PRECISION" type="variable">
+```js
+import { PRICE_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Create a Drift client
+
+At a minimum you provide a Solana `connection`, a `wallet`, and the `env`. Then call `subscribe()` to start receiving account updates.
+
+<SDKDoc>
+  <TypeScript name="loadKeypair" type="function">
+```js
+import { loadKeypair } from "@drift-labs/sdk";
+
+const keypair = loadKeypair("<KEYPAIR_PATH>");
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="Wallet" type="class">
+```js
+import { Wallet, loadKeypair } from "@drift-labs/sdk";
+
+const wallet = new Wallet(loadKeypair("<KEYPAIR_PATH>"));
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="DriftClient" type="class">
+```js
+import { Connection } from "@solana/web3.js";
+import { DriftClient, Wallet, loadKeypair } from "@drift-labs/sdk";
+
+const connection = new Connection("<RPC_URL>", "confirmed");
+const wallet = new Wallet(loadKeypair("<KEYPAIR_PATH>"));
+
+const driftClient = new DriftClient({
+  connection,
+  wallet,
+  env: "mainnet-beta",
+});
+
+await driftClient.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="subscribe" type="method" owner="DriftClient">
+```js
+await driftClient.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="initialize" type="function">
+```js
+import { initialize } from "@drift-labs/sdk";
+
+const sdkConfig = initialize({ env: "mainnet-beta" });
+console.log(sdkConfig.DRIFT_PROGRAM_ID);
+```
+  </TypeScript>
+</SDKDoc>
+
+TODO:
+- Decide whether you want websocket or polling subscriptions (see `accountSubscription` in `DriftClient` config).
+

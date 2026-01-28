@@ -1,0 +1,54 @@
+## Deposits & withdrawals
+
+Deposits/withdrawals move tokens between your wallet token accounts and your Drift subaccount’s spot position.
+
+### Converting amounts and deriving the token account
+
+<SDKDoc>
+  <TypeScript name="convertToSpotPrecision" type="method" owner="DriftClient">
+```js
+// marketIndex 0 is commonly USDC
+const marketIndex = 0;
+const amount = driftClient.convertToSpotPrecision(marketIndex, 100); // 100 USDC (example)
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getAssociatedTokenAccount" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const ata = await driftClient.getAssociatedTokenAccount(marketIndex);
+console.log(ata.toBase58());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Deposit
+
+<SDKDoc>
+  <TypeScript name="deposit" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const amount = driftClient.convertToSpotPrecision(marketIndex, 100);
+const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(marketIndex);
+
+await driftClient.deposit(amount, marketIndex, associatedTokenAccount);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Withdraw
+
+<SDKDoc>
+  <TypeScript name="withdraw" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const amount = driftClient.convertToSpotPrecision(marketIndex, 100);
+const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(marketIndex);
+
+await driftClient.withdraw(amount, marketIndex, associatedTokenAccount);
+```
+  </TypeScript>
+</SDKDoc>
+
