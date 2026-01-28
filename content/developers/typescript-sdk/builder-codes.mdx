@@ -1,0 +1,35 @@
+## Builder codes
+
+Builder Codes (DBC) let integrators earn fees by routing flow. In practice, you initialize a revenue share account for the builder, and users initialize a revenue share escrow and approve builders.
+
+### Builder: initialize revenue share
+
+<SDKDoc>
+  <TypeScript name="initializeRevenueShare" type="method" owner="DriftClient">
+```js
+await builderClient.initializeRevenueShare(builderAuthority);
+```
+  </TypeScript>
+</SDKDoc>
+
+### User: initialize escrow
+
+<SDKDoc>
+  <TypeScript name="initializeRevenueShareEscrow" type="method" owner="DriftClient">
+```js
+await userClient.initializeRevenueShareEscrow(takerAuthority, 16);
+```
+  </TypeScript>
+</SDKDoc>
+
+### User: approve a builder (max fee)
+
+<SDKDoc>
+  <TypeScript name="changeApprovedBuilder" type="method" owner="DriftClient">
+```js
+// max fee is expressed in tenths of a basis point (100 = 10 bps)
+await userClient.changeApprovedBuilder(builderAuthority, 200, true);
+```
+  </TypeScript>
+</SDKDoc>
+

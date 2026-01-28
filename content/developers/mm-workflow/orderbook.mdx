@@ -1,0 +1,52 @@
+## Orderbook & DLOB
+
+To quote well, you usually need current best bid/ask, depth, and recent flow. Drift exposes multiple ways to access [orderbook](/protocol/about-v3/decentralized-orderbook) state:
+
+- **SDK (local DLOB)** via `UserMap` / `DLOB`
+- **SDK (subscription)** via `DLOBSubscriber`
+- **Hosted DLOB server** (HTTP) for convenience
+
+### UserMap + DLOB (local)
+
+This approach subscribes to user accounts and builds an in-memory orderbook (DLOB). It’s powerful, but can be heavier than calling a hosted DLOB endpoint.
+
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
+```js
+import { UserMap } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="DLOB" type="class">
+```js
+import { DLOB } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Auction subscriber (on-chain auctions)
+
+If your workflow is centered around on-chain auctions / JIT, you can subscribe to auction-related updates.
+
+<SDKDoc>
+  <TypeScript name="AuctionSubscriber" type="class">
+```js
+import { AuctionSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Detecting Swift orders in on-chain feeds
+
+If you also integrate Swift, you may see the same order “twice”: once off-chain via Swift, and again after it lands on-chain. Use `isSignedMsgOrder(...)` to filter Swift-origin orders.
+
+<SDKDoc>
+  <TypeScript name="isSignedMsgOrder" type="function">
+```js
+import { isSignedMsgOrder } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+

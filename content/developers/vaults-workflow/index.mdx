@@ -1,0 +1,59 @@
+## Vaults workflow
+
+Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting).
+
+This page is intentionally compact and focuses on the lifecycle and operational “happy path”.
+
+### Roles
+
+- **Manager / delegate**: trades for the vault (place/cancel orders, manage positions), can update some vault params.
+- **Depositor**: deposits, requests withdrawals, and later withdraws after the redeem period.
+
+### Vault lifecycle (high-level)
+
+1. **Create vault** (manager): choose token market index, redeem period, max capacity, fee params, permissioning.
+2. **Deposits** (depositors): deposit into the vault; permissioned vaults may require manager initialization/approval for depositors.
+3. **Trading** (manager): place/cancel orders and manage positions on behalf of the vault.
+4. **Withdrawals** (depositors): request withdrawal → wait redeem period → complete withdrawal.
+
+### Parameters you should decide up front
+
+- **`spotMarketIndex`**: what token the vault accepts (commonly 0 = USDC).
+- **`redeemPeriod`**: waiting time before withdrawals can complete (often 3–7 days).
+- **`maxTokens`**: capacity (risk control).
+- **`managementFee`**: annualized, charged continuously.
+- **`profitShare`**: charged on realized gains.
+- **`permissioned`** + **`minDepositAmount`**: onboarding controls.
+
+### CLI workflow (example)
+
+```bash
+# Initialize vault
+npx @drift-labs/vaults-sdk init-vault \
+  --name "MyVault" \
+  --market-index 0 \
+  --redeem-period 604800 \
+  --max-tokens 1000000000000 \
+  --management-fee 200 \
+  --profit-share 2000
+
+# User deposit
+npx @drift-labs/vaults-sdk deposit \
+  --vault <VAULT_PUBKEY> \
+  --amount 1000000000
+
+# Request withdrawal
+npx @drift-labs/vaults-sdk request-withdraw \
+  --vault <VAULT_PUBKEY> \
+  --shares 1000000
+
+# Complete withdrawal (after redeem period)
+npx @drift-labs/vaults-sdk withdraw \
+  --vault <VAULT_PUBKEY>
+```
+
+### Security model (what to communicate to users)
+
+- Managers **cannot** withdraw user funds directly.
+- Withdrawals are governed by **redeem period** and **share accounting**.
+- Managers can usually **decrease** (but not increase) the redeem period.

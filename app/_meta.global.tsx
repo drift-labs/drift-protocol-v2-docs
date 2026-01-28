@@ -1,6 +1,6 @@
 import { MetaRecord } from "nextra";
 
-const META: MetaRecord = {
+const META = {
   "protocol": {
     "title": "Drift Protocol",
     "type": "page",
@@ -28,20 +28,9 @@ const META: MetaRecord = {
       "getting-started": {
         "title": "Getting Started",
         "items": {
-          "wallet-setup": {
-            "title": "Wallet Setup",
-            "items": {
-              "phantom-setup": " Phantom",
-              "metamask-setup": "MetaMask",
-              "bot-wallet-setup": "Bot Wallet",
-              "wallet-faq": "Wallet FAQ"
-            }
-          },
-          "passwordless-login": "Passwordless and Social Login",
           "cross-collateral-deposits": "Cross-collateral deposits",
           "managing-subaccount": "Managing Subaccount",
           "delegated-accounts": "Delegated Accounts",
-          "versioned-transactions": "Versioned Transactions",
           "withdraw-and-close-account": "Withdraw and Close Account"
         }
       },
@@ -137,7 +126,14 @@ const META: MetaRecord = {
           "historical-data-glossary": "Historical Data Glossary"
         }
       },
-      "risk-and-safety": "Risk and Safety",
+      "risk-and-safety": {
+        "title": "Risk and Safety",
+        "items": {
+          "delisting-process": "Delisting Process",
+          "protocol-guard-rails": "Protocol Guard Rails",
+          "risk-parameters": "Risk Parameters"
+        }
+      },
       "drift-safety-module": "Drift Safety Module",
       "security": {
         "title": "Security",
@@ -177,9 +173,44 @@ const META: MetaRecord = {
     "title": "Developers",
     "type": "page",
     "items": {
+      "typescript-sdk": {
+        "title": "TypeScript SDK",
+        "items": {
+          "setup": "Setup",
+          "precision-and-types": "Precision & types",
+          "deposits-withdrawals": "Deposits & withdrawals",
+          "transfers": "Transfers",
+          "users": "Users",
+          "orders": "Orders",
+          "markets": "Markets",
+          "pnl-risk": "PnL & risk",
+          "swift": "Swift",
+          "builder-codes": "Builder codes",
+          "events": "Events",
+          "swaps": "Swaps"
+        }
+      },
+      "mm-workflow": {
+        "title": "MM workflow",
+        "items": {
+          "normal-mm": "Normal MM",
+          "orderbook": "Orderbook & DLOB",
+          "jit-only": "JIT-only MM",
+          "swift-order-feed": "Swift order feed",
+          "swift-place-and-make": "Swift place-and-make",
+          "indicative-quotes": "Indicative quotes"
+        }
+      },
+      "vaults-workflow": {
+        "title": "Vaults workflow",
+        "items": {
+          "index": "Overview"
+        }
+      },
       "tutorial-bots": {
         "title": "Tutorial Bots",
         "items": {
+          "bot-template": "Bot template",
           "keeper-bots": {
             "title": "Keeper Bots",
             "items": {
@@ -199,6 +230,6 @@ const META: MetaRecord = {
       }
     }
   }
-};
+} as MetaRecord;
 
 export default META;
