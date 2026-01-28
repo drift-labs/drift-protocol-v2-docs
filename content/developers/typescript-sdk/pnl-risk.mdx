@@ -1,0 +1,85 @@
+## PnL & risk
+
+These helpers are commonly used for risk checks, dashboards, and liquidation logic.
+
+### User health
+
+<SDKDoc>
+  <TypeScript name="getHealth" type="method" owner="User">
+```js
+const user = driftClient.getUser();
+const health = user.getHealth();
+console.log(health.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Collateral, margin requirement, leverage
+
+<SDKDoc>
+  <TypeScript name="getTotalCollateral" type="method" owner="User">
+```js
+const total = driftClient.getUser().getTotalCollateral();
+console.log(total.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getMarginRequirement" type="method" owner="User">
+```js
+const req = driftClient.getUser().getMarginRequirement();
+console.log(req.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getFreeCollateral" type="method" owner="User">
+```js
+const free = driftClient.getUser().getFreeCollateral();
+console.log(free.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getLeverage" type="method" owner="User">
+```js
+const lev = driftClient.getUser().getLeverage();
+console.log(lev.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Unrealized PnL
+
+<SDKDoc>
+  <TypeScript name="getUnrealizedPNL" type="method" owner="User">
+```js
+const pnl = driftClient.getUser().getUnrealizedPNL();
+console.log(pnl.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUnrealizedFundingPNL" type="method" owner="User">
+```js
+const pnl = driftClient.getUser().getUnrealizedFundingPNL();
+console.log(pnl.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Settle perp PnL
+
+<SDKDoc>
+  <TypeScript name="settlePNL" type="method" owner="DriftClient">
+```js
+const user = driftClient.getUser();
+await driftClient.settlePNL(user.userAccountPublicKey, user.getUserAccount(), 0);
+```
+  </TypeScript>
+</SDKDoc>
+

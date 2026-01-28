@@ -1,0 +1,33 @@
+## Transfers
+
+Transfers let you move balances/positions between subaccounts owned by the same authority.
+
+### Transfer a spot deposit between subaccounts
+
+<SDKDoc>
+  <TypeScript name="transferDeposit" type="method" owner="DriftClient">
+```js
+const marketIndex = 0; // e.g. USDC
+const amount = driftClient.convertToSpotPrecision(marketIndex, 100);
+
+await driftClient.transferDeposit(amount, marketIndex, 0, 1);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Transfer a perp position between subaccounts
+
+<SDKDoc>
+  <TypeScript name="transferPerpPosition" type="method" owner="DriftClient">
+```js
+// Example: transfer 1 base unit of perp position from subaccount 0 -> 1
+await driftClient.transferPerpPosition({
+  fromSubAccountId: 0,
+  toSubAccountId: 1,
+  marketIndex: 0,
+  amount: driftClient.convertToPerpPrecision(1),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
