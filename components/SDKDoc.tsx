@@ -1,4 +1,5 @@
 import React from "react";
+import { Callout } from "nextra/components";
 import { generateDefinition, TSDoc } from "nextra/tsdoc";
 import { SDKDocTabs } from "./SDKDocTabs";
 
@@ -7,6 +8,46 @@ type SDKDocProps = {
 };
 
 const SDK_BASE_URL = "https://drift-labs.github.io/protocol-v2/sdk";
+const JSDOC_LINK_RE = /{@link ([^}]*)}/g;
+
+function sanitizeDocText(text?: string) {
+  if (!text) return text;
+  return text
+    .replace(JSDOC_LINK_RE, "$1")
+    // Prevent MDX expression parsing on stray braces.
+    .replaceAll("{", "&#123;")
+    .replaceAll("}", "&#125;");
+}
+
+function sanitizeTags(tags?: Record<string, string>) {
+  if (!tags) return tags;
+  const next: Record<string, string> = {};
+  for (const [key, value] of Object.entries(tags)) {
+    next[key] = sanitizeDocText(value) ?? value;
+  }
+  return next;
+}
+
+function sanitizeDefinition(definition: ReturnType<typeof generateDefinition>) {
+  if (!definition) return definition;
+  const next: ReturnType<typeof generateDefinition> & {
+    entries?: ReturnType<typeof generateDefinition> extends { entries: infer E } ? E : never;
+  } = {
+    ...definition,
+    description: sanitizeDocText(definition.description),
+    tags: sanitizeTags(definition.tags),
+  };
+
+  if ("entries" in definition && Array.isArray(definition.entries)) {
+    next.entries = definition.entries.map((entry) => ({
+      ...entry,
+      description: sanitizeDocText(entry.description),
+      tags: sanitizeTags(entry.tags),
+    }));
+  }
+
+  return next;
+}
 
 function getTsDocLink(ts: { name: string; type?: SDKBlockProps["type"]; owner?: string }) {
   const name = ts.name;
@@ -81,6 +122,11 @@ export function SDKDoc({ children }: SDKDocProps) {
     const tsModule = "@drift-labs/sdk";
     let code: string | undefined;
     let exportName = props.name;
+    const displayType = tsType.charAt(0).toUpperCase() + tsType.slice(1);
+    const displayName =
+      tsType === "method" && props.owner
+        ? `${props.owner}.${props.name}`
+        : props.name;
 
     if (tsType === "method") {
       if (props.owner) {
@@ -96,14 +142,22 @@ export function SDKDoc({ children }: SDKDocProps) {
 
     tabs.push({
       label: "TypeScript",
-      content: (
-        <TSDoc
-          definition={generateDefinition({
+      heading: `${displayType} ${displayName}`,
+      content: (() => {
+        try {
+          const definition = generateDefinition({
             code,
             exportName,
-          })}
-        />
-      ),
+          });
+          return <TSDoc definition={sanitizeDefinition(definition)} />;
+        } catch (error) {
+          return (
+            <Callout type="warning">
+              Unable to render TypeScript docs for `{props.name}`.
+            </Callout>
+          );
+        }
+      })(),
       link: getTsDocLink({
         name: props.name,
         type: tsType,
