@@ -4,6 +4,7 @@ import { Callout, Tabs } from "nextra/components";
 
 type SDKTab = {
   label: string;
+  heading?: string;
   content?: React.ReactNode;
   placeholder?: boolean;
   link?: string;
@@ -38,18 +39,17 @@ export function SDKDocTabs({ tabs }: SDKDocTabsProps) {
               {tab.example.content}
             </div>
           ) : null}
-          {tab.content ?? (tab.placeholder ? <Placeholder label={tab.label} /> : null)}
-          {tab.link ? (
-            <div className="x:my-4">
-              <a
-                href={tab.link}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Reference ↗
-              </a>
+          {tab.heading ? (
+            <div className="x:mt-4 x:flex x:flex-wrap x:items-center x:gap-3">
+              <b>{tab.heading}</b>
+              {tab.link ? (
+                <a href={tab.link} target="_blank" rel="noopener noreferrer">
+                  Reference ↗
+                </a>
+              ) : null}
             </div>
           ) : null}
+          {tab.content ?? (tab.placeholder ? <Placeholder label={tab.label} /> : null)}
         </Tabs.Tab>
       ))}
     </Tabs>
