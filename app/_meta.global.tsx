@@ -99,15 +99,16 @@ const META = {
       "borrow-lend": {
         "title": "Borrow & Lend",
         "items": {
-          "what-is-borrow-lend": "What is Borrow & Lend?",
-          "supply-borrow-apy": "Supply & Borrow APY",
+          "index": "What is Borrow & Lend?",
           "borrow-interest-rate": "Borrow Interest Rate",
+          "isolated-pools": "Isolated Pools",
           "borrow-lend-faq": "Borrow & Lend FAQ",
-          "rewards": "Collateral Rewards",
+          "rewards": "Rewards",
+          "borrow-lend-apy": "Borrow & Lend APY",
           "amplify": {
             "title": "Amplify",
             "items": {
-              "how-it-works": "How it Works",
+              "index": "How it Works",
               "opening-a-position": "Opening a Position",
               "monitoring-a-position": "Monitoring a Position",
               "closing-a-position": "Closing a Position",
@@ -136,8 +137,8 @@ const META = {
       "partnerships": {
         "title": "Partnerships",
         "items": {
-          "DBC": "🛠️ Drift Builder Codes",
-          "referral-link": "💌 Referral Link"
+          "DBC": "Drift Builder Codes",
+          "referral-link": "Referral Link"
         }
       },
       "historical-data": {
