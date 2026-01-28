@@ -1,0 +1,97 @@
+## Precision & types
+
+The Drift SDK uses integer big numbers (BN) for most values. Always convert using the SDK’s precision constants and helpers.
+
+### Margin system (high-level)
+
+At a high level, Drift checks:
+
+- **Initial margin**: can you open/increase positions?
+- **Maintenance margin**: should you be liquidated?
+
+The system uses weighted collateral and weighted liabilities. The exact weights/inputs depend on margin category (initial vs maintenance) and oracle vs oracle-twap pricing.
+
+### Precision constants
+
+<SDKDoc>
+  <TypeScript name="QUOTE_PRECISION" type="variable">
+```js
+import { QUOTE_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="BASE_PRECISION" type="variable">
+```js
+import { BASE_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="PRICE_PRECISION" type="variable">
+```js
+import { PRICE_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="MARGIN_PRECISION" type="variable">
+```js
+import { MARGIN_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Core enums you’ll use in bots
+
+<SDKDoc>
+  <TypeScript name="OrderType" type="enum">
+```js
+import { OrderType } from "@drift-labs/sdk";
+
+// OrderType.MARKET / LIMIT / TRIGGER_MARKET / TRIGGER_LIMIT / ORACLE
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="MarketType" type="enum">
+```js
+import { MarketType } from "@drift-labs/sdk";
+
+// MarketType.PERP / MarketType.SPOT
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="PositionDirection" type="enum">
+```js
+import { PositionDirection } from "@drift-labs/sdk";
+
+// PositionDirection.LONG / PositionDirection.SHORT
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="PostOnlyParams" type="enum">
+```js
+import { PostOnlyParams } from "@drift-labs/sdk";
+
+// PostOnlyParams.NONE / MUST_POST_ONLY / TRY_POST_ONLY / SLIDE
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="OrderTriggerCondition" type="enum">
+```js
+import { OrderTriggerCondition } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+

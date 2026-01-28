@@ -1,0 +1,30 @@
+## Swift (off-chain signed orders)
+
+Swift lets users sign an order message off-chain and submit it to a Swift endpoint. The SDK helps you build and sign the message; the HTTP POST is up to you.
+
+### Sign a Swift order message
+
+<SDKDoc>
+  <TypeScript name="signSignedMsgOrderParamsMessage" type="method" owner="DriftClient">
+```js
+// `orderParams` is a normal Drift `OrderParams` object.
+const slot = await driftClient.connection.getSlot();
+
+const orderMessage = {
+  signedMsgOrderParams: orderParams,
+  subAccountId: driftClient.activeSubAccountId,
+  slot,
+  uuid: "<UUID>",
+  stopLossOrderParams: null,
+  takeProfitOrderParams: null,
+};
+
+const { orderParams: message, signature } =
+  driftClient.signSignedMsgOrderParamsMessage(orderMessage);
+```
+  </TypeScript>
+</SDKDoc>
+
+TODO:
+- If you want, I can add a small “submit to Swift API” snippet using `fetch(...)` with placeholders (no SDK doc block, since it’s not part of the SDK).
+
