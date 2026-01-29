@@ -1,0 +1,55 @@
+## Bot architecture patterns
+
+These patterns are used across keeper-bots (market making, fillers, triggers), and can potentially be useful to copy.
+
+### Subscription loop + resubscribe
+
+```js
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: {
+    type: "websocket",
+    resubTimeoutMs: 30_000,
+    resyncIntervalMs: 300_000,
+  },
+});
+await orderSubscriber.subscribe();
+```
+
+### Periodic tasks + mutex guard
+
+```js
+if (await tryAcquire(periodicTaskMutex)) {
+  try {
+    // refresh quotes, run risk checks, rebalance
+  } finally {
+    // update watchdog timestamp
+  }
+}
+```
+
+### Throttling / backoff
+
+```js
+const lastAttempt = throttledNodes.get(nodeKey) ?? 0;
+if (lastAttempt + 1000 > Date.now()) return;
+throttledNodes.set(nodeKey, Date.now());
+```
+
+### Priority fees and tx sending
+
+```js
+const priorityFee = priorityFeeSubscriber.getCustomStrategyResult();
+const ix = ComputeBudgetProgram.setComputeUnitPrice({
+  microLamports: Math.floor(priorityFee * driftClient.txSender.getSuggestedPriorityFeeMultiplier()),
+});
+```
+
+### ALT and blockhash lifecycle
+
+```js
+const lookupTableAccounts = await driftClient.fetchAllLookupTableAccounts();
+const { blockhash } = await driftClient.connection.getLatestBlockhash({
+  commitment: "confirmed",
+});
+```

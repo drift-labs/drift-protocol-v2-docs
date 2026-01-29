@@ -1,6 +1,6 @@
 ## Setup
 
-Install the SDK and create a client connected to the cluster. The examples below use placeholders like `<RPC_URL>` and `<KEYPAIR_PATH>` — replace them with your own values.
+The examples below use placeholders like `<RPC_URL>` and `<KEYPAIR_PATH>`.
 
 ### Program addresses
 
@@ -98,6 +98,96 @@ await driftClient.subscribe();
 </SDKDoc>
 
 <SDKDoc>
+  <TypeScript name="fetchAccounts" type="method" owner="DriftClient">
+```js
+// Force-refresh all tracked accounts from RPC.
+await driftClient.fetchAccounts();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="unsubscribe" type="method" owner="DriftClient">
+```js
+await driftClient.unsubscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+### Account subscriptions (websocket vs polling)
+
+For most bots, websocket subscriptions are the easiest way to keep markets and users up to date. For read-only workflows or when you need tighter control over RPC load, you can switch to polling with a `BulkAccountLoader`.
+
+<SDKDoc>
+  <TypeScript name="BulkAccountLoader" type="class">
+```js
+import { BulkAccountLoader } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+```js
+import { BulkAccountLoader } from "@drift-labs/sdk";
+
+const accountLoader = new BulkAccountLoader(connection, "confirmed", 0);
+
+const driftClient = new DriftClient({
+  connection,
+  wallet,
+  env: "mainnet-beta",
+  accountSubscription: {
+    type: "polling",
+    accountLoader,
+  },
+  // Optional: explicitly list markets/oracles to load.
+  // perpMarketIndexes: [0, 1],
+  // spotMarketIndexes: [0],
+  // oracleInfos: [{ publicKey: <ORACLE_PUBKEY>, source: <ORACLE_SOURCE> }],
+});
+```
+
+### Multiple subaccounts
+
+<SDKDoc>
+  <TypeScript name="hasUser" type="method" owner="DriftClient">
+```js
+if (!driftClient.hasUser(1)) {
+  await driftClient.addUser(1);
+}
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="addUser" type="method" owner="DriftClient">
+```js
+await driftClient.addUser(1);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Program accounts (advanced)
+
+<SDKDoc>
+  <TypeScript name="DRIFT_PROGRAM_ID" type="variable">
+```js
+import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getHighLeverageModeConfigPublicKey" type="function">
+```js
+import { getHighLeverageModeConfigPublicKey } from "@drift-labs/sdk";
+
+const pda = getHighLeverageModeConfigPublicKey(driftClient.program.programId);
+const config = await driftClient.program.account.highLeverageModeConfig.fetch(pda);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
   <TypeScript name="initialize" type="function">
 ```js
 import { initialize } from "@drift-labs/sdk";
@@ -107,7 +197,4 @@ console.log(sdkConfig.DRIFT_PROGRAM_ID);
 ```
   </TypeScript>
 </SDKDoc>
-
-TODO:
-- Decide whether you want websocket or polling subscriptions (see `accountSubscription` in `DriftClient` config).
 

@@ -65,3 +65,22 @@ import { isSignedMsgOrder } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
+<SDKDoc>
+  <TypeScript name="getMMOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+const oracle = driftClient.getMMOracleDataForPerpMarket(0);
+```
+  </TypeScript>
+</SDKDoc>
+
+```js
+const marketIndex = 0;
+const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const perpMarket = driftClient.getPerpMarketAccount(marketIndex);
+
+if (!oracle.isValid) return;
+if (!perpMarket) return;
+
+// Example: skip if oracle is stale or market is volatile for your strategy.
+```
+

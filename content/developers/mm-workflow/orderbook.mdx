@@ -26,6 +26,29 @@ import { DLOB } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
+```js
+import { DLOBSubscriber, OrderSubscriber, SlotSubscriber } from "@drift-labs/sdk";
+
+const slotSubscriber = new SlotSubscriber(connection);
+await slotSubscriber.subscribe();
+
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: { type: "websocket" },
+  fastDecode: true,
+  decodeData: true,
+});
+await orderSubscriber.subscribe();
+
+const dlobSubscriber = new DLOBSubscriber({
+  driftClient,
+  dlobSource: orderSubscriber,
+  slotSource: slotSubscriber,
+  updateFrequency: 1000,
+});
+await dlobSubscriber.subscribe();
+```
+
 ### Auction subscriber (on-chain auctions)
 
 If your workflow is centered around on-chain auctions / JIT, you can subscribe to auction-related updates.
