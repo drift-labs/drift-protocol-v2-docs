@@ -106,10 +106,15 @@ table {
   tbody td {
     padding: 16px;
     border: 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--x-color-gray-600) 10%, transparent);
   }
 
   tbody tr {
     background: transparent;
+
+    &:last-child td {
+      border-bottom: 0;
+    }
   }
 }
 
