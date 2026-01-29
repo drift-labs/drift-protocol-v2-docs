@@ -12,7 +12,7 @@ Liquidations are a part of leveraged trading. Traders that elect to use leverage
 
 When this occurs, the protocol must protect itself by ensuring that there is enough margin for the position to settle any losses that occur. There is a prescribed minimum ratio between a position's value and its margin for each asset (**Minimum Maintenance Margin**).
 
-If a position drops below its Minimum Maintenance Margin, liquidators are incentivized by the protocol to take over positions so a user's remaining collateral may settle the losses that have occurred. Read [Insurance Fund](/protocol/insurance-fund/insurance-fund-intro) for what happens when prices move rapidly and/or liquidations don't happen in time.  
+If a position drops below its Minimum Maintenance Margin, liquidators are incentivized by the protocol to take over positions so a user's remaining collateral may settle the losses that have occurred. Read [Insurance Fund](/protocol/insurance-fund) for what happens when prices move rapidly and/or liquidations don't happen in time.  
 
 ## How do Liquidations work?  
 
@@ -42,7 +42,7 @@ Example:
 You deposit 500 USDC and you long 200 SOL-PERP at $25.
 
 * Your position value is $5000 USDC and your margin/collateral is $500 USDC, you have 10x leverage.
-* Note that the Minimum Maintenance Margin for a SOL-PERP is 3% (see Minimum Maintenance Margin for assets here: [Margin](/broken/pages/91e420bf7d9cbd34cab27d84e6640ec942662a06)).
+* Note that the Minimum Maintenance Margin for a SOL-PERP is 3% (see Minimum Maintenance Margin for assets here: [Margin](/protocol/trading/margin)).
 
 Calculations:
 
@@ -60,5 +60,5 @@ At that point your total collateral is less than your margin requirement and liq
 
 ## Being a Liquidator
 
-Read [Liquidators](/protocol/liquidations/liquidators) if you want to learn more about being a liquidator on the platform. Liquidators earn a fee for their services.  
+Read [Liquidators](/protocol/trading/liquidations/liquidators) if you want to learn more about being a liquidator on the platform. Liquidators earn a fee for their services.  
 
