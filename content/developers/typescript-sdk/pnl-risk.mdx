@@ -72,6 +72,22 @@ console.log(pnl.toString());
   </TypeScript>
 </SDKDoc>
 
+### Entry price helper
+
+<SDKDoc>
+  <TypeScript name="calculateEntryPrice" type="function">
+```js
+import { calculateEntryPrice } from "@drift-labs/sdk";
+
+const position = driftClient.getUser().getPerpPosition(0);
+if (position) {
+  const entryPrice = calculateEntryPrice(position);
+  console.log(entryPrice.toString());
+}
+```
+  </TypeScript>
+</SDKDoc>
+
 ### Settle perp PnL
 
 <SDKDoc>

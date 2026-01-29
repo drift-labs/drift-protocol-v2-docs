@@ -25,6 +25,120 @@ const { orderParams: message, signature } =
   </TypeScript>
 </SDKDoc>
 
-TODO:
-- If you want, I can add a small “submit to Swift API” snippet using `fetch(...)` with placeholders (no SDK doc block, since it’s not part of the SDK).
+### Submit to the Swift API
 
+```js
+const swiftUrl = "https://swift.drift.trade/orders";
+
+const response = await fetch(swiftUrl, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    market_index: orderParams.marketIndex,
+    market_type: "perp",
+    message: message.toString(),
+    signature: signature.toString("base64"),
+    taker_authority: driftClient.wallet.publicKey.toBase58(),
+  }),
+});
+
+if (!response.ok) {
+  throw new Error(`Swift error: ${response.status}`);
+}
+```
+
+### Signed message accounts (delegate flow)
+
+<SDKDoc>
+  <TypeScript name="getSignedMsgUserAccountPublicKey" type="function">
+```js
+import { getSignedMsgUserAccountPublicKey } from "@drift-labs/sdk";
+
+const pda = getSignedMsgUserAccountPublicKey(driftClient.program.programId, authority);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="initializeSignedMsgUserOrders" type="method" owner="DriftClient">
+```js
+const [txSig, signedMsgUserAccount] =
+  await driftClient.initializeSignedMsgUserOrders(authority, 8);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Decode signed messages
+
+<SDKDoc>
+  <TypeScript name="decodeSignedMsgOrderParamsMessage" type="method" owner="DriftClient">
+```js
+const signedMessage = driftClient.decodeSignedMsgOrderParamsMessage(
+  Buffer.from(orderMessageHex, "hex"),
+  isDelegateSigner
+);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Instruction builders (Swift taker + maker)
+
+<SDKDoc>
+  <TypeScript name="getPlaceSignedMsgTakerPerpOrderIxs" type="method" owner="DriftClient">
+```js
+const ixs = await driftClient.getPlaceSignedMsgTakerPerpOrderIxs(
+  { orderParams: orderMessageHex, signature },
+  marketIndex,
+  takerInfo
+);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPlaceAndMakeSignedMsgPerpOrderIxs" type="method" owner="DriftClient">
+```js
+const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
+  signedMsgOrderParams,
+  signedMsgOrderUuid,
+  takerInfo,
+  makerOrderParams
+);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Helpers commonly used in Swift flows
+
+<SDKDoc>
+  <TypeScript name="generateSignedMsgUuid" type="function">
+```js
+import { generateSignedMsgUuid } from "@drift-labs/sdk";
+
+const uuid = generateSignedMsgUuid();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="digestSignature" type="function">
+```js
+import { digestSignature } from "@drift-labs/sdk";
+
+const hash = digestSignature(Uint8Array.from(signature));
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUserStatsAccountPublicKey" type="function">
+```js
+import { getUserStatsAccountPublicKey } from "@drift-labs/sdk";
+
+const userStats = getUserStatsAccountPublicKey(
+  driftClient.program.programId,
+  authority
+);
+```
+  </TypeScript>
+</SDKDoc>

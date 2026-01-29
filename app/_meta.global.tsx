@@ -185,13 +185,19 @@ const META = {
           "deposits-withdrawals": "Deposits & withdrawals",
           "transfers": "Transfers",
           "users": "Users",
-          "orders": "Orders",
           "markets": "Markets",
+          "orders": "Orders",
           "pnl-risk": "PnL & risk",
-          "swift": "Swift",
-          "builder-codes": "Builder codes",
           "events": "Events",
-          "swaps": "Swaps"
+          "swaps": "Swaps",
+          "swift": "Swift",
+          "builder-codes": "Builder codes"
+        }
+      },
+      "data-api": {
+        "title": "Data API",
+        "items": {
+          "index": "Overview"
         }
       },
       "mm-workflow": {
@@ -202,7 +208,8 @@ const META = {
           "jit-only": "JIT-only MM",
           "swift-order-feed": "Swift order feed",
           "swift-place-and-make": "Swift place-and-make",
-          "indicative-quotes": "Indicative quotes"
+          "indicative-quotes": "Indicative quotes",
+          "bot-architecture": "Bot architecture patterns"
         }
       },
       "vaults-workflow": {
@@ -233,7 +240,6 @@ const META = {
         }
       },
       "builder-codes": "Builder Codes",
-      "sdk-documentation": "SDK Documentation",
       "contributing-to-drift": "Contributing to Drift"
     }
   }

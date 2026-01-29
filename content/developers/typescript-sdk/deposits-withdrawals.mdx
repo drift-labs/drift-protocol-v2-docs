@@ -52,3 +52,36 @@ await driftClient.withdraw(amount, marketIndex, associatedTokenAccount);
   </TypeScript>
 </SDKDoc>
 
+### Spot rates (borrow / lend)
+
+<SDKDoc>
+  <TypeScript name="calculateDepositRate" type="function">
+```js
+import { SPOT_MARKET_RATE_PRECISION, calculateDepositRate, convertToNumber } from "@drift-labs/sdk";
+
+const spotMarket = driftClient.getSpotMarketAccount(0);
+const rate = calculateDepositRate(spotMarket);
+console.log(convertToNumber(rate, SPOT_MARKET_RATE_PRECISION));
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="calculateBorrowRate" type="function">
+```js
+import { SPOT_MARKET_RATE_PRECISION, calculateBorrowRate, convertToNumber } from "@drift-labs/sdk";
+
+const spotMarket = driftClient.getSpotMarketAccount(0);
+const rate = calculateBorrowRate(spotMarket);
+console.log(convertToNumber(rate, SPOT_MARKET_RATE_PRECISION));
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="SPOT_MARKET_RATE_PRECISION" type="variable">
+```js
+import { SPOT_MARKET_RATE_PRECISION } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>

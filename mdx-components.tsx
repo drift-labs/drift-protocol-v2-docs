@@ -18,6 +18,7 @@ import {
   LTVTable,
 } from "./components/data/CrossCollateralTables";
 import { Api, Python, Rust, SDKDoc, TypeScript } from "./components/SDKDoc";
+import { OpenApiSummary } from "./components/OpenApiSummary";
 
 export function useMDXComponents(components?: Record<string, unknown>) {
   return useDocsMDXComponents({
@@ -38,6 +39,7 @@ export function useMDXComponents(components?: Record<string, unknown>) {
     Python,
     Rust,
     Api,
+    OpenApiSummary,
     ...components,
   });
 }
