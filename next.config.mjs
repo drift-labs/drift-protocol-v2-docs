@@ -31,6 +31,11 @@ const nextConfig = {
     }
     return config;
   },
+  turbopack: {
+    resolveAlias: {
+      'next-mdx-import-source-file': './mdx-components.tsx'
+    }
+  }
 };
 
 export default withNextra(nextConfig);
