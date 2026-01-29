@@ -2,7 +2,7 @@
 
 import { Callout, Tabs } from "nextra/components";
 
-type SDKTab = {
+export type SDKTab = {
   label: string;
   heading?: string;
   content?: React.ReactNode;

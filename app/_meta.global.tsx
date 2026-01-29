@@ -9,7 +9,7 @@ const META = {
       "about-v3": {
         "title": "About Drift v3",
         "items": {
-          "understanding-drift": "Understanding Drift",
+          "index": "Understanding Drift",
           "drift-amm": "Drift AMM",
           "decentralized-orderbook": "Decentralized Orderbook",
           "keepers": {
@@ -107,8 +107,9 @@ const META = {
           "borrow-lend-apy": "Borrow & Lend APY",
           "amplify": {
             "title": "Amplify",
+            // "asIndexPage": true,
             "items": {
-              "index": "How it Works",
+              // "index": "How it Works",
               "opening-a-position": "Opening a Position",
               "monitoring-a-position": "Monitoring a Position",
               "closing-a-position": "Closing a Position",
@@ -135,8 +136,7 @@ const META = {
       "historical-data": {
         "title": "Historical Data",
         "items": {
-          "historical-data-v1": "Historical Data v1",
-          "historical-data-v2": "Historical Data v2",
+          "historical-data-api": "Historical Data API",
           "historical-data-glossary": "Historical Data Glossary"
         }
       },

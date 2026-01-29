@@ -117,8 +117,3 @@ table {
     }
   }
 }
-
-/* Hotfixes */
-[aria-hidden] {
-  display: none;
-}
