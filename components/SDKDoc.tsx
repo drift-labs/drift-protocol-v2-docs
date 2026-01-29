@@ -1,7 +1,7 @@
 import React from "react";
 import { Callout } from "nextra/components";
 import { generateDefinition, TSDoc } from "nextra/tsdoc";
-import { SDKDocTabs } from "./SDKDocTabs";
+import { SDKDocTabs, SDKTab } from "./SDKDocTabs";
 
 type SDKDocProps = {
   children?: React.ReactNode;
@@ -28,22 +28,21 @@ function sanitizeTags(tags?: Record<string, string>) {
   return next;
 }
 
-function sanitizeDefinition(definition: ReturnType<typeof generateDefinition>) {
+function sanitizeDefinition<T extends ReturnType<typeof generateDefinition>>(definition: T) {
   if (!definition) return definition;
-  const next: ReturnType<typeof generateDefinition> & {
-    entries?: ReturnType<typeof generateDefinition> extends { entries: infer E } ? E : never;
-  } = {
+  const next = {
     ...definition,
     description: sanitizeDocText(definition.description),
     tags: sanitizeTags(definition.tags),
-  };
+  } as T;
 
   if ("entries" in definition && Array.isArray(definition.entries)) {
-    next.entries = definition.entries.map((entry) => ({
-      ...entry,
-      description: sanitizeDocText(entry.description),
-      tags: sanitizeTags(entry.tags),
-    }));
+    (next as T & { entries: typeof definition.entries }).entries =
+      definition.entries.map((entry) => ({
+        ...entry,
+        description: sanitizeDocText(entry.description),
+        tags: sanitizeTags(entry.tags),
+      }));
   }
 
   return next;
@@ -94,13 +93,7 @@ export function Api(_props: { name: string; children?: React.ReactNode }) {
 }
 
 export function SDKDoc({ children }: SDKDocProps) {
-  const tabs: Array<{
-    label: string;
-    content?: React.ReactNode;
-    placeholder?: boolean;
-    link?: string;
-    example?: { content?: React.ReactNode };
-  }> = [];
+  const tabs: Array<SDKTab> = [];
 
   const childArray = React.Children.toArray(children);
   const childTs = childArray.find(
