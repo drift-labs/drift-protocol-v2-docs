@@ -29,7 +29,7 @@ Note: Funding rate hourly magnitudes are clamped according to the market's Contr
 
 - The update will reflect the premium or discount between the AMM’s mark price and the oracle’s price TWAP over the previous hour.
 
-- The cumulative funding rate is checked against user positions in case the off-chain funding rate bot does not trigger on the hour. This will show up as "Unrealised P&L" until your next user action within the market (such as a trade, deposit, withdraw etc.), see also [P&L](/protocol/profit-loss/profit-loss-intro).
+- The cumulative funding rate is checked against user positions in case the off-chain funding rate bot does not trigger on the hour. This will show up as "Unrealised P&L" until your next user action within the market (such as a trade, deposit, withdraw etc.), see also [P&L](/protocol/trading/profit-loss).
 
 - Funding payments may not pay out for markets that trade infrequently.
 
@@ -39,7 +39,7 @@ Drift Protocol aims to provide a symmetric funding rate to both sides of the mar
 
 If the pool is empty or does not have enough to provide for funding (2/3 of the Rebate Pool balance available at each funding interval), then the receipts for funding will be capped to the available amount.
 
-See [Rebates](/protocol/market-makers/maker-rebate-fees) for funding pool sizes where the funding paid from the Rebate Pool will be capped. This ensures that the risk is spread in the system and the Insurance Fund isn't drained by funding rates.
+See [Rebates](/protocol/market-makers/maker-fee-rebate) for funding pool sizes where the funding paid from the Rebate Pool will be capped. This ensures that the risk is spread in the system and the Insurance Fund isn't drained by funding rates.
 
 Over the hour, the amount available in the Rebate Pool will increase from fees as trades occur, so any existing predicted capped rate should move closer to being balanced.
 
