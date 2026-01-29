@@ -1,5 +1,5 @@
 import { useMDXComponents as useDocsMDXComponents } from "nextra-theme-docs";
-import { Callout, Steps, Tabs } from "nextra/components";
+import { Callout,Cards, Steps, Tabs } from "nextra/components";
 
 import {
   AdjustedPerpMarketFeesTable,
@@ -21,7 +21,7 @@ import { Api, Python, Rust, SDKDoc, TypeScript } from "./components/SDKDoc";
 
 export function useMDXComponents(components?: Record<string, unknown>) {
   return useDocsMDXComponents({
-    Callout, Steps, Tabs,
+    Callout, Steps, Tabs, Cards,
     AdjustedPerpMarketFeesTable,
     AdjustedSpotMarketFeesTable,
     FeeTiersTable,
