@@ -6,9 +6,13 @@ _For more information on incentive programs for Market Makers, see_ [Maker Rebat
 
 Any user can participate as a Market Maker on the platform. Market Makers can provide liquidity through either:  
 
-1.  Just-in-Time Liquidity (see [Matching Engine](/protocol/about-v3/matching-engine)); or
+<Steps>
+### Just-in-Time (JIT)
+Just-in-Time Liquidity (see [Matching Engine](/protocol/about-v3/matching-engine))
 
-2.  Post-Only Orders on the decentralised orderbook (see [Keepers & Decentralised Orderbook](/protocol/about-v3/keepers-decentralized-orderbook-faq)).
+### Post-Only Orders
+Post-Only Orders on the decentralised orderbook (see [Keepers & Decentralised Orderbook](/protocol/about-v3/keepers-decentralized-orderbook-faq))
+</Steps>
 
 ## Just-in-Time Liquidity  
 
@@ -24,7 +28,7 @@ For more information on JIT, check out [JIT Maker FAQ](/protocol/about-v3/jit-ma
 
 Makers can also provide liquidity to Drift's decentralised orderbook by quoting via the UI or programmatically through the [SDK Documentation](/protocol/sdk-documentation)  
 
-### (a) providing liquidity via the UI
+### Providing liquidity via the UI
 
 Placing 'Post-Only' limit orders via Drift's UI qualifies the order as a maker order.  
 
@@ -32,7 +36,7 @@ This order won't be executed against the AMM or go through the JIT. It will sit 
 
 ![The 'POST' flag is toggled on here.](/assets/S3njjazK500hoUw5o2v6z_image.png)
 
-### (b) programmatic market making with a floating maker bot
+### Programmatic market making with a floating maker bot
 
 Drift has an open-sourced bot that programmatically quotes bids and asks around the oracle price. These quotes are automatically updated as the oracle price moves.  
 

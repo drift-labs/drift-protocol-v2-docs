@@ -117,30 +117,21 @@ const META = {
           },
         }
       },
-
       "market-makers": {
         "title": "Market Makers",
         "items": {
           "market-maker-participation": "Market Maker Participation",
-          "maker-rebate-fees": "Maker Rebate Fees",
-          "rewards-program": "Market Maker Reward Program"
+          "maker-fee-rebate": "Maker Fee Rebate",
         }
       },
       "insurance-fund": {
         "title": "Insurance Fund",
         "items": {
-          "insurance-fund-intro": "Introduction to Insurance Fund",
+          "index": "What is the Insurance Fund?",
           "insurance-fund-staking": "Insurance Fund Staking"
         }
       },
-      "sdk-documentation": "SDK Documentation",
-      "partnerships": {
-        "title": "Partnerships",
-        "items": {
-          "DBC": "Drift Builder Codes",
-          "referral-link": "Referral Link"
-        }
-      },
+      "referral-links": "Referral Links",
       "historical-data": {
         "title": "Historical Data",
         "items": {
@@ -152,12 +143,11 @@ const META = {
       "risk-and-safety": {
         "title": "Risk and Safety",
         "items": {
+          "risk-parameters": "Risk Parameters",
           "delisting-process": "Delisting Process",
           "protocol-guard-rails": "Protocol Guard Rails",
-          "risk-parameters": "Risk Parameters"
         }
       },
-      "drift-safety-module": "Drift Safety Module",
       "security": {
         "title": "Security",
         "items": {
@@ -166,8 +156,8 @@ const META = {
           "risks": "Risks"
         }
       },
+      "drift-safety-module": "Drift Safety Module",
       "glossary": "Glossary",
-      "additional-resources-data": "Additional Resources and Data",
       "--- Legal": {
         "title": "LEGAL",
         "type": "separator"
@@ -181,15 +171,6 @@ const META = {
           "competition-terms": "Competition Terms"
         }
       },
-      "contributing-to-drift": {
-        "title": "Contribute",
-        "type": "page"
-      },
-      "contact": {
-        "title": "Contact ↗",
-        "type": "page",
-        "href": "https://twitter.com/DriftProtocol"
-      }
     }
   },
   "developers": {
@@ -250,7 +231,10 @@ const META = {
           },
           "rpc-providers": "RPC Providers"
         }
-      }
+      },
+      "builder-codes": "Builder Codes",
+      "sdk-documentation": "SDK Documentation",
+      "contributing-to-drift": "Contributing to Drift"
     }
   }
 } as MetaRecord;
