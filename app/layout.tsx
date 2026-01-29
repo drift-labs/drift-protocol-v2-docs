@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 const logo = (
   <div className="nx-flex nx-items-center">
-    <Link href="/protocol" className="nx-flex nx-items-center">
+    <Link href="/" className="nx-flex nx-items-center">
       <Logo />
     </Link>
   </div>

@@ -24,13 +24,15 @@
     "@solana/web3.js": "^1.95.3",
     "canvas-txt": "^4.1.1",
     "dotenv": "^16.4.5",
-    "next": "^14.2.0",
+    "fs": "0.0.1-security",
+    "next": "15.3.8",
     "next-themes": "^0.4.6",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3",
     "react-singleton-hook": "^4.0.1",
+    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
