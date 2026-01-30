@@ -5,39 +5,39 @@ Spot Trading is the direct purchase or sale of an asset. The delivery of the ass
 Spot trading on Drift v3 uses liquidity from OpenBook DEX as well as our own DLOB. By default, margin trading is not enabled. Learn how to enable it in the next section.
 
 <Steps>
-### Select the market
-Select the SOL / USDC market in the top bar or the market's dropdown menu
+### Navigate to spot trading
+Select "Trade" then "Spot" from the top navigation.
+<img src="/assets/spot-trading-1.png" alt="" width="800" height="auto"></img>
 
-![Hover over a market in the top bar](/assets/z3zW45nt1iU64WvO7O5ZH_screenshot-2023-01-25-at-41736-pm.png)
+### Select the market
+Select a market in the top bar or the market's dropdown menu
+<img src="/assets/spot-trading-2.png" alt="" width="800" height="auto"></img>
 
 ### Choose direction and order type
 Select your direction (e.g. Buy or Sell) and order type (e.g. Market, Limit)
 
-
 ### Enter asset amount or notional value
 Input the asset amount you'd like to trade or the notional value
 
-![Spot trading form](/assets/26S8LnOdiTA8XLW7Wyfso_screenshot-2023-01-26-at-10913-pm.png)
+<img src="/assets/spot-trading-3.png" alt="" width="800" height="auto"></img>
 
 ### Confirm and fill
 Once you've confirmed your order and it has been filled, your Balances tab will update to reflect your balance changes
-
-![Confirmed Order](/assets/Bxlg-O6wA5YszE4HVwc_O_screenshot-2023-01-26-at-11025-pm.png)
 </Steps>
 
 ## Enable Spot Margin Trading
 
-Margin needs to be enabled per subaccount. Here's how you can enable margin:
-
 Margin trading allows you to leverage your assets as collateral to borrow funds for the trade. The leverage a trader can take in each spot market is determined by the protocol's risk engine.
-
+Margin needs to be enabled per subaccount. Here's how you can enable margin:
 
 <Steps>
 ### Open Settings
 Open Settings in the app.
+<img src="/assets/spot-trading-4.png" alt="" width="800" height="auto"></img>
 
 ### Go to Margin Trading
 Go to Margin Trading in the left navigation
+<img src="/assets/spot-trading-5.png" alt="" width="800" height="auto"></img>
 
 ### Toggle to enable
 Click the toggle to enable it for the subaccount you want
@@ -45,8 +45,6 @@ Click the toggle to enable it for the subaccount you want
 ### Sign transaction
 Sign the wallet transaction to confirm
 </Steps>
-
-<img src="/assets/KJFGX4AoQAP3FvuC7jqMn_image.png" alt="" width="600" height="auto"></img>
 
 Once margin is enabled, you should see the leverage bar appear in the trade form.
 
@@ -67,12 +65,9 @@ Once margin is enabled, you should see the leverage bar appear in the trade form
 
 </Callout>
 
-![Spot margin trade form](/assets/zS5jHR786XcbWrsJW4sqh_screenshot-2023-01-26-at-122019-pm.png)
-
 ## FAQ
 
 ### Why is Drift's spot market better for takers (versus alternatives)?
-
 Takers enter a JIT auction, which can offer price improvement, and otherwise can fill via an external program. (e.g. Serum).
 
 Takers can also utilise special order types such as oracle-offset limit orders, which appropriately can cap fills using slippage tolerance versus the oracle provider's fair value. This allows ordinary takers on a UI to control swapping at the fairest price, even without access to advanced infrastructure / bots.
