@@ -1,11 +1,9 @@
-## Data API (OpenAPI)
+import SwaggerUI from "swagger-ui-react"
+import "swagger-ui-react/swagger-ui.css"
 
-This section renders a summary of the Drift Data API from the OpenAPI spec.
+## Data API
 
-<Callout type="info">
-The summary component reads from `data/openapi/data-api.json` when present, and
-falls back to the local spec at `/Users/w/v2-teacher-1/source/api spec.json`.
-For deployment, copy the spec into this repo under `data/openapi/`.
-</Callout>
+At a high level, the Drift Data API is the backbone for reading historical and real-time protocol data so that apps, analytics, and integrations don’t need to index the chain themselves. The Drift Data API follows the OpenAPI spec.
 
-<OpenApiSummary />
+
+<SwaggerUI url="http://data.api.drift.trade/playground/json" />

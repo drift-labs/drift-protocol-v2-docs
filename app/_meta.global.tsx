@@ -177,8 +177,8 @@ const META = {
     "title": "Developers",
     "type": "page",
     "items": {
-      "typescript-sdk": {
-        "title": "TypeScript SDK",
+      "drift-sdk": {
+        "title": "Drift SDK",
         "items": {
           "setup": "Setup",
           "precision-and-types": "Precision & types",
@@ -200,8 +200,8 @@ const META = {
           "index": "Overview"
         }
       },
-      "mm-workflow": {
-        "title": "MM workflow",
+      "market-makers": {
+        "title": "Market Makers",
         "items": {
           "normal-mm": "Normal MM",
           "orderbook": "Orderbook & DLOB",
@@ -212,14 +212,14 @@ const META = {
           "bot-architecture": "Bot architecture patterns"
         }
       },
-      "vaults-workflow": {
-        "title": "Vaults workflow",
+      "vault-keepers": {
+        "title": "Vault Keepers",
         "items": {
           "index": "Overview"
         }
       },
-      "tutorial-bots": {
-        "title": "Tutorial Bots",
+      "bots": {
+        "title": "Bots",
         "items": {
           "bot-template": "Bot template",
           "keeper-bots": {

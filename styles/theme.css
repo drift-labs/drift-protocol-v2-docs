@@ -98,7 +98,7 @@ table {
       border-bottom-right-radius: 8px;
     }
 
-    & + th {
+    &+th {
       border-left: 0;
     }
   }
@@ -114,6 +114,158 @@ table {
 
     &:last-child td {
       border-bottom: 0;
+    }
+  }
+}
+
+/* Swagger UI Dark Mode Fixes */
+.swagger-ui {
+  .wrapper {
+    padding: 0 !important;
+  }
+
+  .opblock-tag-section {
+    background: none !important;
+  }
+
+  table {
+    margin: 0;
+    background: none !important;
+    ;
+  }
+
+  th {
+    background: none;
+  }
+
+  .opblock-control-arrow,
+  .expand-operation {
+    position: relative;
+    color: currentColor;
+    padding: 12px;
+
+    svg.arrow {
+      display: none;
+    }
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.15s ease;
+    }
+
+    &[aria-expanded="true"]::before {
+      transform: rotate(-135deg);
+    }
+  }
+}
+
+.dark {
+  .swagger-ui {
+    color: var(--x-color-gray-700);
+
+    .info,
+    .info .title,
+    .info .title small,
+    .info .title small pre,
+    .info a,
+    p,
+    th,
+    td,
+    button {
+      color: var(--x-color-gray-900) !important;
+    }
+
+    .opblock,
+    .opblock-tag-section,
+    .scheme-container,
+    .parameters,
+    .responses-wrapper,
+    .model-box,
+    .model {
+      color: var(--x-color-gray-900);
+      background: color-mix(in oklab, var(--x-color-gray-600) 6%, transparent);
+      border-color: color-mix(in oklab, var(--x-color-gray-600) 18%, transparent);
+    }
+
+    .opblock-summary,
+    .opblock-tag,
+    .tab-header .tab-item {
+      color: var(--x-color-gray-900);
+      border-color: color-mix(in oklab, var(--x-color-gray-600) 18%, transparent);
+    }
+
+    .opblock-summary-method,
+    .opblock-title,
+    h4 {
+      color: var(--x-color-gray-900) !important;
+    }
+
+    .opblock-section-header {
+      color: var(--x-color-gray-900);
+      background: color-mix(in oklab, var(--x-color-gray-600) 6%, transparent) !important;
+    }
+
+    .parameter__name,
+    .parameter__type,
+    .response-col_status,
+    .response-col_description,
+    .model-title,
+    .model .property.primitive,
+    .model .property,
+    .model-toggle {
+      color: var(--x-color-gray-900);
+    }
+
+    .description,
+    .markdown,
+    .renderedMarkdown,
+    .responses-inner,
+    .parameter__in {
+      color: var(--x-color-gray-700);
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="search"],
+    input[type="email"],
+    input[type="url"],
+    input[type="number"],
+    select,
+    textarea {
+      background: color-mix(in oklab, var(--x-color-gray-600) 10%, transparent);
+      color: var(--x-color-gray-900);
+      border-color: color-mix(in oklab, var(--x-color-gray-600) 20%, transparent);
+    }
+
+    .btn,
+    .btn.cancel,
+    .btn.execute {
+      color: var(--x-color-gray-900);
+      background: color-mix(in oklab, var(--x-color-gray-600) 14%, transparent);
+      border-color: color-mix(in oklab, var(--x-color-gray-600) 22%, transparent);
+    }
+
+    .table-container,
+    table {
+      color: var(--x-color-gray-800);
+    }
+
+    .highlight-code,
+    pre,
+    code {
+      color: var(--x-color-gray-900);
+      background: color-mix(in oklab, var(--x-color-gray-600) 10%, transparent);
+    }
+
+    .opblock .opblock-summary-path,
+    .opblock .opblock-summary-operation-id {
+      color: var(--x-color-gray-900);
     }
   }
 }
