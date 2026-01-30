@@ -74,6 +74,10 @@ export function OpenApiSummary() {
       if (!tagMap.has(tag)) tagMap.set(tag, {});
     }
   }
+  const tagEntries: Array<[string, { description?: string }]> = [];
+  tagMap.forEach((meta, name) => {
+    tagEntries.push([name, meta]);
+  });
 
   return (
     <div>
@@ -87,7 +91,7 @@ export function OpenApiSummary() {
 
       <h3>Tags</h3>
       <ul>
-        {[...tagMap.entries()].map(([name, meta]) => (
+        {tagEntries.map(([name, meta]) => (
           <li key={name}>
             <b>{name}</b>
             {meta.description ? ` — ${meta.description}` : ""}
