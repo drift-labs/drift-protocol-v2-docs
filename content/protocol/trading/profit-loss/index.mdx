@@ -6,7 +6,7 @@ This guide explains how to track your Profit and Loss (P&L or PnL) on Drift to u
 
 P&L reflects the potential profit or loss on your open positions. It's a dynamic value that changes based on the current market price of the underlying asset compared to your average entry price. In simpler terms, it indicates whether your positions are currently trending towards profit or loss.
 
-![](/assets/pnl-positions.png)
+![PnL Positions](/assets/pnl-positions.png)
 
 A user's current position on Drift is the cumulative sum of all their filled orders (increasing, reducing, or closing) over time. All trading lots, per market and per subaccount, are combined into a single position to determine P&L. The P&L in the table above is calculated as the difference between the position's `Entry Price` with the current mark price (can toggle to oracle price) multiplied by the `Size` (view can be switched between $ and %).
 
@@ -22,7 +22,7 @@ A user's current position on Drift is the cumulative sum of all their filled ord
 - `Settled P&L`: Actual realised profit and loss (can be settled without closing the position).
 - `Claimable / Unsettled P&L`: Claimable P&L represents the portion of unsettled P&L that is available to be claimed at this moment. It is possible to have unsettled P&L that is not claimable due to insufficient funds in the P&L Pool, invalid oracle, or other reasons.
 
-![](/assets/pnl-unsettled.png)
+![Unsettled PnL](/assets/pnl-unsettled.png)
 
 <Callout type="info">
 
@@ -70,7 +70,7 @@ The key difference lies in the availability for withdrawal:
 1. Navigate to the "Unsettled P&L" tab.
 2. Select "Claim" for specific positions or "Claim All".
 
-![](/assets/pnl-claim.png)
+![Claiming Settled PnL](/assets/pnl-claim.png)
 
 Users can claim positive P&L when:
 
