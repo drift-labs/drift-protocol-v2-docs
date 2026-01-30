@@ -26,4 +26,4 @@ There are three ways a user can have their taker order filled:
 
 To place an order, users sign a transaction containing their order params. The transaction is sent to the Solana network and, once it is included in a block, it is propagated to keepers and market makers via RPCs. The keepers and market makers then race to fill user orders with liquidity that satisfies their auction prices. Backstop liquidity is compared against resting and JIT liquidity before each fill. If the backstop liquidity offers a superior price, Drift will fill users against the backstop liquidity prior to filling against the resting or JIT liquidity specified by the keeper or market maker.
 
-![](/assets/matching-engine.png)
+![Drift's Matching Engine](/assets/matching-engine.png)
