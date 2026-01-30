@@ -10,110 +10,119 @@ const META = {
         "title": "About Drift v3",
         "items": {
           "index": "Understanding Drift",
-          "drift-amm": "Drift AMM",
-          "decentralized-orderbook": "Decentralized Orderbook",
+          "drift-amm": "",
+          "decentralized-orderbook": "",
           "keepers": {
             "title": "Keepers",
             "items": {
-              "index": "What are Keepers?",
-              "keepers-dlob-faq": "Keepers & DLOB FAQ",
-              "keeper-incentives": "Keeper Incentives",
+              "index": "",
+              "keepers-dlob-faq": "",
+              "keeper-incentives": "",
             },
           },
-          "matching-engine": "Matching Engine",
-          "jit-faq": "Just-in-Time (JIT) FAQ",
-          "revenue-pool": "Revenue Pool",
-          "optimizations": "Optimizations",
+          "matching-engine": "",
+          "jit-faq": "",
+          "revenue-pool": "",
+          "optimizations": "",
         }
       },
       "getting-started": {
         "title": "Getting Started",
         "items": {
-          "cross-collateral-deposits": "Cross-collateral deposits",
-          "managing-subaccount": "Managing Subaccount",
-          "delegated-accounts": "Delegated Accounts",
-          "withdraw-and-close-account": "Withdraw and Close Account"
+          "wallet-setup": {
+            "title": "Wallet Setup",
+            "items": {
+              "index": "",
+              "phantom-wallet": "",
+              "metamask": "",
+              "passwordless-login": "",
+              "bot-wallet": "",
+            },
+          },
+          "cross-collateral-deposits": "",
+          "managing-subaccounts": "",
+          "delegated-accounts": "",
+          "withdraw-and-close-account": ""
         }
       },
       "trading": {
         "title": "Trading",
         "items": {
-          "market-specs": "Market Specs",
-          "prelaunch-markets": "Prelaunch Markets",
+          "market-specs": "",
+          "prelaunch-markets": "",
           "perpetuals-trading": {
             "title": "Perpetuals Trading",
             "items": {
-              "index": "What are Perpetual Futures?",
-              "perpetuals-trading": "Perpetuals Trading",
-              "auction-parameters": "Auction Parameters",
-              "funding-rates": "Funding Rates",
+              "index": "",
+              "perpetuals-trading": "",
+              "auction-parameters": "",
+              "funding-rates": "",
             }
           },
           "spot-trading": "Spot Trading",
           "margin": {
             "title": "Margin",
             "items": {
-              "index": "Margin",
-              "per-market-leverage": "Per-Market Leverage",
-              "account-health": "Account Health",
+              "index": "",
+              "per-market-leverage": "",
+              "account-health": "",
             },
           },
           "profit-loss": {
             "title": "Profit & Loss (P&L)",
             "items": {
-              "index": "Introduction to Profit & Loss",
-              "accounting-settlement": "Accounting and Settlement",
-              "what-is-unsettled-profit-loss": "What is unsettled P&L?",
-              "profit-loss-pool": "P&L Pool"
+              "index": "",
+              "accounting-settlement": "",
+              "what-is-unsettled-profit-loss": "",
+              "profit-loss-pool": ""
             }
           },
           "order-types": {
             "title": "Order Types",
             "items": {
-              "index": "Basic Order Types",
-              "advanced-order-types": "Advanced Order Types",
-              "advanced-orders-faq": "Advanced Orders FAQ",
+              "index": "",
+              "advanced-order-types": "",
+              "advanced-orders-faq": "",
             },
           },
           "liquidations": {
             "title": "Liquidations",
             "items": {
-              "index": "What is Liquidation?",
-              "liquidation-engine": "Liquidation Engine",
-              "liquidators": "Liquidators"
+              "index": "",
+              "liquidation-engine": "",
+              "liquidators": ""
             }
           },
           "trading-fees": {
             "title": "Trading Fees",
             "items": {
-              "index": "Fee Structure",
-              "fee-pool": "Fee Pool",
-              "other-trading-fees": "Other Trading Fees",
+              "index": "",
+              "fee-pool": "",
+              "other-trading-fees": "",
             }
           },
-          "versioned-transactions": "Versioned Transactions",
-          "oracles": "Oracles",
-          "block-conditions": "Block Conditions",
+          "versioned-transactions": "",
+          "oracles": "",
+          "block-conditions": "",
         }
       },
       "borrow-lend": {
         "title": "Borrow & Lend",
         "items": {
-          "index": "What is Borrow & Lend?",
-          "borrow-interest-rate": "Borrow Interest Rate",
-          "isolated-pools": "Isolated Pools",
-          "borrow-lend-faq": "Borrow & Lend FAQ",
-          "rewards": "Rewards",
-          "borrow-lend-apy": "Borrow & Lend APY",
+          "index": "",
+          "borrow-interest-rate": "",
+          "isolated-pools": "",
+          "borrow-lend-faq": "",
+          "rewards": "",
+          "borrow-lend-apy": "",
           "amplify": {
             "title": "Amplify",
-            // "asIndexPage": true,
             "items": {
-              // "index": "How it Works",
-              "opening-a-position": "Opening a Position",
-              "monitoring-a-position": "Monitoring a Position",
-              "closing-a-position": "Closing a Position",
-              "risk": "Risk"
+              "index": "",
+              "opening-a-position": "",
+              "monitoring-a-position": "",
+              "closing-a-position": "",
+              "risk": ""
             }
           },
         }
@@ -121,43 +130,36 @@ const META = {
       "market-makers": {
         "title": "Market Makers",
         "items": {
-          "market-maker-participation": "Market Maker Participation",
-          "maker-fee-rebate": "Maker Fee Rebate",
+          "market-maker-participation": "",
+          "maker-fee-rebate": "",
         }
       },
       "insurance-fund": {
         "title": "Insurance Fund",
         "items": {
-          "index": "What is the Insurance Fund?",
-          "insurance-fund-staking": "Insurance Fund Staking"
+          "index": "",
+          "insurance-fund-staking": ""
         }
       },
-      "referral-links": "Referral Links",
-      "historical-data": {
-        "title": "Historical Data",
-        "items": {
-          "historical-data-api": "Historical Data API",
-          "historical-data-glossary": "Historical Data Glossary"
-        }
-      },
+      "referral-links": "",
       "risk-and-safety": {
         "title": "Risk and Safety",
         "items": {
-          "risk-parameters": "Risk Parameters",
-          "delisting-process": "Delisting Process",
-          "protocol-guard-rails": "Protocol Guard Rails",
+          "risk-parameters": "",
+          "delisting-process": "",
+          "protocol-guard-rails": "",
         }
       },
       "security": {
         "title": "Security",
         "items": {
-          "audits": "Audits",
-          "bug-bounty": "Bug Bounty",
-          "risks": "Risks"
+          "audits": "",
+          "bug-bounty": "",
+          "risks": ""
         }
       },
-      "drift-safety-module": "Drift Safety Module",
-      "glossary": "Glossary",
+      "drift-safety-module": "",
+      "glossary": "",
       "--- Legal": {
         "title": "LEGAL",
         "type": "separator"
@@ -165,10 +167,10 @@ const META = {
       "legal-and-regulations": {
         "title": "Legal and Regulations",
         "items": {
-          "terms-of-use": "Terms of Use",
-          "disclaimer": "Disclaimer",
-          "privacy-policy": "Privacy Policy",
-          "competition-terms": "Competition Terms"
+          "terms-of-use": "",
+          "disclaimer": "",
+          "privacy-policy": "",
+          "competition-terms": ""
         }
       },
     }
@@ -197,8 +199,13 @@ const META = {
       "data-api": {
         "title": "Data API",
         "items": {
-          "index": "Overview"
+          "index": "",
+          "glossary": ""
         }
+      },
+      "--- guides": {
+        "title": "GUIDES",
+        "type": "separator"
       },
       "market-makers": {
         "title": "Market Makers",
@@ -212,8 +219,8 @@ const META = {
           "bot-architecture": "Bot architecture patterns"
         }
       },
-      "vault-keepers": {
-        "title": "Vault Keepers",
+      "vault-managers": {
+        "title": "Vault Managers",
         "items": {
           "index": "Overview"
         }
@@ -236,10 +243,32 @@ const META = {
               "tutorial-jit-trading-bot": "Tutorial: JIT Maker Bot"
             }
           },
+          "liquidator-bots": {
+            "title": "Liquidator Bots",
+            "items": {
+              "index": "Overview"
+            }
+          },
           "rpc-providers": "RPC Providers"
         }
       },
+      "ecosystem-builders": {
+        "title": "Ecosystem Builders",
+        "items": {
+          "index": "Overview",
+        }
+      },
+      "traders": {
+        "title": "Traders",
+        "items": {
+          "index": "Overview",
+        }
+      },
       "builder-codes": "Builder Codes",
+      "--- Contribute": {
+        "title": "CONTRIBUTE",
+        "type": "separator"
+      },
       "contributing-to-drift": "Contributing to Drift"
     }
   }

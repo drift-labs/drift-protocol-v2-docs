@@ -1,14 +1,22 @@
 # Auction Parameters
 
-Drift Protocol allows orders to set custom auction parameters.
+Drift Protocol allows orders to set custom auction parameters. You can access these settings by clicking the gear icon followed by "More Settings" in the top right of any page in the app.
 
-These settings allow users to customize how their orders are executed on the Drift Protocol by setting specific auction parameters. You can see the implementation of these auction settings [here](https://github.com/drift-labs/drift-common/blob/master/common-ts/src/common-ui-utils/commonUiUtils.ts#L374).
+<img src="/assets/auction-parameters-1.png" alt="" width="800" height="auto"></img>
+
+On the "Trade" tab click "Custom". These settings allow users to customize how orders are executed on the Drift Protocol by setting specific auction parameters.
+
+<img src="/assets/auction-parameters-2.png" alt="" width="800" height="auto"></img>
+
+<Callout type="warning">
+Customising auction parameters is recommended for advanced traders only.
+</Callout>
+
+You can see the implementation of these auction settings [here](https://github.com/drift-labs/drift-common/blob/master/common-ts/src/common-ui-utils/commonUiUtils.ts#L374).
 
 <Callout type="important">
-
-**Double Check:** One can always review their Auction Parameters for a particular order in the Confirmation Modal before submitting.
+You can always review Auction Parameters for a particular order in the Confirmation Modal before submitting.
 (you can expand details with "Advanced" checked)
-
 </Callout>
 
 
@@ -17,16 +25,15 @@ These settings allow users to customize how their orders are executed on the Dri
 | Field | Description
 | ----- | ------
 | Oracle Price | Current oracle price of the market
+| Mark Price | Current mark price, reflecting the protocol’s fair price based on oracle and market conditions
 | Best Bid/Ask | Use best bid/ask price
-| Est. Entry Price | Price includes estimated price impact on DLOB/AMM)
-| Best Overall | Select best price of all of the above
+| Est. Entry Price | Price includes estimated price impact on DLOB/AMM
+| Best Overall Price | Select best price of all of the above
+| Market Based | Dynamically derive the start price using live market conditions, prioritizing liquidity and execution quality
 
 <Callout type="warning">
 **For Large Size:** It's recommended to set a longer duration, "Use Oracle Offset", and wider start, end buffers.
 </Callout>
-
-
-![Auction Parameter Settings](/assets/hP5UraVYsWUZWP2ntEZI1_screen-shot-2023-11-03-at-71615-am.png)
 
 With Drift Protocol, users can determine the duration of their order in 'slots', and set starting and ending prices based on the keeper network's view of the DLOB.
 
