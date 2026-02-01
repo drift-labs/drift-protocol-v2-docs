@@ -1,4 +1,5 @@
 import nextra from "nextra";
+import redirects from "./data/redirects"
 
 const withNextra = nextra({
   defaultShowCopyCode: true,
@@ -11,13 +12,18 @@ const nextConfig = {
       {
         source: "/",
         destination: "/protocol/",
-        permanent: true,
+        permanent: false,
       },
       {
         source: "/about-v2/:path*",
         destination: "/protocol/about-v3/:path*",
-        permanent: true,
+        permanent: false,
       },
+      ...redirects.map(([source, destination]) => ({
+        source,
+        destination,
+        permanent: false,
+      }))
     ];
   },
   webpack: (config, { isServer }) => {

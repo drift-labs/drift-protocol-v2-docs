@@ -73,7 +73,7 @@ const META = {
             "items": {
               "index": "",
               "accounting-settlement": "",
-              "what-is-unsettled-profit-loss": "",
+              "unsettled-profit-loss": "",
               "profit-loss-pool": ""
             }
           },
@@ -148,17 +148,12 @@ const META = {
           "risk-parameters": "",
           "delisting-process": "",
           "protocol-guard-rails": "",
-        }
-      },
-      "security": {
-        "title": "Security",
-        "items": {
           "audits": "",
           "bug-bounty": "",
-          "risks": ""
+          "risks": "",
+          "drift-safety-module": "",
         }
       },
-      "drift-safety-module": "",
       "glossary": "",
       "--- Legal": {
         "title": "LEGAL",
@@ -232,15 +227,15 @@ const META = {
           "keeper-bots": {
             "title": "Keeper Bots",
             "items": {
-              "tutorial-order-matching-bot": "Tutorial: Order Matching Bot",
-              "tutorial-order-trigger-bot": "Tutorial: Order Trigger Bot",
-              "tutorial-liquidation-bot": "Tutorial: Order Liquidation Bot"
+              "order-matching-bot": "Tutorial: Order Matching Bot",
+              "order-trigger-bot": "Tutorial: Order Trigger Bot",
+              "liquidation-bot": "Tutorial: Order Liquidation Bot"
             }
           },
           "trading-bots": {
             "title": "Trading Bots",
             "items": {
-              "tutorial-jit-trading-bot": "Tutorial: JIT Maker Bot"
+              "jit-trading-bot": "Tutorial: JIT Maker Bot"
             }
           },
           "liquidator-bots": {
