@@ -3,3 +3,5 @@
 node_modules
 .env.local
 _pagefind/
+sitemap*.xml
+robots.txt
