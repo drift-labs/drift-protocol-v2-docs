@@ -1,6 +1,6 @@
 # Tutorial: Order Trigger Bot
 
-# Introduction
+## Introduction
 
 Order Trigger Bots (Trigger Bots) are responsible for marking orders that satisfy the trigger condition, including:
 
@@ -12,7 +12,7 @@ Trigger Bots receive a small compensation for each successfully marked order.
 
 See [Keepers & Decentralised Orderbook](/protocol/about-v3/decentralized-orderbook) for a technical explanation of how the decentralised orderbook (DLOB) and matching incentives work.
 
-Trigger Bots are similar to [Tutorial: Order Matching Bot](/developers/bots/keeper-bots/order-matching-bot) in that they:
+Trigger Bots are similar to [Tutorial: Order Matching Bot](/developers/trading-automation/keeper-bots/order-matching-bot) in that they:
 
 -   also maintain a local copy of the [Keepers & Decentralised Orderbook](/protocol/about-v3/decentralized-orderbook);
 
@@ -20,7 +20,7 @@ Trigger Bots are similar to [Tutorial: Order Matching Bot](/developers/bots/keep
 
 -   receive a small reward for performing their duties.
 
-# Getting Started
+## Getting Started
 
 The reference implementation of a Trigger Bot is available [here](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/trigger.ts).
 
@@ -32,9 +32,9 @@ Start the Trigger Bot:
 yarn run dev:trigger
 ```
 
-# Technical Explanation
+## Technical Explanation
 
-## 1. Get nodes from the DLOB that are ready to be triggered
+### Step 1: Get nodes from the DLOB that are ready to be triggered
 
 The DLOB implementation includes a method for getting orders ready to be triggered:
 
@@ -50,7 +50,7 @@ const nodesToTrigger = this.dlob.findNodesToTrigger(
 );
 ```
 
-## 2. Call `trigger_order` on `DriftClient`
+### Step 2: Call `trigger_order` on `DriftClient`
 
 ```typescript
 const user = this.userMap.get(nodeToTrigger.node.userAccount.toString());

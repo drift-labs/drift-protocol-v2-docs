@@ -1,1 +1,36 @@
 # Ecosystem Builders
+
+This workflow is for teams building apps, analytics, or integrations that mirror Drift UI functionality. The goal: use the same data sources the UI uses, and send actions via the SDK.
+
+### Step 1: Decide your data sources
+
+For UI-parity data, Drift uses a mix of:
+
+- **Data API** (historical data, candles, trades)
+- **DLOB server** (orderbook + trades websocket)
+- **Swift** (signed message orders)
+
+Start here:
+
+- [Reading data (API + websockets)](/developers/ecosystem-builders/reading-data)
+- [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws)
+
+### Step 2: Use drift-common UI building blocks
+
+If you want UI parity, the fastest path is `drift-common` — it contains shared UI utilities, hooks, and components used to render Drift-like markets, accounts, health, and funding views. This is the intended way for ecosystem apps to reuse Drift UI elements instead of re-implementing them from scratch.
+
+### Step 3: Build UI models
+
+Translate protocol data into UI shapes (markets, accounts, positions, funding, health). These views are consistent with how Drift surfaces data to end users.
+
+### Step 4: Send actions with the SDK
+
+Once the UI state is ready, use the SDK to place orders, cancel, and manage accounts:
+
+- [Sending actions](/developers/ecosystem-builders/sending-actions)
+
+### Step 5: Keep parity over time
+
+Track API changes and SDK updates, and review the official Data API docs:
+
+- [Data API playground](/developers/data-api)

@@ -1,6 +1,6 @@
 # Tutorial: Order Matching Bot
 
-# Introduction
+## Introduction
 
 Order Matching Bots (Matching Bots) are responsible for matching two orders that cross or a taker order against the AMM. Specifically, this includes:
 
@@ -12,7 +12,7 @@ Matching Bots receive a small compensation for each order that they successfully
 
 See [Keepers & Decentralised Orderbook](/protocol/about-v3/decentralized-orderbook) for a technical explanation of how the decentralised orderbook (DLOB) and matching incentives work.
 
-Matching Bots are similar to [Tutorial: Order Trigger Bot](/developers/bots/keeper-bots/order-trigger-bot) in that they:
+Matching Bots are similar to [Tutorial: Order Trigger Bot](/developers/trading-automation/keeper-bots/order-trigger-bot) in that they:
 
 -   also maintain a local copy of the Decentralised Limit Orderbook (DLOB);
 
@@ -20,7 +20,7 @@ Matching Bots are similar to [Tutorial: Order Trigger Bot](/developers/bots/keep
 
 -   receive a small reward for performing their duties.
 
-# Getting Started
+## Getting Started
 
 The reference implementation of the Order Matching Bot is available [here](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/filler.ts).
 
@@ -32,9 +32,9 @@ Start the Matching Bot:
 yarn run dev:filler
 ```
 
-# Technical Explanation
+## Technical Explanation
 
-## 1. Get nodes from the DLOB that are ready to be filled
+### Step 1: Get nodes from the DLOB that are ready to be filled
 
 Market orders that are sent on the Drift Protocol first go through the [Just-In-Time (JIT) Auctions](/protocol/about-v3/matching-engine). After the auction period, Matching Bots step in to fill orders for a small reward.
 
@@ -63,7 +63,7 @@ const nodesToFill = this.dlob.findNodesToFill(
 );
 ```
 
-## 2. Filter for Fillable Nodes
+### Step 2: Filter for fillable nodes
 
 To avoid trying to fill orders that aren't ready to be filled, filter out orders that are too small to fill
 
@@ -89,7 +89,7 @@ if (
 }
 ```
 
-## 3. Call `fill_order` on `DriftClient`
+### Step 3: Call `fill_order` on `DriftClient`
 
 ```typescript
 const user = this.userMap.get(nodeToFill.node.userAccount.toString());
