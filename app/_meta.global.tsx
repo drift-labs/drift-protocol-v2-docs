@@ -205,58 +205,59 @@ const META = {
       "market-makers": {
         "title": "Market Makers",
         "items": {
-          "normal-mm": "Normal MM",
-          "orderbook": "Orderbook & DLOB",
-          "jit-only": "JIT-only MM",
-          "swift-order-feed": "Swift order feed",
-          "swift-place-and-make": "Swift place-and-make",
-          "indicative-quotes": "Indicative quotes",
-          "bot-architecture": "Bot architecture patterns"
+          "normal-mm": "",
+          "orderbook": "",
+          "jit-only": "",
+          "swift-order-feed": "",
+          "swift-place-and-make": "",
+          "indicative-quotes": "",
+          "bot-architecture": ""
         }
       },
       "vault-managers": {
         "title": "Vault Managers",
         "items": {
-          "index": "Overview"
+          "index": ""
         }
       },
-      "bots": {
-        "title": "Bots",
+      "trading-automation": {
+        "title": "Trading Automation",
         "items": {
-          "bot-template": "Bot template",
+          "index": "",
+          "trading-workflows": "",
+          "bot-template": "",
           "keeper-bots": {
             "title": "Keeper Bots",
             "items": {
-              "order-matching-bot": "Tutorial: Order Matching Bot",
-              "order-trigger-bot": "Tutorial: Order Trigger Bot",
-              "liquidation-bot": "Tutorial: Order Liquidation Bot"
+              "order-matching-bot": "",
+              "order-trigger-bot": "",
+              "liquidation-bot": ""
             }
           },
           "trading-bots": {
             "title": "Trading Bots",
             "items": {
-              "jit-trading-bot": "Tutorial: JIT Maker Bot"
+              "index": "",
+              "jit-trading-bot": ""
             }
           },
           "liquidator-bots": {
             "title": "Liquidator Bots",
             "items": {
-              "index": "Overview"
+              "index": ""
             }
           },
-          "rpc-providers": "RPC Providers"
+          "rpc-providers": "",
+          "troubleshooting": ""
         }
       },
       "ecosystem-builders": {
         "title": "Ecosystem Builders",
         "items": {
-          "index": "Overview",
-        }
-      },
-      "traders": {
-        "title": "Traders",
-        "items": {
-          "index": "Overview",
+          "index": "",
+          "reading-data": "",
+          "orderbook-and-ws": "",
+          "sending-actions": ""
         }
       },
       "builder-codes": "Builder Codes",

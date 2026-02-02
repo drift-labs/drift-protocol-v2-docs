@@ -1,58 +1,77 @@
 # Vault Managers
 
-Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting).
+Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting). Vault execution still happens through Drift accounts, so vault behavior mirrors standard Drift margin + order flows.
 
-This page is intentionally compact and focuses on the lifecycle and operational “happy path”.
+This guide focuses on the lifecycle and decisions a manager needs to make. For full CLI flags and details, see the vaults CLI reference in the `drift-vaults` repo.
 
-### Roles
+### Step 1: Understand roles and lifecycle
 
-- **Manager / delegate**: trades for the vault (place/cancel orders, manage positions), can update some vault params.
-- **Depositor**: deposits, requests withdrawals, and later withdraws after the redeem period.
+- **Manager/delegate**: trades for the vault, can update some params.
+- **Depositor**: deposits, requests withdrawals, and completes withdrawals after redeem period.
 
-### Vault lifecycle (high-level)
+Lifecycle: **create → deposit → trade → request withdraw → wait → withdraw**.
 
-1. **Create vault** (manager): choose token market index, redeem period, max capacity, fee params, permissioning.
-2. **Deposits** (depositors): deposit into the vault; permissioned vaults may require manager initialization/approval for depositors.
-3. **Trading** (manager): place/cancel orders and manage positions on behalf of the vault.
-4. **Withdrawals** (depositors): request withdrawal → wait redeem period → complete withdrawal.
+### Step 2: Decide vault parameters
 
-### Parameters you should decide up front
+- **`market-index` / `spotMarketIndex`**: deposit token (commonly 0 = USDC)
+- **`redeem-period`**: withdrawal cooldown (often 3–7 days)
+- **`max-tokens`**: capacity / risk control
+- **`management-fee`**: annualized fee
+- **`profit-share`**: charged on realized gains
+- **`permissioned`** + **`min-deposit-amount`**: onboarding controls
 
-- **`spotMarketIndex`**: what token the vault accepts (commonly 0 = USDC).
-- **`redeemPeriod`**: waiting time before withdrawals can complete (often 3–7 days).
-- **`maxTokens`**: capacity (risk control).
-- **`managementFee`**: annualized, charged continuously.
-- **`profitShare`**: charged on realized gains.
-- **`permissioned`** + **`minDepositAmount`**: onboarding controls.
-
-### CLI workflow (example)
+### Step 3: Initialize the vault (manager)
 
 ```bash
-# Initialize vault
-npx @drift-labs/vaults-sdk init-vault \
+yarn cli init-vault \
   --name "MyVault" \
   --market-index 0 \
   --redeem-period 604800 \
-  --max-tokens 1000000000000 \
+  --max-tokens 0 \
   --management-fee 200 \
   --profit-share 2000
-
-# User deposit
-npx @drift-labs/vaults-sdk deposit \
-  --vault <VAULT_PUBKEY> \
-  --amount 1000000000
-
-# Request withdrawal
-npx @drift-labs/vaults-sdk request-withdraw \
-  --vault <VAULT_PUBKEY> \
-  --shares 1000000
-
-# Complete withdrawal (after redeem period)
-npx @drift-labs/vaults-sdk withdraw \
-  --vault <VAULT_PUBKEY>
 ```
 
-### Security model (what to communicate to users)
+### Step 4: Enable trading + set policies
+
+Optional actions you may take after creation:
+
+- enable margin trading on the vault
+- update parameters (redeem period, caps, fees)
+
+```bash
+yarn cli manager-update-margin-trading-enabled \
+  --vault-address <VAULT_ADDRESS> \
+  --enabled true
+```
+
+### Step 5: Deposits and withdrawals (depositors)
+
+For permissioned vaults, managers must initialize depositors:
+
+```bash
+yarn cli init-vault-depositor \
+  --vault-address <VAULT_ADDRESS> \
+  --deposit-authority <AUTHORITY_TO_ALLOW_DEPOSIT>
+```
+
+Deposits are permissioned or permissionless based on vault settings. Withdrawals are two-step:
+
+- request withdrawal
+- wait redeem period
+- complete withdrawal
+
+### Step 6: Manager operations
+
+Common manager actions:
+
+- manager deposit/withdraw
+- apply profit share across depositors
+- view vault state
+
+See the `drift-vaults` CLI docs for the full command list and flags.
+
+### Step 7: Security
 
 - Managers **cannot** withdraw user funds directly.
 - Withdrawals are governed by **redeem period** and **share accounting**.
