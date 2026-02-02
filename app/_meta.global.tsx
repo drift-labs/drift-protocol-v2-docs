@@ -1,5 +1,14 @@
 import { MetaRecord } from "nextra";
 
+/*
+Conditionally hide items in production
+const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
+USAGE:
+{
+  ...,
+  "display": displayWip,
+}
+*/
 const META = {
   "protocol": {
     "title": "Drift Protocol",
@@ -177,19 +186,19 @@ const META = {
       "drift-sdk": {
         "title": "Drift SDK",
         "items": {
-          "setup": "Setup",
-          "precision-and-types": "Precision & types",
-          "deposits-withdrawals": "Deposits & withdrawals",
-          "transfers": "Transfers",
-          "users": "Users",
-          "markets": "Markets",
-          "orders": "Orders",
-          "pnl-risk": "PnL & risk",
-          "events": "Events",
-          "swaps": "Swaps",
-          "swift": "Swift",
-          "builder-codes": "Builder codes"
-        }
+          "setup": "",
+          "precision-and-types": "",
+          "deposits-withdrawals": "",
+          "transfers": "",
+          "users": "",
+          "markets": "",
+          "orders": "",
+          "pnl-risk": "",
+          "events": "",
+          "swaps": "",
+          "swift": "",
+          "builder-codes": ""
+        },
       },
       "data-api": {
         "title": "Data API",
@@ -244,8 +253,8 @@ const META = {
           "liquidator-bots": {
             "title": "Liquidator Bots",
             "items": {
-              "index": ""
-            }
+              "index": "",
+            },
           },
           "rpc-providers": "",
           "troubleshooting": ""
@@ -258,7 +267,7 @@ const META = {
           "reading-data": "",
           "orderbook-and-ws": "",
           "sending-actions": ""
-        }
+        },
       },
       "builder-codes": "Builder Codes",
       "--- Contribute": {

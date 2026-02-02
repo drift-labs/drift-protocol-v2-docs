@@ -41,7 +41,7 @@ export function SDKDocTabs({ tabs }: SDKDocTabsProps) {
           ) : null}
           {tab.heading ? (
             <div className="x:mt-4 x:flex x:flex-wrap x:items-center x:gap-3">
-              <b>{tab.heading}</b>
+              <code className="nextra-code x:max-md:break-all">{tab.heading}</code>
               {tab.link ? (
                 <a href={tab.link} target="_blank" rel="noopener noreferrer">
                   Reference ↗

@@ -146,7 +146,7 @@ export function SDKDoc({ children }: SDKDocProps) {
         } catch (error) {
           return (
             <Callout type="warning">
-              Unable to render TypeScript docs for `{props.name}`.
+              TypeScript docs unavailable for <code className="nextra-code x:max-md:break-all">{props.name}</code>.
             </Callout>
           );
         }
