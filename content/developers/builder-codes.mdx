@@ -19,17 +19,19 @@ This approval is stored directly inside the `RevenueShareEscrow` account.
 
 ### How Builder Codes Work
 
-1. **Order Placement**  
+<Steps>
+#### Order Placement
    The builder’s app constructs a `place_order` transaction, which includes their `builderIdx` and `builderFee` in the signed order params 
    The `RevenueShareEscrow` account is included in the transaction so the program can validate and record the order.
 
-2. **Fee Accrual (Per Order)**  
+#### Fee Accrual (Per Order)
 When an order is filled, the fee is credited to the user’s `RevenueShareEscrow` as a `RevenueShareOrder`:
    - This tracks builder’s pubkey, `feesAccrued`, `orderId`, `feeBps`, market type (spot or perp), and completion status.
    - Fees remain in escrow until settlement.
 
-3. **Settlement**  
+#### Settlement
    On `settle_pnl`, any accrued fees in the escrow are swept to the builder’s `RevenueShareAccount`:
+</Steps>
 
 Code examples can be found in the API [docs](https://drift-labs.github.io/v2-teacher/#buildercodes)
 

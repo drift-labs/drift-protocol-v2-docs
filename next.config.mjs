@@ -6,8 +6,8 @@ const withNextra = nextra({
 });
 
 const redirects = [
-    ["/rewards/traderrewards", "/"],
-    ["/rewards/rewards-program", "/"],
+    ["/rewards/traderrewards", "/rewards"],
+    ["/rewards/rewards-program", "/rewards"],
     ["/about-v3/understanding-drift", "/protocol/about-v3"],
     ["/about-v3/drift-amm", "/protocol/about-v3/drift-amm"],
     ["/about-v3/decentralized-orderbook", "/protocol/about-v3/decentralized-orderbook"],
@@ -58,7 +58,7 @@ const redirects = [
     ["/lend-borrow/borrow-interest-rate", "/protocol/borrow-lend/borrow-interest-rate"],
     ["/lend-borrow/isolated-pools", "/protocol/borrow-lend/isolated-pools"],
     ["/lend-borrow/lend-borrow-faq", "/protocol/borrow-lend/borrow-lend-faq"],
-    ["/lend-borrow/rewards", "/protocol/borrow-lend/rewards"],
+    ["/lend-borrow/rewards", "/protocol/rewards"],
     ["/lend-borrow/supply-borrow-apy", "/protocol/borrow-lend/borrow-lend-apy"],
     ["/lend-borrow/what-is-lend-borrow", "/protocol/borrow-lend"],
     ["/amplify/how-it-works", "/protocol/borrow-lend/amplify"],
@@ -73,7 +73,7 @@ const redirects = [
     ["/insurance-fund/insurance-fund-staking", "/protocol/insurance-fund/insurance-fund-staking"],
     ["/sdk-documentation", "/developers"],
     ["/partnerships/DBC", "/developers/builder-codes"],
-    ["/partnerships/referral-link", "/protocol/referral-links"],
+    ["/partnerships/referral-link", "/protocol/rewards/referral-links"],
     ["/tutorial-bots", "/developers/trading-automation"],
     ["/tutorial-bots/keeper-bots", "/developers/trading-automation/keeper-bots"],
     ["/tutorial-bots/keeper-bots/tutorial-order-matching-bot", "/developers/trading-automation/keeper-bots/order-matching-bot"],
