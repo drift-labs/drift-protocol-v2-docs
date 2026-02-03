@@ -122,7 +122,6 @@ const META = {
           "borrow-interest-rate": "",
           "isolated-pools": "",
           "borrow-lend-faq": "",
-          "rewards": "",
           "borrow-lend-apy": "",
           "amplify": {
             "title": "Amplify",
@@ -150,7 +149,14 @@ const META = {
           "insurance-fund-staking": ""
         }
       },
-      "referral-links": "",
+      "rewards": {
+        "title": "Rewards",
+        "items": {
+          "index": "",
+          "referral-links": "",
+          "wlfi-trading-campaign": "",
+        },
+      },
       "risk-and-safety": {
         "title": "Risk and Safety",
         "items": {
