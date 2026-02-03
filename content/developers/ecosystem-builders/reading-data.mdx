@@ -1,0 +1,46 @@
+# Reading Data
+
+This page covers the core data sources used by Drift UI so external builders can mirror the same state.
+
+### Step 1: Use the Data API for history + candles
+
+Base URL:
+
+- `https://data.api.drift.trade`
+
+Common uses:
+
+- historical trades
+- funding rates
+- candles
+
+The OpenAPI explorer lives here:
+
+- [Data API playground](/developers/data-api)
+
+### Step 2: Use Data API websockets for candles + trades
+
+The Data API websocket endpoint is:
+
+- `wss://data.api.drift.trade/ws`
+
+The UI subscribes by sending a message like:
+
+```json
+{
+  "type": "subscribe",
+  "symbol": "SOL-PERP",
+  "resolution": "1"
+}
+```
+
+### Step 3: Use DLOB + Swift for live order flow
+
+For UI-parity order flow, Drift uses:
+
+- DLOB server: `https://dlob.drift.trade`
+- Swift server: `https://swift.drift.trade`
+
+See:
+
+- [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws)

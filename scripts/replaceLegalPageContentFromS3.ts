@@ -2,15 +2,15 @@ import fs from 'fs';
 
 const pages = [
     {
-        file: '../pages/terms-of-use.mdx',
+        file: '../content/protocol/legal-and-regulations/terms-of-use.mdx',
         s3Url: process.env.NEXT_PUBLIC_S3_URL_TERMS_OF_USE
     },
     {
-        file: '../pages/privacy-policy.mdx',
+        file: '../content/protocol/legal-and-regulations/privacy-policy.mdx',
         s3Url: process.env.NEXT_PUBLIC_S3_URL_PRIVACY_POLICY
     },
     {
-        file: '../pages/competition-terms.mdx',
+        file: '../content/protocol/legal-and-regulations/competition-terms.mdx',
         s3Url: process.env.NEXT_PUBLIC_S3_URL_COMPETITION_TERMS
     }
 ]
@@ -23,7 +23,7 @@ const replacePageContentFromS3 = async (filename: string, s3Url: string) => {
 };
 
 const replaceAllLegalPageContent = async () => {
-    await Promise.all(pages.map(page => replacePageContentFromS3(page.file, page.s3Url)));
+    await Promise.all(pages.map(page => replacePageContentFromS3(page.file, page.s3Url || '')));
 }
 
 replaceAllLegalPageContent().then(() => {
@@ -32,5 +32,3 @@ replaceAllLegalPageContent().then(() => {
     console.error(err);
     process.exit(1);
 });
-
-

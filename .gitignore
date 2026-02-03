@@ -2,4 +2,6 @@
 .next
 node_modules
 .env.local
-pnpm-lock.yaml
+_pagefind/
+sitemap*.xml
+robots.txt

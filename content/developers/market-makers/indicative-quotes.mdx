@@ -1,0 +1,35 @@
+# Indicative Quotes
+
+**Indicative quotes:** publish bid/ask + size to a websocket endpoint for discovery and routing. If any fields are `null`, the sender stops publishing for that market (and `marketIndex = null` stops all quotes).
+
+<SDKDoc>
+  <TypeScript name="IndicativeQuotesSender" type="class">
+```js
+import { IndicativeQuotesSender } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="connect" type="method" owner="IndicativeQuotesSender">
+```js
+await quoter.connect();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="setQuote" type="method" owner="IndicativeQuotesSender">
+```js
+quoter.setQuote({
+  bidPrice: new BN(bid * PRICE_PRECISION.toNumber()),
+  askPrice: new BN(ask * PRICE_PRECISION.toNumber()),
+  bidBaseAssetAmount: new BN(bidSize * BASE_PRECISION.toNumber()),
+  askBaseAssetAmount: new BN(askSize * BASE_PRECISION.toNumber()),
+  marketIndex,
+  isOracleOffset: false,
+});
+```
+  </TypeScript>
+</SDKDoc>
+

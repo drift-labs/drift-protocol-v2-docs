@@ -1,0 +1,71 @@
+# Insurance Fund Staking
+
+## Overview
+
+Users that elect to stake into the Insurance Fund will be collateralising the Insurance Fund.  
+
+The Insurance Fund is the protocol's first backstop to maintaining the solvency of the protocol. All users that stake into the IF should read through and be clear on what happens to the Insurance Fund when levered losses and AMM deficits occur ([Insurance Fund](/protocol/insurance-fund)).
+
+## Reward
+
+For providing liquidity to the Insurance Fund, Insurance Fund Stakers are rewarded with their proportionate share of the [Revenue Pool](/protocol/about-v3/revenue-pool) every hour.  
+
+The Revenue Pool is funded by various aspects of the protocol:  
+1.  borrow fees;
+2.  spot market exchange fees;
+3.  perpetual market exchange fees; and
+4.  liquidation fees.
+
+An Insurance Fund Staker's proportionate share is calculated by: `Total Staked Amount / Total Insurance Fund`
+
+Each revenue settlement is split between Insurance Fund Stakers and a protocol-owned portion of the insurance fund.
+
+<Callout type="important">
+**Example:**
+
+The Insurance Fund is at \$5000 USDC. You decide to stake \$10,000 USDC, bringing the total to \$15,000 USDC. Your proportionate share of the Revenue Pool paid every hour for stakers would be 10000/15000 = 66.6%. 
+
+Each hour, as the revenue pool settles fees earned to the Insurance Fund, let's say \$30. Half of this is reserved for the protocol, while the other half is designated for stakers, making the staker payout \$15. You will receive 66.6% of the payout (\$10) and the remaining Insurance Fund stakers would receive 33.3% (\$5).
+
+All rewards earned accumulate and compound the account's insurance amount staked.
+</Callout>
+
+### Cooldown Period
+
+There is a cooldown period of 13 days for unstaking any collateral from the Insurance Fund.  
+
+A user first requests to unstake a specific amount (denominated in shares). During the cooldown period, the staked amount does not receive rewards. After the elapsed period, the user can fully unstake. 
+
+*Note: You cannot unstake while the spot market utilization (or 1hr utilization twap) is above 80%. This does not affect opening/timing on unstake requests.*
+
+
+### How to stake to Insurance Fund Vault
+
+1. Select the vault and click `Stake`
+
+<img src="/assets/1-if-choose-vault.png" alt="health-modal" width="500" height="auto"></img>
+
+2. In the modal, enter the amount you'd like to stake
+
+<img src="/assets/2-if-confirm-stake.png" alt="health-modal" width="500" height="auto"></img>
+
+3. Click `Confirm Stake`
+
+
+### How to unstake from Insurance Fund Vault
+
+<Callout type="warning">
+Funds will be available to withdraw 13 days after making an unstake request.
+
+You can only have one pending unstake request per vault at a time. You can cancel a request at any time, noting your 13 day cool down period will restart upon any new unstake request. 
+</Callout>
+
+You can unstake from the Insurance Fund page:
+
+1. Click `Unstake`
+
+<img src="/assets/3-if-unstake.png" alt="health-modal" width="500" height="auto"></img>
+
+2. Select the amount you'd like to unstake and click `Request Unstake`
+
+<img src="/assets/4-if-request-unstake.png" alt="health-modal" width="500" height="auto"></img>

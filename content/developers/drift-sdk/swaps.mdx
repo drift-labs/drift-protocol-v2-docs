@@ -1,0 +1,48 @@
+# Swaps (Jupiter)
+
+You can route spot swaps using Jupiter. In TypeScript, the SDK exposes a `JupiterClient` plus a convenience `driftClient.swap(...)` helper.
+
+<SDKDoc>
+  <TypeScript name="JupiterClient" type="class">
+```js
+import { Connection } from "@solana/web3.js";
+import { JupiterClient } from "@drift-labs/sdk";
+
+const connection = new Connection("<RPC_URL>", "confirmed");
+const jupiterClient = new JupiterClient({ connection });
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getQuote" type="method" owner="JupiterClient">
+```js
+// Preview a quote before swapping (shape depends on Jupiter route selection).
+const quote = await jupiterClient.getQuote({
+  inputMint: "<INPUT_MINT>",
+  outputMint: "<OUTPUT_MINT>",
+  amount: "<AMOUNT_IN_BASE_UNITS>",
+});
+console.log(quote);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="swap" type="method" owner="DriftClient">
+```js
+// Assumes `driftClient` is subscribed.
+const txSig = await driftClient.swap({
+  jupiterClient,
+  inMarketIndex: 0,  // e.g. USDC
+  outMarketIndex: 1, // e.g. SOL
+  amount: driftClient.convertToSpotPrecision(0, 10), // 10 USDC (example)
+  slippageBps: 50,
+  onlyDirectRoutes: false,
+});
+
+console.log(txSig);
+```
+  </TypeScript>
+</SDKDoc>
+

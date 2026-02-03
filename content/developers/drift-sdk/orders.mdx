@@ -1,0 +1,335 @@
+# Orders
+
+This page focuses on placing and canceling orders via `DriftClient`. For concise examples we use helper builders like `getMarketOrderParams(...)`.
+
+### Build market order params
+
+<SDKDoc>
+  <TypeScript name="getMarketOrderParams" type="function">
+```js
+import { BN, BASE_PRECISION, MarketType, PositionDirection, getMarketOrderParams } from "@drift-labs/sdk";
+
+const orderParams = getMarketOrderParams({
+  marketIndex: 0,
+  marketType: MarketType.PERP,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: new BN(1).mul(BASE_PRECISION), // 1 SOL (in 1e9 precision)
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Build order params (generic helper)
+
+If you want a single helper that works for limit/market/oracle/trigger, use `getOrderParams(...)`.
+
+<SDKDoc>
+  <TypeScript name="getOrderParams" type="function">
+```js
+import { getOrderParams, OrderType, PositionDirection } from "@drift-labs/sdk";
+
+const orderParams = getOrderParams({
+  orderType: OrderType.LIMIT,
+  marketIndex: 0,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+  price: driftClient.convertToPricePrecision(21.23),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Precision helpers for orders
+
+<SDKDoc>
+  <TypeScript name="convertToPerpPrecision" type="method" owner="DriftClient">
+```js
+const size = driftClient.convertToPerpPrecision(1); // 1 base unit (BN)
+console.log(size.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="convertToPricePrecision" type="method" owner="DriftClient">
+```js
+const price = driftClient.convertToPricePrecision(21.23); // price BN
+console.log(price.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Place a perp order
+
+<SDKDoc>
+  <TypeScript name="placePerpOrder" type="method" owner="DriftClient">
+```js
+// Assumes `driftClient` is subscribed.
+const txSig = await driftClient.placePerpOrder(
+  getMarketOrderParams({
+    marketIndex: 0,
+    direction: PositionDirection.LONG,
+    baseAssetAmount: new BN(1).mul(BASE_PRECISION),
+  })
+);
+console.log(txSig);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Oracle / auction-style orders (example shape)
+
+```js
+// Example shape from older docs: auction params + oracle offset.
+// This is a usage pattern example; verify fields against the `OrderParams` type.
+const oraclePrice = driftClient.getOracleDataForPerpMarket(18).price;
+const auctionStartPrice = oraclePrice.neg().divn(1000);
+const auctionEndPrice = oraclePrice.divn(1000);
+
+const orderParams = {
+  orderType: OrderType.ORACLE,
+  baseAssetAmount: driftClient.convertToPerpPrecision(10),
+  direction: PositionDirection.LONG,
+  marketIndex: 18,
+  auctionStartPrice,
+  auctionEndPrice,
+  oraclePriceOffset: oraclePrice.divn(500).toNumber(),
+  auctionDuration: 30,
+};
+
+await driftClient.placePerpOrder(orderParams);
+```
+
+### Instruction builders (advanced)
+
+Use ix builders when you need custom compute budgets, ALT usage, or batching.
+
+<SDKDoc>
+  <TypeScript name="getPlacePerpOrderIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getPlacePerpOrderIx(orderParams);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPlaceSpotOrderIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getPlaceSpotOrderIx(orderParams);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getCancelOrdersIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getCancelOrdersIx(marketType, marketIndex, direction);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getFillPerpOrderIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getFillPerpOrderIx(userAccountPublicKey, userAccount, order, makerInfos);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getFillSpotOrderIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getFillSpotOrderIx(userAccountPublicKey, userAccount, order, makerInfos);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getTriggerOrderIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getTriggerOrderIx(userAccountPublicKey, userAccount, order);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getRevertFillIx" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getRevertFillIx();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getSettlePNLsIxs" type="method" owner="DriftClient">
+```js
+const ixs = await driftClient.getSettlePNLsIxs(userAccountPublicKey, marketIndexes);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getJupiterSwapIxV6" type="method" owner="DriftClient">
+```js
+const ix = await driftClient.getJupiterSwapIxV6({
+  inMarketIndex: 0,
+  outMarketIndex: 1,
+  amount: driftClient.convertToSpotPrecision(0, 10),
+  slippageBps: 50,
+});
+```
+  </TypeScript>
+</SDKDoc>
+### Place a spot order
+
+<SDKDoc>
+  <TypeScript name="placeSpotOrder" type="method" owner="DriftClient">
+```js
+// Example uses a simplified object; adjust fields to your strategy.
+await driftClient.placeSpotOrder({
+  marketIndex: 1,
+  direction: PositionDirection.LONG,
+  // ... order fields (amount/price/etc)
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Place multiple orders
+
+<SDKDoc>
+  <TypeScript name="placeOrders" type="method" owner="DriftClient">
+```js
+await driftClient.placeOrders([
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.LONG,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    price: driftClient.convertToPricePrecision(21.23),
+  },
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.SHORT,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    oraclePriceOffset: driftClient.convertToPricePrecision(0.05).toNumber(),
+  },
+]);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Cancel orders
+
+<SDKDoc>
+  <TypeScript name="cancelOrder" type="method" owner="DriftClient">
+```js
+await driftClient.cancelOrder(1);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="cancelOrdersByIds" type="method" owner="DriftClient">
+```js
+await driftClient.cancelOrdersByIds([1]);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="cancelOrders" type="method" owner="DriftClient">
+```js
+import { MarketType, PositionDirection } from "@drift-labs/sdk";
+
+// Cancels orders matching the filters. To cancel all orders, omit parameters.
+await driftClient.cancelOrders(MarketType.PERP, 0, PositionDirection.LONG);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Cancel and place (atomic)
+
+<SDKDoc>
+  <TypeScript name="cancelAndPlaceOrders" type="method" owner="DriftClient">
+```js
+await driftClient.cancelAndPlaceOrders(
+  { marketType: MarketType.PERP, marketIndex: 0 },
+  [
+    {
+      orderType: OrderType.LIMIT,
+      marketIndex: 0,
+      direction: PositionDirection.LONG,
+      baseAssetAmount: driftClient.convertToPerpPrecision(1),
+      price: driftClient.convertToPricePrecision(21.23),
+    },
+  ]
+);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Modify orders
+
+<SDKDoc>
+  <TypeScript name="modifyOrder" type="method" owner="DriftClient">
+```js
+await driftClient.modifyOrder({
+  orderId: 1,
+  newBaseAssetAmount: driftClient.convertToPerpPrecision(2),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="modifyOrderByUserOrderId" type="method" owner="DriftClient">
+```js
+await driftClient.modifyOrderByUserOrderId({
+  userOrderId: 1,
+  newBaseAssetAmount: driftClient.convertToPerpPrecision(2),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Trigger orders (stop / take-profit)
+
+```js
+import { OrderTriggerCondition, OrderType, PositionDirection } from "@drift-labs/sdk";
+
+const orderParams = {
+  orderType: OrderType.TRIGGER_MARKET,
+  marketIndex: 0,
+  direction: PositionDirection.SHORT,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+  triggerPrice: driftClient.convertToPricePrecision(95),
+  triggerCondition: OrderTriggerCondition.BELOW,
+};
+
+await driftClient.placePerpOrder(orderParams);
+```
+
+### Oracle / auction orders (shape)
+
+```js
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
+
+const oracle = driftClient.getOracleDataForPerpMarket(0);
+const orderParams = {
+  orderType: OrderType.ORACLE,
+  marketIndex: 0,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+  auctionStartPrice: oracle.price.muln(9950).divn(10000),
+  auctionEndPrice: oracle.price.muln(10050).divn(10000),
+  auctionDuration: 50,
+  oraclePriceOffset: driftClient.convertToPricePrecision(0.05).toNumber(),
+};
+
+await driftClient.placePerpOrder(orderParams);
+```
+

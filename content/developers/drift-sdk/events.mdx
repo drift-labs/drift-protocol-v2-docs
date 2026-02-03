@@ -1,0 +1,54 @@
+# Events
+
+Protocol events are emitted in transaction logs. The SDK provides an `EventSubscriber` that can listen, deserialize, and emit events to your app.
+
+<SDKDoc>
+  <TypeScript name="EventSubscriber" type="class">
+```js
+import { EventSubscriber } from "@drift-labs/sdk";
+
+const options = {
+  // eventTypes: ["DepositRecord", "OrderRecord", ...],
+  commitment: "confirmed",
+  logProviderConfig: { type: "websocket" },
+};
+
+const eventSubscriber = new EventSubscriber(connection, driftClient.program, options);
+await eventSubscriber.subscribe();
+
+eventSubscriber.eventEmitter.on("newEvent", (event) => {
+  console.log(event);
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Filtering events (market fills example)
+
+<SDKDoc>
+  <TypeScript name="isVariant" type="function">
+```js
+import { isVariant } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+```js
+const marketIndex = 0;
+
+const isPerpFill = (event) => {
+  if (event.eventType !== "OrderActionRecord") return false;
+  if (event.marketIndex !== marketIndex) return false;
+  if (!isVariant(event.marketType, "perp")) return false;
+  if (!isVariant(event.action, "fill")) return false;
+  return true;
+};
+
+eventSubscriber.eventEmitter.on("newEvent", (event) => {
+  if (isPerpFill(event)) console.log(event);
+});
+```
+
+TODO:
+- Add a “filter by marketIndex / event type” snippet for common bot patterns.
+
