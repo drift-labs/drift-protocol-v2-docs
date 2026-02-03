@@ -1,0 +1,86 @@
+# JIT-only MM
+
+JIT-only market making means you **do not keep a standing book**. You compete in [JIT auctions](/protocol/about-v3/jit-faq) (see [Matching Engine](/protocol/about-v3/matching-engine) for liquidity sources). Instead, you:
+
+- subscribe to on-chain auction / order feeds,
+- compute the current “auction price” / acceptable fill price,
+- atomically fill as maker (and optionally post liquidity) when opportunities arise.
+
+### Subscribe to auctions / orders
+
+<SDKDoc>
+  <TypeScript name="AuctionSubscriber" type="class">
+```js
+import { AuctionSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="OrderSubscriber" type="class">
+```js
+import { OrderSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Compute auction prices (helpers)
+
+<SDKDoc>
+  <TypeScript name="getAuctionPrice" type="function">
+```js
+import { getAuctionPrice } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Fill as maker (atomic place-and-make)
+
+This pattern places your maker order and fills against the taker in one transaction.
+
+<SDKDoc>
+  <TypeScript name="placeAndMakePerpOrder" type="method" owner="DriftClient">
+```js
+// makerOrderParams: OptionalOrderParams
+// takerInfo: TakerInfo (includes taker user account + the order to fill)
+await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Practical filters
+
+In JIT-only workflows you’ll usually want filters like:
+
+- **risk-increasing vs reducing** (skip toxic flow)
+- **max position size / leverage / free collateral**
+- **oracle validity / divergence checks**
+- **skip Swift-origin orders** if you’re already handling them via the Swift websocket feed
+
+<SDKDoc>
+  <TypeScript name="isSignedMsgOrder" type="function">
+```js
+import { isSignedMsgOrder } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getMMOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+const oracle = driftClient.getMMOracleDataForPerpMarket(0);
+```
+  </TypeScript>
+</SDKDoc>
+
+```js
+const marketIndex = 0;
+const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const perpMarket = driftClient.getPerpMarketAccount(marketIndex);
+
+if (!oracle.isValid) return;
+if (!perpMarket) return;
+
+// Example: skip if oracle is stale or market is volatile for your strategy.
+```
+

@@ -1,0 +1,203 @@
+# Users
+
+Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you’ll typically use a `User`.
+
+### Initialize a user account
+
+<SDKDoc>
+  <TypeScript name="initializeUserAccount" type="method" owner="DriftClient">
+```js
+// Assumes you already constructed and subscribed `driftClient`.
+const [txSig, userAccountPublicKey] = await driftClient.initializeUserAccount(0, "my-account");
+console.log(txSig, userAccountPublicKey.toBase58());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Get the next subaccount id
+
+<SDKDoc>
+  <TypeScript name="getNextSubAccountId" type="method" owner="DriftClient">
+```js
+const nextId = driftClient.getNextSubAccountId();
+console.log(nextId);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Get a User and subscribe
+
+<SDKDoc>
+  <TypeScript name="User" type="class">
+```js
+import { User } from "@drift-labs/sdk";
+
+const user = driftClient.getUser(); // convenience helper
+await user.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUser" type="method" owner="DriftClient">
+```js
+const user = driftClient.getUser(); // active subaccount
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUser" type="method" owner="DriftClient">
+```js
+// Fetch a specific subaccount.
+const user = driftClient.getUser(1);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUserAccount" type="method" owner="User">
+```js
+const account = driftClient.getUser().getUserAccount();
+console.log(account);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getUserAccount" type="method" owner="DriftClient">
+```js
+const account = driftClient.getUserAccount(); // active subaccount
+console.log(account);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="fetchAccounts" type="method" owner="User">
+```js
+const user = driftClient.getUser(0);
+await user.fetchAccounts();
+```
+  </TypeScript>
+</SDKDoc>
+
+### Derived addresses (user account)
+
+<SDKDoc>
+  <TypeScript name="getUserAccountPublicKey" type="method" owner="DriftClient">
+```js
+const userAccountPublicKey = await driftClient.getUserAccountPublicKey(0);
+console.log(userAccountPublicKey.toBase58());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Query user state (orders / positions)
+
+<SDKDoc>
+  <TypeScript name="getTokenAmount" type="method" owner="User">
+```js
+import { BN } from "@drift-labs/sdk";
+
+const user = driftClient.getUser();
+const tokenAmount = user.getTokenAmount(0);
+
+const isDeposit = tokenAmount.gte(new BN(0));
+const isBorrow = tokenAmount.lt(new BN(0));
+console.log({ tokenAmount: tokenAmount.toString(), isDeposit, isBorrow });
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPerpPosition" type="method" owner="User">
+```js
+const position = driftClient.getUser().getPerpPosition(0);
+console.log(position?.baseAssetAmount.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getOrder" type="method" owner="User">
+```js
+const order = driftClient.getUser().getOrder(1);
+console.log(order);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getOrderByUserOrderId" type="method" owner="User">
+```js
+const order = driftClient.getUser().getOrderByUserOrderId(1);
+console.log(order);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getOpenOrders" type="method" owner="User">
+```js
+const orders = driftClient.getUser().getOpenOrders();
+console.log(orders.length);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Switch active subaccount
+
+<SDKDoc>
+  <TypeScript name="switchActiveUser" type="method" owner="DriftClient">
+```js
+// Switch to subaccount 1.
+driftClient.switchActiveUser(1);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Update user settings (delegate / margin)
+
+<SDKDoc>
+  <TypeScript name="updateUserDelegate" type="method" owner="DriftClient">
+```js
+import { PublicKey } from "@solana/web3.js";
+
+await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="updateUserMarginTradingEnabled" type="method" owner="DriftClient">
+```js
+await driftClient.updateUserMarginTradingEnabled(true, 0);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="updateUserCustomMarginRatio" type="method" owner="DriftClient">
+```js
+import { MARGIN_PRECISION } from "@drift-labs/sdk";
+
+await driftClient.updateUserCustomMarginRatio([
+  { marginRatio: MARGIN_PRECISION, subAccountId: 0 },
+]);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Delete a user account
+
+If a subaccount has no assets/liabilities, it can be deleted to reclaim rent.
+
+<SDKDoc>
+  <TypeScript name="deleteUser" type="method" owner="DriftClient">
+```js
+await driftClient.deleteUser(1);
+```
+  </TypeScript>
+</SDKDoc>
+

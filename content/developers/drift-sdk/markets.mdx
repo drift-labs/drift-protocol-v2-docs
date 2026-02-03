@@ -1,0 +1,169 @@
+# Markets, Oracles, and Positions
+
+These are the most common read-path helpers you’ll use to power bots, dashboards, and risk logic.
+
+### Market accounts
+
+<SDKDoc>
+  <TypeScript name="getSpotMarketAccount" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const spotMarket = driftClient.getSpotMarketAccount(marketIndex);
+console.log(spotMarket?.marketIndex);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPerpMarketAccount" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const perpMarket = driftClient.getPerpMarketAccount(marketIndex);
+console.log(perpMarket?.marketIndex);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getSpotMarketAccounts" type="method" owner="DriftClient">
+```js
+const spotMarkets = driftClient.getSpotMarketAccounts();
+console.log(spotMarkets.length);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPerpMarketAccounts" type="method" owner="DriftClient">
+```js
+const perpMarkets = driftClient.getPerpMarketAccounts();
+console.log(perpMarkets.length);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Oracle price
+
+<SDKDoc>
+  <TypeScript name="getOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+console.log(oracle.price.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getOracleDataForSpotMarket" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const oracle = driftClient.getOracleDataForSpotMarket(marketIndex);
+console.log(oracle.price.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getMMOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+const marketIndex = 0;
+const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+console.log(oracle.price.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### Positions and balances
+
+<SDKDoc>
+  <TypeScript name="getSpotPosition" type="method" owner="DriftClient">
+```js
+const spotPosition = driftClient.getSpotPosition(0);
+console.log(spotPosition);
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="getPerpPosition" type="method" owner="DriftClient">
+```js
+const perpPosition = driftClient.getPerpPosition(0);
+console.log(perpPosition);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Protocol state
+
+<SDKDoc>
+  <TypeScript name="getStateAccount" type="method" owner="DriftClient">
+```js
+const state = driftClient.getStateAccount();
+console.log(state);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Orderbook & DLOB (local)
+
+<SDKDoc>
+  <TypeScript name="OrderSubscriber" type="class">
+```js
+import { OrderSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="DLOBSubscriber" type="class">
+```js
+import { DLOBSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="SlotSubscriber" type="class">
+```js
+import { SlotSubscriber } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+```js
+const slotSubscriber = new SlotSubscriber(connection);
+await slotSubscriber.subscribe();
+
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: { type: "websocket" },
+  fastDecode: true,
+  decodeData: true,
+});
+await orderSubscriber.subscribe();
+
+const dlobSubscriber = new DLOBSubscriber({
+  driftClient,
+  dlobSource: orderSubscriber,
+  slotSource: slotSubscriber,
+  updateFrequency: 1000,
+});
+await dlobSubscriber.subscribe();
+```
+
+<SDKDoc>
+  <TypeScript name="DLOB" type="class">
+```js
+import { DLOB } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
+```js
+import { UserMap } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>

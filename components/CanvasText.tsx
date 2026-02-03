@@ -1,6 +1,8 @@
+"use client";
+
 import { drawText } from "canvas-txt";
 import { useEffect, useRef, useState } from "react";
-import { useTheme } from "nextra-theme-docs";
+import { useTheme } from "next-themes";
 
 // Note that the height MUST be set manually because the canvas doesn't resize to fit the text!
 const CanvasText = ({

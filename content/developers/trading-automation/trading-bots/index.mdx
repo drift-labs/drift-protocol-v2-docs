@@ -1,0 +1,37 @@
+# Trading Bots
+
+Trading bots are profit-seeking strategies that interact with Drift markets. These bots typically:
+
+- subscribe to market data (orderbook, trades, oracles),
+- compute signals or quotes,
+- place and cancel orders, and
+- manage risk and collateral.
+
+### Step 1: Choose a strategy
+
+Start with a reference implementation before customizing:
+
+- [Tutorial: JIT Maker Bot](/developers/trading-automation/trading-bots/jit-trading-bot)
+
+### Step 2: Prepare a wallet + RPC
+
+Use a dedicated bot wallet and a reliable RPC provider:
+
+- [Bot wallet setup](/protocol/getting-started/wallet-setup/bot-wallet-setup)
+- [RPC providers](/developers/trading-automation/rpc-providers)
+
+### Step 3: Connect and subscribe
+
+Most strategies rely on:
+
+- Drift SDK subscriptions (websocket or polling)
+- Orderbook/DLOB updates
+- Oracle feeds
+
+For setup patterns, see:
+
+- [Bot architecture patterns](/developers/market-makers/bot-architecture)
+
+### Step 4: Run and monitor
+
+Start in paper mode or with small size. Monitor logs and latency, and track performance over time.

@@ -1,0 +1,51 @@
+# Orderbook + DLOB websocket
+
+The DLOB server powers the UI orderbook and trades feed. It exposes a websocket interface and uses a small set of channels.
+
+### Step 1: Connect to the DLOB websocket
+
+Base URL:
+
+- `https://dlob.drift.trade`
+
+You’ll connect to its websocket endpoint (e.g. `wss://dlob.drift.trade/ws`).
+
+### Step 2: Subscribe to channels
+
+Supported channels include:
+
+- `orderbook`
+- `orderbook_indicative`
+- `trades`
+- `heartbeat`
+
+Example subscription message (perp orderbook):
+
+```json
+{
+  "type": "subscribe",
+  "channel": "orderbook",
+  "marketType": "perp",
+  "market": "SOL-PERP",
+  "grouping": 10
+}
+```
+
+Example subscription message (trades):
+
+```json
+{
+  "type": "subscribe",
+  "channel": "trades",
+  "marketType": "perp",
+  "market": "SOL-PERP"
+}
+```
+
+### Step 3: Handle indicative quotes
+
+Use `orderbook_indicative` to surface indicative quotes for routing and discovery. It uses the same message shape as `orderbook`.
+
+### Step 4: Map symbols consistently
+
+Market symbols match UI markets (e.g. `SOL-PERP`). Keep your market list in sync with the SDK’s market metadata to avoid mismatches.

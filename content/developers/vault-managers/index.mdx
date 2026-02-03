@@ -1,0 +1,78 @@
+# Vault Managers
+
+Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting). Vault execution still happens through Drift accounts, so vault behavior mirrors standard Drift margin + order flows.
+
+This guide focuses on the lifecycle and decisions a manager needs to make. For full CLI flags and details, see the vaults CLI reference in the `drift-vaults` repo.
+
+### Step 1: Understand roles and lifecycle
+
+- **Manager/delegate**: trades for the vault, can update some params.
+- **Depositor**: deposits, requests withdrawals, and completes withdrawals after redeem period.
+
+Lifecycle: **create → deposit → trade → request withdraw → wait → withdraw**.
+
+### Step 2: Decide vault parameters
+
+- **`market-index` / `spotMarketIndex`**: deposit token (commonly 0 = USDC)
+- **`redeem-period`**: withdrawal cooldown (often 3–7 days)
+- **`max-tokens`**: capacity / risk control
+- **`management-fee`**: annualized fee
+- **`profit-share`**: charged on realized gains
+- **`permissioned`** + **`min-deposit-amount`**: onboarding controls
+
+### Step 3: Initialize the vault (manager)
+
+```bash
+yarn cli init-vault \
+  --name "MyVault" \
+  --market-index 0 \
+  --redeem-period 604800 \
+  --max-tokens 0 \
+  --management-fee 200 \
+  --profit-share 2000
+```
+
+### Step 4: Enable trading + set policies
+
+Optional actions you may take after creation:
+
+- enable margin trading on the vault
+- update parameters (redeem period, caps, fees)
+
+```bash
+yarn cli manager-update-margin-trading-enabled \
+  --vault-address <VAULT_ADDRESS> \
+  --enabled true
+```
+
+### Step 5: Deposits and withdrawals (depositors)
+
+For permissioned vaults, managers must initialize depositors:
+
+```bash
+yarn cli init-vault-depositor \
+  --vault-address <VAULT_ADDRESS> \
+  --deposit-authority <AUTHORITY_TO_ALLOW_DEPOSIT>
+```
+
+Deposits are permissioned or permissionless based on vault settings. Withdrawals are two-step:
+
+- request withdrawal
+- wait redeem period
+- complete withdrawal
+
+### Step 6: Manager operations
+
+Common manager actions:
+
+- manager deposit/withdraw
+- apply profit share across depositors
+- view vault state
+
+See the `drift-vaults` CLI docs for the full command list and flags.
+
+### Step 7: Security
+
+- Managers **cannot** withdraw user funds directly.
+- Withdrawals are governed by **redeem period** and **share accounting**.
+- Managers can usually **decrease** (but not increase) the redeem period.

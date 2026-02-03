@@ -1,0 +1,49 @@
+# Delisting Process
+
+Delisting a perpetuals market can occur in a tail risk event, but the protocol has an on-chain procedure in place similar to the expiry of any derivatives contract (futures, options).
+
+The process is as follows:
+
+## Perpetual Markets
+
+<Steps>
+### Reduce only mode
+The market immediately enters "reduce only mode" once an expiry date is set.
+*   All new orders are forced to have reduce only flag
+
+*   All current orders that will increase risk will get cancelled on fill attempts
+
+*   No new funding rate updates
+
+*   Users cannot settle unrealized P&L prior to expiry
+
+### Settlement price lock in
+After the expiry date, the market can lock in a settlement price.
+*   Must call the instruction: `settle_expired_market`
+    *   The target price is the amm's calculated 5-min oracle twap but is altered such that it allows for full solvency across all users
+
+### Expired Position Settlement
+After the expiry date + optional time buffer, users can settle their "expired positions" at the settlement price.
+*   The optional time buffer is the settlement duration, which acts as a buffer for liquidations
+
+*   Any necessary insurance fund draws and/or social loss can occur
+
+*   At position closure, the taker fee is applied (so as to encourage close during reduce only mode)
+
+### PnL Pool Settlement
+Once the number of users in the market reaches zero, the remaining balance PnL Pool can be settled into the quote asset's [Revenue Pool](/protocol/about-v3/revenue-pool)
+</Steps>
+
+## Spot Markets
+
+<Steps>
+### Reduce only mode
+The market immediately enters "reduce only mode" once an expiry date is set
+*   This blocks new borrows, new deposits, and new buys in the market
+
+### Force close mode (coming soon)
+After the expiry date, the market is set into "force close mode"
+*   Deposits are sent back to the user's associated token address up to an amount that still satisfies their margin requirement
+
+*   Opens the possibility for liquidation of borrows and/or swaps of deposits to other accepted collateral
+</Steps>

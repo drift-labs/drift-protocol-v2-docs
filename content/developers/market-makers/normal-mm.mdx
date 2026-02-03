@@ -1,0 +1,129 @@
+# Normal MM
+
+“Normal” market making on Drift means placing **resting** two-sided quotes on the [decentralized orderbook](/protocol/about-v3/decentralized-orderbook) (orderbook / DLOB) and earning [maker rebates](/protocol/market-makers/maker-fee-rebate) when takers trade against you. You can also participate in JIT when relevant. For protocol background, see [Market Maker Participation](/protocol/market-makers/market-maker-participation) and [JIT FAQ](/protocol/about-v3/jit-faq).
+
+### Maker vs taker
+
+- **Maker**: provides liquidity (resting order), earns rebate.
+- **Taker**: removes liquidity (crosses spread), pays fee.
+
+### Always use post-only for maker quotes
+
+<SDKDoc>
+  <TypeScript name="PostOnlyParams" type="class">
+```js
+import { PostOnlyParams } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="placePerpOrder" type="method" owner="DriftClient">
+```js
+import { OrderType, PositionDirection, PostOnlyParams } from "@drift-labs/sdk";
+
+await driftClient.placePerpOrder({
+  orderType: OrderType.LIMIT,
+  marketIndex: 0,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+  price: driftClient.convertToPricePrecision(99),
+  postOnly: PostOnlyParams.MUST_POST_ONLY,
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Two-sided quotes (place in one tx)
+
+<SDKDoc>
+  <TypeScript name="placeOrders" type="method" owner="DriftClient">
+```js
+import { MarketType, OrderType, PositionDirection, PostOnlyParams } from "@drift-labs/sdk";
+
+await driftClient.placeOrders([
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.LONG,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    price: driftClient.convertToPricePrecision(99.5),
+    postOnly: PostOnlyParams.MUST_POST_ONLY,
+  },
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.SHORT,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    price: driftClient.convertToPricePrecision(100.5),
+    postOnly: PostOnlyParams.MUST_POST_ONLY,
+  },
+]);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Quote around oracle
+
+<SDKDoc>
+  <TypeScript name="getOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+import { PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const oracle = driftClient.getOracleDataForPerpMarket(0);
+const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+console.log(oraclePrice);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Inventory-aware quoting (basic)
+
+You can widen/tighten one side of your spread based on current inventory to reduce drift.
+
+<SDKDoc>
+  <TypeScript name="getPerpPosition" type="method" owner="User">
+```js
+const user = driftClient.getUser();
+const position = user.getPerpPosition(0);
+console.log(position?.baseAssetAmount.toString());
+```
+  </TypeScript>
+</SDKDoc>
+
+### JIT maker (on-chain “place-and-make”)
+
+If you’re reacting to on-chain taker auctions, Drift exposes a helper that “places a maker order and fills against a taker” atomically.
+
+<SDKDoc>
+  <TypeScript name="placeAndMakePerpOrder" type="method" owner="DriftClient">
+```js
+// `takerInfo` comes from your taker discovery / order intake logic.
+await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Risk management basics
+
+Common MM guardrails:
+
+- position limits (max long/short)
+- minimum free collateral
+- health / leverage checks
+- cancel all orders on errors / volatility spikes
+
+<SDKDoc>
+  <TypeScript name="cancelOrders" type="method" owner="DriftClient">
+```js
+import { MarketType } from "@drift-labs/sdk";
+
+await driftClient.cancelOrders(MarketType.PERP, 0);
+```
+  </TypeScript>
+</SDKDoc>
+
+For production patterns (subscription loops, throttling, priority fees), see [Bot architecture patterns](/developers/market-makers/bot-architecture).
+
