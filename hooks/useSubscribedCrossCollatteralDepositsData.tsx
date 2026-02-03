@@ -139,9 +139,10 @@ const getWeightDataFromAccount = (
   subscription: DriftClientAccountSubscriber
 ): AssetWeightsData => {
   const marketName = decodeName(account.name);
+  
   const oraclePriceData = subscription.getOraclePriceDataAndSlotForSpotMarket(
     account.marketIndex
-  ).data;
+  )?.data;
 
   const strictOraclePrice = new StrictOraclePrice(
     oraclePriceData?.price ?? ZERO
