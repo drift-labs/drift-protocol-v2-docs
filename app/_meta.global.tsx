@@ -190,7 +190,7 @@ const META = {
     "type": "page",
     "items": {
       "drift-sdk": {
-        "title": "Drift SDK",
+        "title": "Drift TS SDK",
         "items": {
           "setup": "",
           "precision-and-types": "",
@@ -240,7 +240,6 @@ const META = {
         "items": {
           "index": "",
           "trading-workflows": "",
-          "bot-template": "",
           "keeper-bots": {
             "title": "Keeper Bots",
             "items": {
