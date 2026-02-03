@@ -23,7 +23,7 @@ const replacePageContentFromS3 = async (filename: string, s3Url: string) => {
 };
 
 const replaceAllLegalPageContent = async () => {
-    await Promise.all(pages.map(page => replacePageContentFromS3(page.file, page.s3Url)));
+    await Promise.all(pages.map(page => replacePageContentFromS3(page.file, page.s3Url || '')));
 }
 
 replaceAllLegalPageContent().then(() => {
