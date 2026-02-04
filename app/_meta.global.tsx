@@ -1,8 +1,8 @@
 import { MetaRecord } from "nextra";
 
+const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
 /*
 Conditionally hide items in production
-const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
 USAGE:
 {
   ...,
@@ -154,7 +154,9 @@ const META = {
         "items": {
           "index": "",
           "referral-links": "",
-          "wlfi-trading-campaign": "",
+          "wlfi-trading-campaign": {
+            "display": displayWip
+          },
         },
       },
       "risk-and-safety": {
@@ -190,7 +192,7 @@ const META = {
     "type": "page",
     "items": {
       "drift-sdk": {
-        "title": "Drift TS SDK",
+        "title": "Drift SDK",
         "items": {
           "setup": "",
           "precision-and-types": "",
