@@ -12,6 +12,12 @@ const marketIndex = 0;
 const amount = driftClient.convertToSpotPrecision(marketIndex, 100); // 100 USDC (example)
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.convert_to_spot_precision">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -22,6 +28,12 @@ const ata = await driftClient.getAssociatedTokenAccount(marketIndex);
 console.log(ata.toBase58());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_associated_token_account_public_key">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Deposit
@@ -36,6 +48,12 @@ const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(marke
 await driftClient.deposit(amount, marketIndex, associatedTokenAccount);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.deposit">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Withdraw
@@ -50,6 +68,12 @@ const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(marke
 await driftClient.withdraw(amount, marketIndex, associatedTokenAccount);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.withdraw">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Spot rates (borrow / lend)
@@ -64,6 +88,12 @@ const rate = calculateDepositRate(spotMarket);
 console.log(convertToNumber(rate, SPOT_MARKET_RATE_PRECISION));
 ```
   </TypeScript>
+
+  <Python name="driftpy.math.spot_balance.calculate_deposit_rate">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -76,6 +106,12 @@ const rate = calculateBorrowRate(spotMarket);
 console.log(convertToNumber(rate, SPOT_MARKET_RATE_PRECISION));
 ```
   </TypeScript>
+
+  <Python name="driftpy.math.spot_balance.calculate_borrow_rate">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -84,4 +120,10 @@ console.log(convertToNumber(rate, SPOT_MARKET_RATE_PRECISION));
 import { SPOT_MARKET_RATE_PRECISION } from "@drift-labs/sdk";
 ```
   </TypeScript>
+
+  <Python name="SPOT_MARKET_RATE_PRECISION">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>

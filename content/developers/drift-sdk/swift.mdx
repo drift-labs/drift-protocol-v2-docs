@@ -23,6 +23,12 @@ const { orderParams: message, signature } =
   driftClient.signSignedMsgOrderParamsMessage(orderMessage);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.sign_signed_msg_order_params_message">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Submit to the Swift API
@@ -57,6 +63,12 @@ import { getSignedMsgUserAccountPublicKey } from "@drift-labs/sdk";
 const pda = getSignedMsgUserAccountPublicKey(driftClient.program.programId, authority);
 ```
   </TypeScript>
+
+  <Python name="driftpy.addresses.get_signed_msg_user_account_public_key">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -66,6 +78,12 @@ const [txSig, signedMsgUserAccount] =
   await driftClient.initializeSignedMsgUserOrders(authority, 8);
 ```
   </TypeScript>
+
+  <Python name="initializeSignedMsgUserOrders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Decode signed messages
@@ -79,6 +97,12 @@ const signedMessage = driftClient.decodeSignedMsgOrderParamsMessage(
 );
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.decode_signed_msg_order_params_message">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Instruction builders (Swift taker + maker)
@@ -93,6 +117,12 @@ const ixs = await driftClient.getPlaceSignedMsgTakerPerpOrderIxs(
 );
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_place_signed_msg_taker_perp_order_ixs">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -106,6 +136,12 @@ const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
 );
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_place_and_make_signed_msg_perp_order_ixs">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Helpers commonly used in Swift flows
@@ -118,6 +154,12 @@ import { generateSignedMsgUuid } from "@drift-labs/sdk";
 const uuid = generateSignedMsgUuid();
 ```
   </TypeScript>
+
+  <Python name="driftpy.swift.util.generate_signed_msg_uuid">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -128,6 +170,12 @@ import { digestSignature } from "@drift-labs/sdk";
 const hash = digestSignature(Uint8Array.from(signature));
 ```
   </TypeScript>
+
+  <Python name="driftpy.swift.util.digest_signature">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -141,4 +189,10 @@ const userStats = getUserStatsAccountPublicKey(
 );
 ```
   </TypeScript>
+
+  <Python name="driftpy.addresses.get_user_stats_account_public_key">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>

@@ -35,6 +35,17 @@ const human = convertToNumber(raw, PRICE_PRECISION);
 console.log(human);
 ```
   </TypeScript>
+  <Python name="driftpy.math.conversion.convert_to_number">
+```py
+from driftpy.constants.numeric_constants import PRICE_PRECISION
+from driftpy.math.conversion import convert_to_number
+
+# TODO: replace with a real DriftPy example
+raw = 10_500_000  # e.g. 10.5 with 1e6 precision
+human = convert_to_number(raw, PRICE_PRECISION)
+print(human)
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -43,6 +54,14 @@ console.log(human);
 import { PRICE_PRECISION } from "@drift-labs/sdk";
 ```
   </TypeScript>
+  <Python name="driftpy.constants.numeric_constants.PRICE_PRECISION">
+```py
+from driftpy.constants.numeric_constants import PRICE_PRECISION
+
+# TODO: replace with a real DriftPy example
+print(PRICE_PRECISION)
+```
+  </Python>
 </SDKDoc>
 
 ### Create a Drift client
@@ -57,6 +76,14 @@ import { loadKeypair } from "@drift-labs/sdk";
 const keypair = loadKeypair("<KEYPAIR_PATH>");
 ```
   </TypeScript>
+  <Python name="driftpy.keypair.load_keypair">
+```py
+from driftpy.keypair import load_keypair
+
+# TODO: replace with a real DriftPy example
+keypair = load_keypair("<KEYPAIR_PATH>")
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -67,6 +94,15 @@ import { Wallet, loadKeypair } from "@drift-labs/sdk";
 const wallet = new Wallet(loadKeypair("<KEYPAIR_PATH>"));
 ```
   </TypeScript>
+  <Python name="anchorpy.Wallet">
+```py
+from anchorpy import Wallet
+from driftpy.keypair import load_keypair
+
+# TODO: replace with a real DriftPy example
+wallet = Wallet(load_keypair("<KEYPAIR_PATH>"))
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -87,6 +123,25 @@ const driftClient = new DriftClient({
 await driftClient.subscribe();
 ```
   </TypeScript>
+  <Python name="driftpy.drift_client.DriftClient">
+```py
+from anchorpy import Provider, Wallet
+from solana.rpc.async_api import AsyncClient
+
+from driftpy.constants.config import configs
+from driftpy.drift_client import DriftClient
+from driftpy.keypair import load_keypair
+
+# TODO: replace with a real DriftPy example
+config = configs["mainnet"]
+connection = AsyncClient(config.default_http)
+wallet = Wallet(load_keypair("<KEYPAIR_PATH>"))
+provider = Provider(connection, wallet)
+
+drift_client = DriftClient(connection, wallet, env="mainnet")
+await drift_client.subscribe()
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -95,6 +150,12 @@ await driftClient.subscribe();
 await driftClient.subscribe();
 ```
   </TypeScript>
+  <Python name="driftpy.drift_client.DriftClient.subscribe">
+```py
+# TODO: replace with a real DriftPy example
+await drift_client.subscribe()
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -104,6 +165,12 @@ await driftClient.subscribe();
 await driftClient.fetchAccounts();
 ```
   </TypeScript>
+  <Python name="driftpy.accounts.ws.drift_client.WebsocketDriftClientAccountSubscriber.fetch">
+```py
+# TODO: replace with a real DriftPy example
+await drift_client.account_subscriber.fetch()
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -112,6 +179,12 @@ await driftClient.fetchAccounts();
 await driftClient.unsubscribe();
 ```
   </TypeScript>
+  <Python name="driftpy.drift_client.DriftClient.unsubscribe">
+```py
+# TODO: replace with a real DriftPy example
+await drift_client.unsubscribe()
+```
+  </Python>
 </SDKDoc>
 
 ### Account subscriptions (websocket vs polling)
@@ -124,6 +197,14 @@ For most bots, websocket subscriptions are the easiest way to keep markets and u
 import { BulkAccountLoader } from "@drift-labs/sdk";
 ```
   </TypeScript>
+  <Python name="driftpy.accounts.bulk_account_loader.BulkAccountLoader">
+```py
+from driftpy.accounts.bulk_account_loader import BulkAccountLoader
+
+# TODO: replace with a real DriftPy example
+account_loader = BulkAccountLoader(connection, "confirmed", 0)
+```
+  </Python>
 </SDKDoc>
 
 ```js
@@ -156,6 +237,15 @@ if (!driftClient.hasUser(1)) {
 }
 ```
   </TypeScript>
+  <Python name="driftpy.drift_client.DriftClient.get_user">
+```py
+# TODO: replace with a real DriftPy example
+try:
+    drift_client.get_user(1)
+except KeyError:
+    await drift_client.add_user(1)
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -164,6 +254,12 @@ if (!driftClient.hasUser(1)) {
 await driftClient.addUser(1);
 ```
   </TypeScript>
+  <Python name="driftpy.drift_client.DriftClient.add_user">
+```py
+# TODO: replace with a real DriftPy example
+await drift_client.add_user(1)
+```
+  </Python>
 </SDKDoc>
 
 ### Program accounts (advanced)
@@ -174,6 +270,14 @@ await driftClient.addUser(1);
 import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
 ```
   </TypeScript>
+  <Python name="driftpy.constants.config.DRIFT_PROGRAM_ID">
+```py
+from driftpy.constants.config import DRIFT_PROGRAM_ID
+
+# TODO: replace with a real DriftPy example
+print(DRIFT_PROGRAM_ID)
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -185,6 +289,14 @@ const pda = getHighLeverageModeConfigPublicKey(driftClient.program.programId);
 const config = await driftClient.program.account.highLeverageModeConfig.fetch(pda);
 ```
   </TypeScript>
+  <Python name="driftpy.addresses.get_high_leverage_mode_config_public_key">
+```py
+from driftpy.addresses import get_high_leverage_mode_config_public_key
+
+# TODO: replace with a real DriftPy example
+pda = get_high_leverage_mode_config_public_key(drift_client.program_id)
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -196,5 +308,14 @@ const sdkConfig = initialize({ env: "mainnet-beta" });
 console.log(sdkConfig.DRIFT_PROGRAM_ID);
 ```
   </TypeScript>
+  <Python name="driftpy.constants.config.configs">
+```py
+from driftpy.constants.config import configs
+
+# TODO: replace with a real DriftPy example
+sdk_config = configs["mainnet"]
+print(sdk_config.DRIFT_PROGRAM_ID)
+```
+  </Python>
 </SDKDoc>
 

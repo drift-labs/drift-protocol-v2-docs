@@ -17,6 +17,12 @@ const orderParams = getMarketOrderParams({
 });
 ```
   </TypeScript>
+
+  <Python name="getMarketOrderParams">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Build order params (generic helper)
@@ -37,6 +43,12 @@ const orderParams = getOrderParams({
 });
 ```
   </TypeScript>
+
+  <Python name="getOrderParams">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Precision helpers for orders
@@ -48,6 +60,12 @@ const size = driftClient.convertToPerpPrecision(1); // 1 base unit (BN)
 console.log(size.toString());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.convert_to_perp_precision">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -57,6 +75,12 @@ const price = driftClient.convertToPricePrecision(21.23); // price BN
 console.log(price.toString());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.convert_to_price_precision">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Place a perp order
@@ -75,6 +99,12 @@ const txSig = await driftClient.placePerpOrder(
 console.log(txSig);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.place_perp_order">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Oracle / auction-style orders (example shape)
@@ -110,6 +140,12 @@ Use ix builders when you need custom compute budgets, ALT usage, or batching.
 const ix = await driftClient.getPlacePerpOrderIx(orderParams);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_place_perp_order_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -118,6 +154,12 @@ const ix = await driftClient.getPlacePerpOrderIx(orderParams);
 const ix = await driftClient.getPlaceSpotOrderIx(orderParams);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_place_spot_order_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -126,6 +168,12 @@ const ix = await driftClient.getPlaceSpotOrderIx(orderParams);
 const ix = await driftClient.getCancelOrdersIx(marketType, marketIndex, direction);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_cancel_orders_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -134,6 +182,12 @@ const ix = await driftClient.getCancelOrdersIx(marketType, marketIndex, directio
 const ix = await driftClient.getFillPerpOrderIx(userAccountPublicKey, userAccount, order, makerInfos);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_fill_perp_order_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -142,6 +196,12 @@ const ix = await driftClient.getFillPerpOrderIx(userAccountPublicKey, userAccoun
 const ix = await driftClient.getFillSpotOrderIx(userAccountPublicKey, userAccount, order, makerInfos);
 ```
   </TypeScript>
+
+  <Python name="getFillSpotOrderIx">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -150,6 +210,12 @@ const ix = await driftClient.getFillSpotOrderIx(userAccountPublicKey, userAccoun
 const ix = await driftClient.getTriggerOrderIx(userAccountPublicKey, userAccount, order);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_trigger_order_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -158,6 +224,12 @@ const ix = await driftClient.getTriggerOrderIx(userAccountPublicKey, userAccount
 const ix = await driftClient.getRevertFillIx();
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_revert_fill_ix">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -166,6 +238,12 @@ const ix = await driftClient.getRevertFillIx();
 const ixs = await driftClient.getSettlePNLsIxs(userAccountPublicKey, marketIndexes);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_settle_pnl_ixs">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -179,6 +257,12 @@ const ix = await driftClient.getJupiterSwapIxV6({
 });
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_jupiter_swap_ix_v6">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 ### Place a spot order
 
@@ -193,6 +277,12 @@ await driftClient.placeSpotOrder({
 });
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.place_spot_order">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Place multiple orders
@@ -220,6 +310,12 @@ await driftClient.placeOrders([
 ]);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.place_orders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Cancel orders
@@ -230,6 +326,12 @@ await driftClient.placeOrders([
 await driftClient.cancelOrder(1);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.cancel_order">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -238,6 +340,12 @@ await driftClient.cancelOrder(1);
 await driftClient.cancelOrdersByIds([1]);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.cancel_orders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -249,6 +357,12 @@ import { MarketType, PositionDirection } from "@drift-labs/sdk";
 await driftClient.cancelOrders(MarketType.PERP, 0, PositionDirection.LONG);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.cancel_orders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Cancel and place (atomic)
@@ -270,6 +384,12 @@ await driftClient.cancelAndPlaceOrders(
 );
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.cancel_and_place_orders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Modify orders
@@ -283,6 +403,12 @@ await driftClient.modifyOrder({
 });
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.modify_order">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -294,6 +420,12 @@ await driftClient.modifyOrderByUserOrderId({
 });
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.modify_order_by_user_id">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Trigger orders (stop / take-profit)

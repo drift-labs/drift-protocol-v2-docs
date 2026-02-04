@@ -1,0 +1,858 @@
+{
+  "version": 1,
+  "symbols": {
+    "driftpy.accounts.bulk_account_loader.BulkAccountLoader": {
+      "fqn": "driftpy.accounts.bulk_account_loader.BulkAccountLoader",
+      "kind": "class",
+      "signature": "BulkAccountLoader(connection: AsyncClient, commitment: Commitment = 'confirmed', frequency: float = 1)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.accounts.get_accounts.get_user_account": {
+      "fqn": "driftpy.accounts.get_accounts.get_user_account",
+      "kind": "function",
+      "signature": "get_user_account(program: Program, user_public_key: Pubkey) -> Optional[UserAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.accounts.ws.drift_client.WebsocketDriftClientAccountSubscriber.fetch": {
+      "fqn": "driftpy.accounts.ws.drift_client.WebsocketDriftClientAccountSubscriber.fetch",
+      "kind": "function",
+      "signature": "fetch()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.addresses.get_high_leverage_mode_config_public_key": {
+      "fqn": "driftpy.addresses.get_high_leverage_mode_config_public_key",
+      "kind": "function",
+      "signature": "get_high_leverage_mode_config_public_key(program_id: Pubkey) -> Pubkey",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.addresses.get_signed_msg_user_account_public_key": {
+      "fqn": "driftpy.addresses.get_signed_msg_user_account_public_key",
+      "kind": "function",
+      "signature": "get_signed_msg_user_account_public_key(program_id: Pubkey, authority: Pubkey) -> Pubkey",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.addresses.get_user_stats_account_public_key": {
+      "fqn": "driftpy.addresses.get_user_stats_account_public_key",
+      "kind": "function",
+      "signature": "get_user_stats_account_public_key(program_id: Pubkey, authority: Pubkey) -> Pubkey",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.config.DRIFT_PROGRAM_ID": {
+      "fqn": "driftpy.constants.config.DRIFT_PROGRAM_ID",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.config.configs": {
+      "fqn": "driftpy.constants.config.configs",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.numeric_constants.BASE_PRECISION": {
+      "fqn": "driftpy.constants.numeric_constants.BASE_PRECISION",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.numeric_constants.MARGIN_PRECISION": {
+      "fqn": "driftpy.constants.numeric_constants.MARGIN_PRECISION",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.numeric_constants.PRICE_PRECISION": {
+      "fqn": "driftpy.constants.numeric_constants.PRICE_PRECISION",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.constants.numeric_constants.QUOTE_PRECISION": {
+      "fqn": "driftpy.constants.numeric_constants.QUOTE_PRECISION",
+      "kind": "attribute",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.dlob.dlob.DLOB": {
+      "fqn": "driftpy.dlob.dlob.DLOB",
+      "kind": "class",
+      "signature": "DLOB()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.dlob.dlob_subscriber.DLOBSubscriber": {
+      "fqn": "driftpy.dlob.dlob_subscriber.DLOBSubscriber",
+      "kind": "class",
+      "signature": "DLOBSubscriber(url: Optional[str] = None, config: Optional[DLOBClientConfig] = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient": {
+      "fqn": "driftpy.drift_client.DriftClient",
+      "kind": "class",
+      "signature": "DriftClient(connection: AsyncClient, wallet: Keypair | Wallet, env: DriftEnv | None = 'mainnet', opts: TxOpts = DEFAULT_TX_OPTIONS, authority: Pubkey | None = None, account_subscription: AccountSubscriptionConfig = AccountSubscriptionConfig.default(), perp_market_indexes: list[int] | None = None, spot_market_indexes: list[int] | None = None, oracle_infos: list[OracleInfo] | None = None, tx_params: Optional[TxParams] = None, tx_version: Optional[TransactionVersion] = None, tx_sender: TxSender | None = None, active_sub_account_id: Optional[int] = None, sub_account_ids: Optional[list[int]] = None, market_lookup_table: Optional[Pubkey] = None, market_lookup_tables: Optional[list[Pubkey]] = None, jito_params: Optional[JitoParams] = None, tx_sender_blockhash_commitment: Commitment | None = None, enforce_tx_sequencing: bool = False)",
+      "summary": "This class is the main way to interact with Drift Protocol including",
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.add_user": {
+      "fqn": "driftpy.drift_client.DriftClient.add_user",
+      "kind": "function",
+      "signature": "add_user(sub_account_id: int)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.cancel_and_place_orders": {
+      "fqn": "driftpy.drift_client.DriftClient.cancel_and_place_orders",
+      "kind": "function",
+      "signature": "cancel_and_place_orders(cancel_params: Tuple[Optional[MarketType], Optional[int], Optional[PositionDirection]], place_order_params: List[OrderParams], sub_account_id: Optional[int] = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.cancel_order": {
+      "fqn": "driftpy.drift_client.DriftClient.cancel_order",
+      "kind": "function",
+      "signature": "cancel_order(order_id: Optional[int] = None, sub_account_id: int = None) -> Signature",
+      "summary": "cancel specific order (if order_id=None will be most recent order)",
+      "params": [
+        {
+          "name": "order_id",
+          "type": "Optional[int], optional",
+          "description": "Defaults to None."
+        },
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount id which contains order. Defaults to 0."
+        }
+      ],
+      "returns": {
+        "type": "str",
+        "description": "tx sig"
+      }
+    },
+    "driftpy.drift_client.DriftClient.cancel_orders": {
+      "fqn": "driftpy.drift_client.DriftClient.cancel_orders",
+      "kind": "function",
+      "signature": "cancel_orders(market_type: MarketType = None, market_index: int = None, direction: PositionDirection = None, sub_account_id: int = None) -> Signature",
+      "summary": "cancel all existing orders on the book",
+      "params": [
+        {
+          "name": "market_type",
+          "type": "MarketType, optional",
+          "description": "only cancel orders for single market, used with market_index"
+        },
+        {
+          "name": "market_index",
+          "type": "int, optional",
+          "description": "only cancel orders for single market, used with market_type"
+        },
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount id. Defaults to 0."
+        }
+      ],
+      "returns": {
+        "type": "Signature",
+        "description": "tx sig"
+      }
+    },
+    "driftpy.drift_client.DriftClient.convert_to_perp_precision": {
+      "fqn": "driftpy.drift_client.DriftClient.convert_to_perp_precision",
+      "kind": "function",
+      "signature": "convert_to_perp_precision(amount: Union[int, float]) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.convert_to_price_precision": {
+      "fqn": "driftpy.drift_client.DriftClient.convert_to_price_precision",
+      "kind": "function",
+      "signature": "convert_to_price_precision(amount: Union[int, float]) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.convert_to_spot_precision": {
+      "fqn": "driftpy.drift_client.DriftClient.convert_to_spot_precision",
+      "kind": "function",
+      "signature": "convert_to_spot_precision(amount: Union[int, float], market_index) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.decode_signed_msg_order_params_message": {
+      "fqn": "driftpy.drift_client.DriftClient.decode_signed_msg_order_params_message",
+      "kind": "function",
+      "signature": "decode_signed_msg_order_params_message(signed_msg_order_params_buf: bytes, is_delegate: bool = False) -> Union[SignedMsgOrderParamsMessage, SignedMsgOrderParamsDelegateMessage]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.deposit": {
+      "fqn": "driftpy.drift_client.DriftClient.deposit",
+      "kind": "function",
+      "signature": "deposit(amount: int, spot_market_index: int, user_token_account: Pubkey, sub_account_id: Optional[int] = None, reduce_only=False, user_initialized=True) -> TxSigAndSlot",
+      "summary": "deposits collateral into protocol",
+      "params": [
+        {
+          "name": "amount",
+          "type": "int",
+          "description": "amount to deposit"
+        },
+        {
+          "name": "spot_market_index",
+          "type": "int",
+          "description": ""
+        },
+        {
+          "name": "user_token_account",
+          "type": "Pubkey",
+          "description": ""
+        },
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount to deposit into. Defaults to 0."
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool, optional",
+          "description": "paying back borrow vs depositing new assets. Defaults to False."
+        },
+        {
+          "name": "user_initialized",
+          "type": "bool, optional",
+          "description": "if need to initialize user account too set this to False. Defaults to True."
+        }
+      ],
+      "returns": {
+        "type": "TxSigAndSlot",
+        "description": "tx sig and slot"
+      }
+    },
+    "driftpy.drift_client.DriftClient.get_associated_token_account_public_key": {
+      "fqn": "driftpy.drift_client.DriftClient.get_associated_token_account_public_key",
+      "kind": "function",
+      "signature": "get_associated_token_account_public_key(market_index: int) -> Pubkey",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_cancel_orders_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_cancel_orders_ix",
+      "kind": "function",
+      "signature": "get_cancel_orders_ix(market_type: MarketType = None, market_index: int = None, direction: PositionDirection = None, sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_fill_perp_order_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_fill_perp_order_ix",
+      "kind": "function",
+      "signature": "get_fill_perp_order_ix(user_account_pubkey: Pubkey, user_account: UserAccount, order: Order, maker_info: Optional[Union[MakerInfo, list[MakerInfo]]], referrer_info: Optional[ReferrerInfo]) -> Instruction",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_jupiter_swap_ix_v6": {
+      "fqn": "driftpy.drift_client.DriftClient.get_jupiter_swap_ix_v6",
+      "kind": "function",
+      "signature": "get_jupiter_swap_ix_v6(out_market_idx: int, in_market_idx: int, amount: int, out_ata: Optional[Pubkey] = None, in_ata: Optional[Pubkey] = None, slippage_bps: int = 50, quote: Optional[dict] = None, reduce_only: Optional[SwapReduceOnly] = None, user_account_public_key: Optional[Pubkey] = None, swap_mode: str = 'ExactIn', fee_account: Optional[Pubkey] = None, platform_fee_bps: Optional[int] = None, only_direct_routes: bool = False, max_accounts: int = 50) -> Tuple[list[Instruction], list[AddressLookupTableAccount]]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_oracle_price_data_for_perp_market": {
+      "fqn": "driftpy.drift_client.DriftClient.get_oracle_price_data_for_perp_market",
+      "kind": "function",
+      "signature": "get_oracle_price_data_for_perp_market(market_index: int) -> Optional[OraclePriceData]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_oracle_price_data_for_spot_market": {
+      "fqn": "driftpy.drift_client.DriftClient.get_oracle_price_data_for_spot_market",
+      "kind": "function",
+      "signature": "get_oracle_price_data_for_spot_market(market_index: int) -> Optional[OraclePriceData]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_perp_market_account": {
+      "fqn": "driftpy.drift_client.DriftClient.get_perp_market_account",
+      "kind": "function",
+      "signature": "get_perp_market_account(market_index: int) -> Optional[PerpMarketAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_perp_market_accounts": {
+      "fqn": "driftpy.drift_client.DriftClient.get_perp_market_accounts",
+      "kind": "function",
+      "signature": "get_perp_market_accounts() -> list[PerpMarketAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_perp_position": {
+      "fqn": "driftpy.drift_client.DriftClient.get_perp_position",
+      "kind": "function",
+      "signature": "get_perp_position(market_index: int, sub_account_id: int = None) -> Optional[PerpPosition]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_place_and_make_signed_msg_perp_order_ixs": {
+      "fqn": "driftpy.drift_client.DriftClient.get_place_and_make_signed_msg_perp_order_ixs",
+      "kind": "function",
+      "signature": "get_place_and_make_signed_msg_perp_order_ixs(signed_msg_order_params: SignedMsgOrderParams, signed_msg_order_uuid: bytes, taker_info: dict, order_params: OrderParams, referrer_info: Optional[ReferrerInfo] = None, sub_account_id: Optional[int] = None, preceding_ixs: list[Instruction] = [], override_ix_count: Optional[int] = None, include_high_leverage_mode_config: Optional[bool] = False) -> list[Instruction]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_place_perp_order_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_place_perp_order_ix",
+      "kind": "function",
+      "signature": "get_place_perp_order_ix(order_params: OrderParams, sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_place_signed_msg_taker_perp_order_ixs": {
+      "fqn": "driftpy.drift_client.DriftClient.get_place_signed_msg_taker_perp_order_ixs",
+      "kind": "function",
+      "signature": "get_place_signed_msg_taker_perp_order_ixs(signed_msg_order_params: Union[dict, SignedMsgOrderParams], market_index: int, taker_info: dict, authority: Optional[Pubkey] = None, preceding_ixs: list[Instruction] = [], override_ix_count: Optional[int] = None, include_high_leverage_mode_config: Optional[bool] = False)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_place_spot_order_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_place_spot_order_ix",
+      "kind": "function",
+      "signature": "get_place_spot_order_ix(order_params: OrderParams, sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_revert_fill_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_revert_fill_ix",
+      "kind": "function",
+      "signature": "get_revert_fill_ix()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_settle_pnl_ixs": {
+      "fqn": "driftpy.drift_client.DriftClient.get_settle_pnl_ixs",
+      "kind": "function",
+      "signature": "get_settle_pnl_ixs(users: dict[Pubkey, UserAccount], market_indexes: list[int]) -> list[Instruction]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_spot_market_account": {
+      "fqn": "driftpy.drift_client.DriftClient.get_spot_market_account",
+      "kind": "function",
+      "signature": "get_spot_market_account(market_index: int) -> Optional[SpotMarketAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_spot_market_accounts": {
+      "fqn": "driftpy.drift_client.DriftClient.get_spot_market_accounts",
+      "kind": "function",
+      "signature": "get_spot_market_accounts() -> list[SpotMarketAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_spot_position": {
+      "fqn": "driftpy.drift_client.DriftClient.get_spot_position",
+      "kind": "function",
+      "signature": "get_spot_position(market_index: int, sub_account_id: int = None) -> Optional[SpotPosition]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_state_account": {
+      "fqn": "driftpy.drift_client.DriftClient.get_state_account",
+      "kind": "function",
+      "signature": "get_state_account() -> Optional[StateAccount]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_trigger_order_ix": {
+      "fqn": "driftpy.drift_client.DriftClient.get_trigger_order_ix",
+      "kind": "function",
+      "signature": "get_trigger_order_ix(user_account_pubkey: Pubkey, user_account: UserAccount, order: Order, filler_pubkey: Optional[Pubkey] = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_user": {
+      "fqn": "driftpy.drift_client.DriftClient.get_user",
+      "kind": "function",
+      "signature": "get_user(sub_account_id: int | None = None) -> DriftUser",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.get_user_account_public_key": {
+      "fqn": "driftpy.drift_client.DriftClient.get_user_account_public_key",
+      "kind": "function",
+      "signature": "get_user_account_public_key(sub_account_id=None) -> Pubkey",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.initialize_user": {
+      "fqn": "driftpy.drift_client.DriftClient.initialize_user",
+      "kind": "function",
+      "signature": "initialize_user(sub_account_id: int = 0, name: str = None, referrer_info: ReferrerInfo = None) -> Signature",
+      "summary": "intializes a drift user",
+      "params": [
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount id to initialize. Defaults to 0."
+        }
+      ],
+      "returns": {
+        "type": "str",
+        "description": "tx signature"
+      }
+    },
+    "driftpy.drift_client.DriftClient.modify_order": {
+      "fqn": "driftpy.drift_client.DriftClient.modify_order",
+      "kind": "function",
+      "signature": "modify_order(order_id: int, modify_order_params: ModifyOrderParams, sub_account_id: Optional[int] = None) -> Signature",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.modify_order_by_user_id": {
+      "fqn": "driftpy.drift_client.DriftClient.modify_order_by_user_id",
+      "kind": "function",
+      "signature": "modify_order_by_user_id(user_order_id: int, modify_order_params: ModifyOrderParams, sub_account_id: int = None) -> Signature",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.place_orders": {
+      "fqn": "driftpy.drift_client.DriftClient.place_orders",
+      "kind": "function",
+      "signature": "place_orders(order_params: List[OrderParams], sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.place_perp_order": {
+      "fqn": "driftpy.drift_client.DriftClient.place_perp_order",
+      "kind": "function",
+      "signature": "place_perp_order(order_params: OrderParams, sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.place_spot_order": {
+      "fqn": "driftpy.drift_client.DriftClient.place_spot_order",
+      "kind": "function",
+      "signature": "place_spot_order(order_params: OrderParams, sub_account_id: int = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.settle_pnl": {
+      "fqn": "driftpy.drift_client.DriftClient.settle_pnl",
+      "kind": "function",
+      "signature": "settle_pnl(settlee_user_account_public_key: Pubkey, settlee_user_account: UserAccount, market_index: int)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.sign_signed_msg_order_params_message": {
+      "fqn": "driftpy.drift_client.DriftClient.sign_signed_msg_order_params_message",
+      "kind": "function",
+      "signature": "sign_signed_msg_order_params_message(order_params_message: Union[dict, SignedMsgOrderParamsMessage, SignedMsgOrderParamsDelegateMessage], delegate_signer: bool = False) -> SignedMsgOrderParams",
+      "summary": "Sign a SignedMsgOrderParamsMessage",
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.subscribe": {
+      "fqn": "driftpy.drift_client.DriftClient.subscribe",
+      "kind": "function",
+      "signature": "subscribe()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.switch_active_user": {
+      "fqn": "driftpy.drift_client.DriftClient.switch_active_user",
+      "kind": "function",
+      "signature": "switch_active_user(sub_account_id: int)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.transfer_deposit": {
+      "fqn": "driftpy.drift_client.DriftClient.transfer_deposit",
+      "kind": "function",
+      "signature": "transfer_deposit(amount: int, market_index: int, from_sub_account_id: int, to_sub_account_id: int)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.unsubscribe": {
+      "fqn": "driftpy.drift_client.DriftClient.unsubscribe",
+      "kind": "function",
+      "signature": "unsubscribe()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_client.DriftClient.update_user_custom_margin_ratio": {
+      "fqn": "driftpy.drift_client.DriftClient.update_user_custom_margin_ratio",
+      "kind": "function",
+      "signature": "update_user_custom_margin_ratio(updates: List[dict]) -> Signature",
+      "summary": "Updates custom margin ratio for one or more subaccounts",
+      "params": [],
+      "returns": {
+        "type": "Signature",
+        "description": "tx sig"
+      }
+    },
+    "driftpy.drift_client.DriftClient.update_user_margin_trading_enabled": {
+      "fqn": "driftpy.drift_client.DriftClient.update_user_margin_trading_enabled",
+      "kind": "function",
+      "signature": "update_user_margin_trading_enabled(margin_trading_enabled: bool, sub_account_id: Optional[int] = None) -> Signature",
+      "summary": "Toggles margin trading for a user",
+      "params": [
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount id. Defaults to 0."
+        }
+      ],
+      "returns": {
+        "type": "Signature",
+        "description": "tx sig"
+      }
+    },
+    "driftpy.drift_client.DriftClient.withdraw": {
+      "fqn": "driftpy.drift_client.DriftClient.withdraw",
+      "kind": "function",
+      "signature": "withdraw(amount: int, market_index: int, user_token_account: Pubkey, reduce_only: bool = False, sub_account_id: int = None) -> TxSigAndSlot",
+      "summary": "withdraws from drift protocol (can also allow borrowing)",
+      "params": [
+        {
+          "name": "amount",
+          "type": "int",
+          "description": "amount to withdraw"
+        },
+        {
+          "name": "market_index",
+          "type": "int",
+          "description": ""
+        },
+        {
+          "name": "user_token_account",
+          "type": "Pubkey",
+          "description": "ata of the account to withdraw to"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool, optional",
+          "description": "if True will only withdraw existing funds else if False will allow taking out borrows. Defaults to False."
+        },
+        {
+          "name": "sub_account_id",
+          "type": "int, optional",
+          "description": "subaccount. Defaults to 0."
+        }
+      ],
+      "returns": {
+        "type": "str",
+        "description": "tx sig"
+      }
+    },
+    "driftpy.drift_user.DriftUser": {
+      "fqn": "driftpy.drift_user.DriftUser",
+      "kind": "class",
+      "signature": "DriftUser(drift_client, user_public_key: Pubkey, account_subscription: AccountSubscriptionConfig = AccountSubscriptionConfig.default())",
+      "summary": "This class is the main way to retrieve and inspect drift user account data.",
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_free_collateral": {
+      "fqn": "driftpy.drift_user.DriftUser.get_free_collateral",
+      "kind": "function",
+      "signature": "get_free_collateral(margin_category: MarginCategory = MarginCategory.INITIAL)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_health": {
+      "fqn": "driftpy.drift_user.DriftUser.get_health",
+      "kind": "function",
+      "signature": "get_health() -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_leverage": {
+      "fqn": "driftpy.drift_user.DriftUser.get_leverage",
+      "kind": "function",
+      "signature": "get_leverage(include_open_orders: bool = True) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_margin_requirement": {
+      "fqn": "driftpy.drift_user.DriftUser.get_margin_requirement",
+      "kind": "function",
+      "signature": "get_margin_requirement(margin_category: MarginCategory = MarginCategory.INITIAL, liquidation_buffer: Optional[int] = 0, strict: bool = False) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_open_orders": {
+      "fqn": "driftpy.drift_user.DriftUser.get_open_orders",
+      "kind": "function",
+      "signature": "get_open_orders()",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_order": {
+      "fqn": "driftpy.drift_user.DriftUser.get_order",
+      "kind": "function",
+      "signature": "get_order(order_id: int) -> Optional[Order]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_order_by_user_order_id": {
+      "fqn": "driftpy.drift_user.DriftUser.get_order_by_user_order_id",
+      "kind": "function",
+      "signature": "get_order_by_user_order_id(user_order_id: int)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_perp_position": {
+      "fqn": "driftpy.drift_user.DriftUser.get_perp_position",
+      "kind": "function",
+      "signature": "get_perp_position(market_index: int) -> Optional[PerpPosition]",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_total_collateral": {
+      "fqn": "driftpy.drift_user.DriftUser.get_total_collateral",
+      "kind": "function",
+      "signature": "get_total_collateral(margin_category: Optional[MarginCategory] = MarginCategory.INITIAL, strict: bool = False) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_unrealized_funding_pnl": {
+      "fqn": "driftpy.drift_user.DriftUser.get_unrealized_funding_pnl",
+      "kind": "function",
+      "signature": "get_unrealized_funding_pnl(market_index: Optional[int] = None)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.drift_user.DriftUser.get_unrealized_pnl": {
+      "fqn": "driftpy.drift_user.DriftUser.get_unrealized_pnl",
+      "kind": "function",
+      "signature": "get_unrealized_pnl(with_funding: bool = False, market_index: int = None, with_weight_margin_category: Optional[MarginCategory] = None, strict: bool = False)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.events.event_subscriber.EventSubscriber": {
+      "fqn": "driftpy.events.event_subscriber.EventSubscriber",
+      "kind": "class",
+      "signature": "EventSubscriber(connection: AsyncClient, program: Program, options: EventSubscriptionOptions = EventSubscriptionOptions.default())",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.keypair.load_keypair": {
+      "fqn": "driftpy.keypair.load_keypair",
+      "kind": "function",
+      "signature": "load_keypair(private_key)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.conversion.convert_to_number": {
+      "fqn": "driftpy.math.conversion.convert_to_number",
+      "kind": "function",
+      "signature": "convert_to_number(big_number: int, precision: int = PRICE_PRECISION) -> float",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.perp_position.calculate_entry_price": {
+      "fqn": "driftpy.math.perp_position.calculate_entry_price",
+      "kind": "function",
+      "signature": "calculate_entry_price(market_position: PerpPosition)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.spot_balance.calculate_borrow_rate": {
+      "fqn": "driftpy.math.spot_balance.calculate_borrow_rate",
+      "kind": "function",
+      "signature": "calculate_borrow_rate(spot_market: SpotMarketAccount, delta: int = 0) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.spot_balance.calculate_deposit_rate": {
+      "fqn": "driftpy.math.spot_balance.calculate_deposit_rate",
+      "kind": "function",
+      "signature": "calculate_deposit_rate(spot_market: SpotMarketAccount, delta: int = 0)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.spot_market.get_signed_token_amount": {
+      "fqn": "driftpy.math.spot_market.get_signed_token_amount",
+      "kind": "function",
+      "signature": "get_signed_token_amount(amount, balance_type)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.math.spot_market.get_token_amount": {
+      "fqn": "driftpy.math.spot_market.get_token_amount",
+      "kind": "function",
+      "signature": "get_token_amount(balance: int, spot_market: SpotMarketAccount, balance_type: SpotBalanceType) -> int",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.slot.slot_subscriber.SlotSubscriber": {
+      "fqn": "driftpy.slot.slot_subscriber.SlotSubscriber",
+      "kind": "class",
+      "signature": "SlotSubscriber(drift_client: DriftClient)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.swift.order_subscriber.SwiftOrderSubscriber": {
+      "fqn": "driftpy.swift.order_subscriber.SwiftOrderSubscriber",
+      "kind": "class",
+      "signature": "SwiftOrderSubscriber(config: SwiftOrderSubscriberConfig)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.swift.util.digest_signature": {
+      "fqn": "driftpy.swift.util.digest_signature",
+      "kind": "function",
+      "signature": "digest_signature(signature: bytes) -> str",
+      "summary": "Create a SHA-256 hash of a signature and return it as a base64 string.",
+      "params": [],
+      "returns": null
+    },
+    "driftpy.swift.util.generate_signed_msg_uuid": {
+      "fqn": "driftpy.swift.util.generate_signed_msg_uuid",
+      "kind": "function",
+      "signature": "generate_signed_msg_uuid(length=8) -> bytes",
+      "summary": "Generate a random string similar to nanoid with specified length and convert to bytes.",
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.MarketType": {
+      "fqn": "driftpy.types.MarketType",
+      "kind": "class",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.OrderTriggerCondition": {
+      "fqn": "driftpy.types.OrderTriggerCondition",
+      "kind": "class",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.OrderType": {
+      "fqn": "driftpy.types.OrderType",
+      "kind": "class",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.PositionDirection": {
+      "fqn": "driftpy.types.PositionDirection",
+      "kind": "class",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.PostOnlyParams": {
+      "fqn": "driftpy.types.PostOnlyParams",
+      "kind": "class",
+      "signature": null,
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.types.is_variant": {
+      "fqn": "driftpy.types.is_variant",
+      "kind": "function",
+      "signature": "is_variant(enum, _type: str) -> bool",
+      "summary": null,
+      "params": [],
+      "returns": null
+    },
+    "driftpy.user_map.user_map.UserMap": {
+      "fqn": "driftpy.user_map.user_map.UserMap",
+      "kind": "class",
+      "signature": "UserMap(config: UserMapConfig)",
+      "summary": null,
+      "params": [],
+      "returns": null
+    }
+  }
+}

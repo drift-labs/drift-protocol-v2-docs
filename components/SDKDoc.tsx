@@ -1,4 +1,6 @@
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import { Callout } from "nextra/components";
 import { generateDefinition, TSDoc } from "nextra/tsdoc";
 import { SDKDocTabs, SDKTab } from "./SDKDocTabs";
@@ -8,7 +10,29 @@ type SDKDocProps = {
 };
 
 const SDK_BASE_URL = "https://drift-labs.github.io/protocol-v2/sdk";
+const PYTHON_DOCS_BASE_URL = "https://drift-labs.github.io/driftpy";
 const JSDOC_LINK_RE = /{@link ([^}]*)}/g;
+const PYTHON_API_PATH = path.join(
+  process.cwd(),
+  "public",
+  "sdk",
+  "python",
+  "api.json"
+);
+
+type PythonSymbol = {
+  fqn: string;
+  kind: string | null;
+  signature: string | null;
+  summary: string | null;
+  params: Array<{ name: string; type?: string; description?: string }>;
+  returns: { type?: string; description?: string } | null;
+};
+
+type PythonApiIndex = {
+  version: number;
+  symbols: Record<string, PythonSymbol>;
+};
 
 function sanitizeDocText(text?: string) {
   if (!text) return text;
@@ -67,6 +91,157 @@ function getTsDocLink(ts: { name: string; type?: SDKBlockProps["type"]; owner?: 
     default:
       return `${SDK_BASE_URL}/functions/${name}.html`;
   }
+}
+
+let cachedPythonApiIndex: PythonApiIndex | null = null;
+function getPythonApiIndex(): PythonApiIndex | null {
+  if (cachedPythonApiIndex) return cachedPythonApiIndex;
+  try {
+    const raw = fs.readFileSync(PYTHON_API_PATH, "utf-8");
+    cachedPythonApiIndex = JSON.parse(raw) as PythonApiIndex;
+  } catch {
+    cachedPythonApiIndex = null;
+  }
+  return cachedPythonApiIndex;
+}
+
+function getPythonDocLink(fqn: string) {
+  if (fqn.startsWith("driftpy.drift_client")) {
+    return `${PYTHON_DOCS_BASE_URL}/clearing_house/`;
+  }
+  if (fqn.startsWith("driftpy.drift_user")) {
+    return `${PYTHON_DOCS_BASE_URL}/clearing_house_user/`;
+  }
+  if (fqn.startsWith("driftpy.accounts")) {
+    return `${PYTHON_DOCS_BASE_URL}/accounts/`;
+  }
+  if (fqn.startsWith("driftpy.addresses")) {
+    return `${PYTHON_DOCS_BASE_URL}/addresses/`;
+  }
+  return PYTHON_DOCS_BASE_URL;
+}
+
+function toPythonHeading(symbol: PythonSymbol) {
+  const parts = symbol.fqn.split(".");
+  const name = parts[parts.length - 1];
+  const owner = parts.length >= 2 ? parts[parts.length - 2] : undefined;
+  const isMethod =
+    symbol.kind === "function" && owner && owner[0] === owner[0]?.toUpperCase();
+  const displayName = isMethod ? `${owner}.${name}` : name;
+  const displayKind = (() => {
+    if (isMethod) return "Method";
+    if (symbol.kind === "class") return "Class";
+    if (symbol.kind === "attribute") return "Variable";
+    return "Function";
+  })();
+  return `${displayKind} ${displayName}`;
+}
+
+function splitSignatureParams(paramsText: string) {
+  const parts: string[] = [];
+  let current = "";
+  let depth = 0;
+  for (let i = 0; i < paramsText.length; i += 1) {
+    const ch = paramsText[i];
+    if (ch === "(" || ch === "[" || ch === "{") depth += 1;
+    if (ch === ")" || ch === "]" || ch === "}") depth -= 1;
+    if (ch === "," && depth === 0) {
+      parts.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts.filter(Boolean);
+}
+
+function parseSignature(signature?: string | null) {
+  if (!signature) return { params: [], returns: null as PythonSymbol["returns"] };
+  const openIdx = signature.indexOf("(");
+  const closeIdx = signature.lastIndexOf(")");
+  if (openIdx === -1 || closeIdx === -1 || closeIdx <= openIdx) {
+    return { params: [], returns: null };
+  }
+  const paramsText = signature.slice(openIdx + 1, closeIdx).trim();
+  const rawParams = paramsText ? splitSignatureParams(paramsText) : [];
+  const params = rawParams
+    .map((param) => {
+      const [namePart, typePart] = param.split(":", 2);
+      const name = namePart?.trim();
+      if (!name || name === "self") return null;
+      const type = typePart?.split("=", 1)[0]?.trim();
+      return { name, type: type || undefined };
+    })
+    .filter(Boolean) as PythonSymbol["params"];
+  const returnMatch = signature.match(/->\s*([^#]+)$/);
+  const returns = returnMatch?.[1]?.trim()
+    ? ({ type: returnMatch[1].trim(), description: undefined } satisfies PythonSymbol["returns"])
+    : null;
+  return { params, returns };
+}
+
+function PythonDoc({ symbol }: { symbol: PythonSymbol }) {
+  const summary = sanitizeDocText(symbol.summary ?? undefined);
+  const signature = sanitizeDocText(symbol.signature ?? undefined);
+  const derived = parseSignature(signature ?? undefined);
+  const params = symbol.params?.length ? symbol.params : derived.params;
+  const returns = symbol.returns ?? derived.returns;
+  return (
+    <div className="x:mt-4 x:space-y-3">
+      {signature ? null : null}
+      {summary ? <p>{summary}</p> : null}
+      {params?.length ? (
+        <div>
+          <div className="x:font-semibold">Parameters</div>
+          <table className="x:mt-3 x:w-full x:border-separate x:border-spacing-0 x:overflow-hidden x:rounded-xl x:border x:border-neutral-800/60">
+            <thead>
+              <tr className="x:bg-neutral-900/50">
+                <th className="x:w-56 x:py-2 x:px-4 x:text-left x:text-sm x:font-semibold">
+                  Name
+                </th>
+                <th className="x:py-2 x:px-4 x:text-left x:text-sm x:font-semibold">
+                  Details
+                </th>
+              </tr>
+            </thead>
+            <tbody className="x:divide-y x:divide-neutral-800/60">
+              {params.map((param) => (
+                <tr key={param.name}>
+                  <td className="x:py-3 x:px-4 x:align-top">
+                    <code className="nextra-code">{param.name}</code>
+                  </td>
+                  <td className="x:py-3 x:px-4 x:align-top">
+                    {param.type ? (
+                      <div className="x:text-sm">
+                        Type: <code className="nextra-code">{param.type}</code>
+                      </div>
+                    ) : null}
+                    {param.description ? (
+                      <div className="x:mt-2 x:text-sm">{param.description}</div>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+      {returns ? (
+        <div>
+          <div className="x:font-semibold">Returns</div>
+          <div className="x:mt-2">
+            {returns.type ? (
+              <code className="nextra-code">{returns.type}</code>
+            ) : null}
+            {returns.description ? (
+              <span>{returns.type ? ": " : ""}{returns.description}</span>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 type SDKBlockProps = {
@@ -162,9 +337,14 @@ export function SDKDoc({ children }: SDKDocProps) {
 
   if (childPy && React.isValidElement(childPy)) {
     const props = childPy.props as { name: string; children?: React.ReactNode };
+    const pythonApi = getPythonApiIndex();
+    const symbol = pythonApi?.symbols?.[props.name];
     tabs.push({
       label: "Python",
-      placeholder: true,
+      heading: symbol ? toPythonHeading(symbol) : undefined,
+      content: symbol ? <PythonDoc symbol={symbol} /> : undefined,
+      link: symbol ? getPythonDocLink(props.name) : undefined,
+      placeholder: !symbol,
       example: props.children ? { content: props.children } : undefined,
     });
   }

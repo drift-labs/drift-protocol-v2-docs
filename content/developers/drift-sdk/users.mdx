@@ -12,6 +12,12 @@ const [txSig, userAccountPublicKey] = await driftClient.initializeUserAccount(0,
 console.log(txSig, userAccountPublicKey.toBase58());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.initialize_user">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Get the next subaccount id
@@ -23,6 +29,12 @@ const nextId = driftClient.getNextSubAccountId();
 console.log(nextId);
 ```
   </TypeScript>
+
+  <Python name="getNextSubAccountId">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Get a User and subscribe
@@ -36,6 +48,12 @@ const user = driftClient.getUser(); // convenience helper
 await user.subscribe();
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_user.DriftUser">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -44,6 +62,12 @@ await user.subscribe();
 const user = driftClient.getUser(); // active subaccount
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_user">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -53,6 +77,12 @@ const user = driftClient.getUser(); // active subaccount
 const user = driftClient.getUser(1);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_user">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -62,6 +92,12 @@ const account = driftClient.getUser().getUserAccount();
 console.log(account);
 ```
   </TypeScript>
+
+  <Python name="driftpy.accounts.get_accounts.get_user_account">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -71,6 +107,12 @@ const account = driftClient.getUserAccount(); // active subaccount
 console.log(account);
 ```
   </TypeScript>
+
+  <Python name="driftpy.accounts.get_accounts.get_user_account">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -80,6 +122,12 @@ const user = driftClient.getUser(0);
 await user.fetchAccounts();
 ```
   </TypeScript>
+
+  <Python name="fetchAccounts">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Derived addresses (user account)
@@ -91,6 +139,12 @@ const userAccountPublicKey = await driftClient.getUserAccountPublicKey(0);
 console.log(userAccountPublicKey.toBase58());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.get_user_account_public_key">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Query user state (orders / positions)
@@ -108,6 +162,12 @@ const isBorrow = tokenAmount.lt(new BN(0));
 console.log({ tokenAmount: tokenAmount.toString(), isDeposit, isBorrow });
 ```
   </TypeScript>
+
+  <Python name="driftpy.math.spot_market.get_token_amount">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -117,6 +177,12 @@ const position = driftClient.getUser().getPerpPosition(0);
 console.log(position?.baseAssetAmount.toString());
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_user.DriftUser.get_perp_position">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -126,6 +192,12 @@ const order = driftClient.getUser().getOrder(1);
 console.log(order);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_user.DriftUser.get_order">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -135,6 +207,12 @@ const order = driftClient.getUser().getOrderByUserOrderId(1);
 console.log(order);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_user.DriftUser.get_order_by_user_order_id">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -144,6 +222,12 @@ const orders = driftClient.getUser().getOpenOrders();
 console.log(orders.length);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_user.DriftUser.get_open_orders">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Switch active subaccount
@@ -155,6 +239,12 @@ console.log(orders.length);
 driftClient.switchActiveUser(1);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.switch_active_user">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Update user settings (delegate / margin)
@@ -167,6 +257,12 @@ import { PublicKey } from "@solana/web3.js";
 await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
 ```
   </TypeScript>
+
+  <Python name="updateUserDelegate">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -175,6 +271,12 @@ await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
 await driftClient.updateUserMarginTradingEnabled(true, 0);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.update_user_margin_trading_enabled">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 <SDKDoc>
@@ -187,6 +289,12 @@ await driftClient.updateUserCustomMarginRatio([
 ]);
 ```
   </TypeScript>
+
+  <Python name="driftpy.drift_client.DriftClient.update_user_custom_margin_ratio">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
 ### Delete a user account
@@ -199,5 +307,11 @@ If a subaccount has no assets/liabilities, it can be deleted to reclaim rent.
 await driftClient.deleteUser(1);
 ```
   </TypeScript>
+
+  <Python name="deleteUser">
+```py
+# TODO: replace with a real DriftPy example
+```
+  </Python>
 </SDKDoc>
 
