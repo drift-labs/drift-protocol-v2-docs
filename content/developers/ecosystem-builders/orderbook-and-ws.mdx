@@ -10,37 +10,53 @@ Base URL:
 
 You’ll connect to its websocket endpoint (e.g. `wss://dlob.drift.trade/ws`).
 
-### Step 2: Subscribe to channels
+### Step 2: Subscribe to channels and handle updates
 
-Supported channels include:
+Supported channels include: `orderbook`, `orderbook_indicative`, `trades`, `heartbeat`
 
-- `orderbook`
-- `orderbook_indicative`
-- `trades`
-- `heartbeat`
+<SDKDoc>
+  <TypeScript name="WebSocket" type="class">
+```js
+const ws = new WebSocket("wss://dlob.drift.trade/ws");
 
-Example subscription message (perp orderbook):
+ws.onopen = () => {
+  // Subscribe to orderbook updates
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    channel: "orderbook",
+    marketType: "perp",
+    market: "SOL-PERP",
+    grouping: 10  // Price grouping (0.01 increments)
+  }));
 
-```json
-{
-  "type": "subscribe",
-  "channel": "orderbook",
-  "marketType": "perp",
-  "market": "SOL-PERP",
-  "grouping": 10
-}
+  // Subscribe to trades
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    channel: "trades",
+    marketType: "perp",
+    market: "SOL-PERP"
+  }));
+};
+
+ws.onmessage = (event) => {
+  const update = JSON.parse(event.data);
+
+  if (update.channel === "orderbook") {
+    console.log("Bids:", update.data.bids);
+    console.log("Asks:", update.data.asks);
+  }
+
+  if (update.channel === "trades") {
+    console.log("New trade:", update.data);
+  }
+};
+
+// Handle connection lifecycle
+ws.onerror = (error) => console.error("DLOB WS error:", error);
+ws.onclose = () => console.log("DLOB WS closed");
 ```
-
-Example subscription message (trades):
-
-```json
-{
-  "type": "subscribe",
-  "channel": "trades",
-  "marketType": "perp",
-  "market": "SOL-PERP"
-}
-```
+  </TypeScript>
+</SDKDoc>
 
 ### Step 3: Handle indicative quotes
 

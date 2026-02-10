@@ -274,6 +274,18 @@ const META = {
           "sending-actions": ""
         },
       },
+      "architecture": {
+        "title": "Architecture",
+        "items": {
+          "index": "",
+          "program-structure": "",
+          "account-model": "",
+          "dlob-architecture": "",
+          "matching-engine": "",
+          "jit-auctions": "",
+          "sdk-internals": ""
+        }
+      },
       "builder-codes": "Builder Codes",
       "--- Contribute": {
         "title": "CONTRIBUTE",

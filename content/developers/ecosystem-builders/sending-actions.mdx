@@ -27,6 +27,47 @@ UI parity requires the same risk/health calculations:
 
 - [PnL & risk](/developers/drift-sdk/pnl-risk)
 
-### Step 5: Keep transaction performance healthy
+### Step 5: Build custom transactions
 
-If you’re batching or sending frequent transactions, consider using priority fees and ALTs (address lookup tables) as described in SDK documentation and bot architecture patterns.
+For advanced use cases, you can build transactions with multiple instructions:
+
+<SDKDoc>
+  <TypeScript name="getPlacePerpOrderIx" type="method" owner="DriftClient">
+```js
+import { ComputeBudgetProgram } from "@solana/web3.js";
+import { getMarketOrderParams, PositionDirection } from "@drift-labs/sdk";
+
+// Get instruction for placing order (doesn't send tx yet)
+const orderParams = getMarketOrderParams({
+  marketIndex: 0,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+});
+
+const placeOrderIx = await driftClient.getPlacePerpOrderIx(orderParams);
+
+// Build transaction with compute budget + order instruction
+const tx = await driftClient.txSender.getVersionedTransaction(
+  [
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50000 }),
+    placeOrderIx,
+  ],
+  [], // lookup tables (if any)
+  driftClient.wallet.publicKey
+);
+
+// Sign and send
+const signature = await driftClient.txSender.sendVersionedTransaction(
+  tx,
+  [],
+  driftClient.opts
+);
+console.log("Transaction:", signature);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Step 6: Keep transaction performance healthy
+
+If you're batching or sending frequent transactions, consider using priority fees and ALTs (address lookup tables) as shown above and described in SDK documentation and bot architecture patterns.

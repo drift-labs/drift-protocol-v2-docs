@@ -1,6 +1,16 @@
 # Deposits & Withdrawals
 
-Deposits/withdrawals move tokens between your wallet token accounts and your Drift subaccount’s spot position.
+## How it works
+
+Drift uses a **cross-margin** system where all your deposits serve as collateral for all your positions across perp and spot markets. When you deposit tokens (like USDC, SOL, or other supported assets), they're added to your user account's spot balances. These deposits can be used to back perp positions, and you can borrow against them to increase leverage.
+
+Each deposit in a spot market earns **interest** from borrowers, while borrows accrue interest charges. Spot balances are tracked with precision (typically 1e6 for USDC, 1e9 for SOL) and can be positive (deposits) or negative (borrows). Your total collateral value is calculated by summing all deposits (weighted by asset weights) and subtracting borrows and unrealized perp losses.
+
+Withdrawals require sufficient free collateral, you can't withdraw funds that are backing open positions or would put your account below minimum margin requirements. The SDK handles token account derivation and precision conversion automatically.
+
+## SDK Usage
+
+Deposits/withdrawals move tokens between your wallet token accounts and your Drift subaccount's spot position.
 
 ### Converting amounts and deriving the token account
 

@@ -1,8 +1,16 @@
 # Vault Managers
 
-Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting). Vault execution still happens through Drift accounts, so vault behavior mirrors standard Drift margin + order flows.
+## How it works
 
-This guide focuses on the lifecycle and decisions a manager needs to make. For full CLI flags and details, see the vaults CLI reference in the `drift-vaults` repo.
+Vaults are delegated trading pools where **depositors** provide capital and a **manager/delegate** trades with it under strict withdrawal rules. Vaults use share-based accounting — when depositors add funds, they receive vault shares proportional to their contribution. Withdrawals work in reverse: shares are redeemed after a cooldown period (redeem period).
+
+Under the hood, each vault has its own Drift user account that the manager trades with. The vault manager has **delegate authority** over this account, allowing them to place orders and manage positions just like any other Drift account. Depositors' funds are pooled in this single account, and PnL affects all share holders proportionally.
+
+Vault parameters control risk and fees: **redeem period** (withdrawal cooldown), **max tokens** (capacity limit), **management fee** (annualized), and **profit share** (performance fee on realized gains). These protect depositors while compensating managers for performance.
+
+## Managing vaults
+
+This guide focuses on the lifecycle and decisions a manager needs to make. You can manage vaults via the CLI (recommended for most operations) or programmatically via the SDK's `VaultClient`. For full CLI flags, see the `drift-vaults` repo.
 
 ### Step 1: Understand roles and lifecycle
 

@@ -1,5 +1,15 @@
 # PnL & Risk
 
+## How it works
+
+Drift calculates your account's risk using a **health** metric that compares your total collateral (deposits minus borrows, plus unrealized perp PnL) against your margin requirements. Health = Total Collateral / Margin Requirement. When health drops below 1.0, your account becomes eligible for liquidation. Health above 1.0 means you're safe.
+
+**PnL** (Profit and Loss) comes in two forms: **unrealized** (mark-to-market value of open positions) and **realized** (settled when positions close). Unrealized PnL is calculated by comparing your position's entry price to the current oracle price. For perps, you also have **funding PnL** from periodic funding rate payments between longs and shorts.
+
+**Free collateral** is the amount of collateral not currently backing positions, it's what you can withdraw or use to open new positions. Margin requirements increase with position size and vary by market. Leverage is calculated as notional position value divided by total collateral. These metrics update in real-time as prices and positions change.
+
+## SDK Usage
+
 These helpers are commonly used for risk checks, dashboards, and liquidation logic.
 
 ### User health

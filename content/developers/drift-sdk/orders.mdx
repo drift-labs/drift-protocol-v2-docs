@@ -1,5 +1,15 @@
 # Orders
 
+## How it works
+
+Orders on Drift go through a multi-stage matching process. When you place an order, it enters a **JIT auction** (Just-In-Time) where market makers can compete to fill it at better prices. If no one fills during the auction, the order either executes against the **DLOB** (Decentralized Limit Order Book) or the **AMM** as a fallback. This design ensures you get the best price from multiple liquidity sources.
+
+Drift supports several order types: **market** (immediate execution), **limit** (rests on the orderbook at a specific price), **oracle** (price pegged to oracle with an offset), and **trigger** orders (conditional execution when a price threshold is hit). Each order has parameters like size, price, post-only flags, and reduce-only settings that control how it behaves.
+
+Orders are stored in your user account and have both an onchain order ID and an optional user-assigned ID for tracking. When an order fills, your position updates automatically, and you can query fill events to see execution details.
+
+## SDK Usage
+
 This page focuses on placing and canceling orders via `DriftClient`. For concise examples we use helper builders like `getMarketOrderParams(...)`.
 
 ### Build market order params
