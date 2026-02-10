@@ -18,23 +18,56 @@ The OpenAPI explorer lives here:
 
 - [Data API playground](/developers/data-api)
 
-### Step 2: Use Data API websockets for candles + trades
+### Step 2: Use Data API for fetching historical data
 
-The Data API websocket endpoint is:
+<SDKDoc>
+  <TypeScript name="fetch" type="function">
+```js
+// Fetch recent trades for a market
+const response = await fetch(
+  "https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100"
+);
+const trades = await response.json();
+console.log(trades.length);
 
-- `wss://data.api.drift.trade/ws`
-
-The UI subscribes by sending a message like:
-
-```json
-{
-  "type": "subscribe",
-  "symbol": "SOL-PERP",
-  "resolution": "1"
-}
+// Fetch funding rate history
+const fundingRes = await fetch(
+  "https://data.api.drift.trade/fundingRates?symbol=SOL-PERP"
+);
+const fundingRates = await fundingRes.json();
 ```
+  </TypeScript>
+</SDKDoc>
 
-### Step 3: Use DLOB + Swift for live order flow
+### Step 3: Use Data API websockets for live candles + trades
+
+<SDKDoc>
+  <TypeScript name="WebSocket" type="class">
+```js
+const ws = new WebSocket("wss://data.api.drift.trade/ws");
+
+ws.onopen = () => {
+  // Subscribe to 1-minute candles for SOL-PERP
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    symbol: "SOL-PERP",
+    resolution: "1"  // 1-minute candles
+  }));
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log("Candle update:", data);
+};
+
+ws.onerror = (error) => {
+  console.error("WebSocket error:", error);
+};
+```
+  </TypeScript>
+</SDKDoc>
+
+### Step 4: Use DLOB + Swift for live order flow
 
 For UI-parity order flow, Drift uses:
 

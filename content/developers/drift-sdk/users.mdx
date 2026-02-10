@@ -1,6 +1,16 @@
 # Users
 
-Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you’ll typically use a `User`.
+## How it works
+
+A **user account** is the onchain account that holds your positions, orders, and collateral on Drift. Each wallet can create multiple user accounts (called **subaccounts**), identified by a numeric ID (0, 1, 2, etc.). All subaccounts under the same wallet share cross-margin, meaning collateral and risk are calculated across all of them together.
+
+User accounts store your perp positions (long/short), spot balances (deposits/borrows), open orders, and leverage settings. When you interact with Drift (place orders, deposit, trade), you're modifying data in your user account. The account is a Solana PDA (Program Derived Address) owned by the Drift program.
+
+Subaccounts are useful for separating strategies, isolating risk between different trading styles, or delegating specific accounts to bots while keeping others manual. You can switch between subaccounts using the SDK, and each one maintains its own positions and orders while sharing the wallet's overall collateral pool.
+
+## SDK Usage
+
+Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you'll typically use a `User`.
 
 ### Initialize a user account
 
