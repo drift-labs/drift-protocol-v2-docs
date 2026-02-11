@@ -12,11 +12,13 @@ const JSDOC_LINK_RE = /{@link ([^}]*)}/g;
 
 function sanitizeDocText(text?: string) {
   if (!text) return text;
-  return text
-    .replace(JSDOC_LINK_RE, "$1")
-    // Prevent MDX expression parsing on stray braces.
-    .replaceAll("{", "&#123;")
-    .replaceAll("}", "&#125;");
+  return (
+    text
+      .replace(JSDOC_LINK_RE, "$1")
+      // Prevent MDX expression parsing on stray braces.
+      .replaceAll("{", "&#123;")
+      .replaceAll("}", "&#125;")
+  );
 }
 
 function sanitizeTags(tags?: Record<string, string>) {
@@ -28,7 +30,9 @@ function sanitizeTags(tags?: Record<string, string>) {
   return next;
 }
 
-function sanitizeDefinition<T extends ReturnType<typeof generateDefinition>>(definition: T) {
+function sanitizeDefinition<T extends ReturnType<typeof generateDefinition>>(
+  definition: T,
+) {
   if (!definition) return definition;
   const next = {
     ...definition,
@@ -48,7 +52,11 @@ function sanitizeDefinition<T extends ReturnType<typeof generateDefinition>>(def
   return next;
 }
 
-function getTsDocLink(ts: { name: string; type?: SDKBlockProps["type"]; owner?: string }) {
+function getTsDocLink(ts: {
+  name: string;
+  type?: SDKBlockProps["type"];
+  owner?: string;
+}) {
   const name = ts.name;
   switch (ts.type ?? "function") {
     case "class":
@@ -97,16 +105,16 @@ export function SDKDoc({ children }: SDKDocProps) {
 
   const childArray = React.Children.toArray(children);
   const childTs = childArray.find(
-    (child) => React.isValidElement(child) && child.type === TypeScript
+    (child) => React.isValidElement(child) && child.type === TypeScript,
   );
   const childPy = childArray.find(
-    (child) => React.isValidElement(child) && child.type === Python
+    (child) => React.isValidElement(child) && child.type === Python,
   );
   const childRust = childArray.find(
-    (child) => React.isValidElement(child) && child.type === Rust
+    (child) => React.isValidElement(child) && child.type === Rust,
   );
   const childApi = childArray.find(
-    (child) => React.isValidElement(child) && child.type === Api
+    (child) => React.isValidElement(child) && child.type === Api,
   );
 
   if (childTs && React.isValidElement(childTs)) {
@@ -133,24 +141,29 @@ export function SDKDoc({ children }: SDKDocProps) {
       code = `export { ${props.name} } from '${tsModule}'`;
     }
 
+    let definition;
+
+    try {
+      definition = sanitizeDefinition(
+        generateDefinition({
+          code,
+          exportName,
+        }),
+      );
+    } catch (error) {}
+
     tabs.push({
       label: "TypeScript",
       heading: `${displayType} ${displayName}`,
-      content: (() => {
-        try {
-          const definition = generateDefinition({
-            code,
-            exportName,
-          });
-          return <TSDoc definition={sanitizeDefinition(definition)} />;
-        } catch (error) {
-          return (
-            <Callout type="warning">
-              TypeScript docs unavailable for <code className="nextra-code x:max-md:break-all">{props.name}</code>.
-            </Callout>
-          );
-        }
-      })(),
+      description: definition?.description || null,
+      content: definition ? (
+        <TSDoc definition={definition} />
+      ) : (
+        <Callout type="warning">
+          TypeScript docs unavailable for{" "}
+          <code className="nextra-code x:max-md:break-all">{props.name}</code>.
+        </Callout>
+      ),
       link: getTsDocLink({
         name: props.name,
         type: tsType,
@@ -170,7 +183,10 @@ export function SDKDoc({ children }: SDKDocProps) {
   }
 
   if (childRust && React.isValidElement(childRust)) {
-    const props = childRust.props as { name: string; children?: React.ReactNode };
+    const props = childRust.props as {
+      name: string;
+      children?: React.ReactNode;
+    };
     tabs.push({
       label: "Rust",
       placeholder: true,
@@ -179,7 +195,10 @@ export function SDKDoc({ children }: SDKDocProps) {
   }
 
   if (childApi && React.isValidElement(childApi)) {
-    const props = childApi.props as { name: string; children?: React.ReactNode };
+    const props = childApi.props as {
+      name: string;
+      children?: React.ReactNode;
+    };
     tabs.push({
       label: "API",
       placeholder: true,
