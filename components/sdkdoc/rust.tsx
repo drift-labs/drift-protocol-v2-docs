@@ -421,7 +421,7 @@ export function buildRustTab(props: SDKBlockProps): SDKTab {
         .constant
     ) {
       const constant = (
-        item.inner as { constant?: { type?: unknown; const?: { value?: string } } }
+        item.inner as { constant?: { type?: unknown; const?: { value?: string, expr?: string } } }
       ).constant;
       const type = constant?.type ? typeToString(constant.type) : undefined;
       const value = constant?.const?.value ?? constant?.const?.expr;
