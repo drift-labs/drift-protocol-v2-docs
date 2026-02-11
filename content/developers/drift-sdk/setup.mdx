@@ -87,6 +87,22 @@ const driftClient = new DriftClient({
 await driftClient.subscribe();
 ```
   </TypeScript>
+  <Rust name="drift_rs::DriftClient">
+```rust
+use drift_rs::{AccountFilter, DriftClient, Wallet, grpc::GrpcSubscribeOpts};
+use solana_sdk::signature::Keypair;
+
+async fn main() {
+    let client = DriftClient::new(
+        Context::MainNet,
+        RpcClient::new("https://rpc-provider.com"),
+        Keypair::new().into(),
+    )
+    .await
+    .expect("connects");
+}
+```
+  </Rust>
 </SDKDoc>
 
 <SDKDoc>
@@ -95,6 +111,35 @@ await driftClient.subscribe();
 await driftClient.subscribe();
 ```
   </TypeScript>
+
+  <Rust name="subscribe" type="method" owner="DriftGrpcClient">
+```rust
+    // Subscribe via WebSocket
+    //
+    // 1) Ws-based live market and price changes
+    let markets = [MarketId::spot(1), MarketId::perp(0)];
+    client.subscribe_markets(&markets).await.unwrap();
+    client.subscribe_oracles(&markets).await.unwrap();
+    client.subscribe_account("SUBACCOUNT_1");
+
+    // OR 2) subscribe via gRPC (advanced)
+    // gRPC automatically subscribes to all markets and oracles
+    client.grpc_subscribe(
+      "https://grpc.example.com".into(),
+      "API-X-TOKEN".into(),
+      GrpcSubscribeOpts::default()
+        .user_accounts("SUBACCOUNT_1", "SUB_ACCOUNT_2")
+        .on_slot(move |new_slot| {
+          // do something on slot
+        })
+        .on_account(
+          AccountFilter::partial().with_discriminator(User::DISCRIMINATOR),
+          move |account| {
+              // do something on user account updates
+          })
+    ).await;
+```
+  </Rust>
 </SDKDoc>
 
 <SDKDoc>
