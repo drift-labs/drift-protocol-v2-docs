@@ -84,6 +84,30 @@ function extractKind(item?: RustItem) {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
+function renderEnumVariants(variants?: Array<{ name?: string; docs?: string }>) {
+  if (!variants?.length) return null;
+  return (
+    <table className="x:mt-4 x:w-full x:text-sm">
+      <thead>
+        <tr>
+          <th>Variant</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {variants.map((variant) => (
+          <tr key={variant.name ?? "variant"}>
+            <td>
+              <code className="nextra-code">{variant.name ?? "-"}</code>
+            </td>
+            <td>{variant.docs ?? ""}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 function typeToString(type: unknown): string {
   if (!type) return "void";
   if (typeof type === "string") return type;
@@ -147,12 +171,16 @@ function typeToString(type: unknown): string {
 
 function renderSignatureTable(params: Array<{ name: string; type: string }>) {
   if (!params.length) return null;
+  const isOptional = (type: string) =>
+    type.startsWith("Option<") || type.includes("Option<");
   return (
     <table className="x:mt-4 x:w-full x:text-sm">
       <thead>
         <tr>
           <th>Parameter</th>
           <th>Type</th>
+          <th>Required</th>
+          <th>Default</th>
         </tr>
       </thead>
       <tbody>
@@ -164,6 +192,8 @@ function renderSignatureTable(params: Array<{ name: string; type: string }>) {
             <td>
               <code className="nextra-code">{param.type}</code>
             </td>
+            <td>{isOptional(param.type) ? "No" : "Yes"}</td>
+            <td>-</td>
           </tr>
         ))}
       </tbody>
@@ -344,6 +374,9 @@ export function buildRustTab(props: SDKBlockProps): SDKTab {
     const kind = extractKind(item);
     let inputs: Array<{ name: string; type: string }> | undefined;
     let output: string | null | undefined;
+    let variants: Array<{ name?: string; docs?: string }> | undefined;
+    let typeAlias: string | undefined;
+    let constantValue: { type?: string; value?: string } | undefined;
     if (item?.inner && (item.inner as { function?: { sig?: unknown } }).function) {
       const sig = (item.inner as { function?: { sig?: unknown } }).function?.sig as
         | {
@@ -359,6 +392,44 @@ export function buildRustTab(props: SDKBlockProps): SDKTab {
       }
       output = sig?.output ? typeToString(sig.output) : null;
     }
+    if (item?.inner && (item.inner as { enum?: { variants?: number[] } }).enum) {
+      const enumInner = (item.inner as { enum?: { variants?: number[] } }).enum;
+      const variantIds = enumInner?.variants ?? [];
+      variants = variantIds
+        .map((variantId) => {
+          const variant = rustData.index[String(variantId)];
+          return {
+            name: variant?.name ?? undefined,
+            docs: variant?.docs ?? undefined,
+          };
+        })
+        .filter((variant) => variant.name);
+    }
+    if (
+      item?.inner &&
+      (item.inner as { type_alias?: { type?: unknown } }).type_alias
+    ) {
+      const alias = (item.inner as { type_alias?: { type?: unknown } })
+        .type_alias;
+      if (alias?.type) {
+        typeAlias = typeToString(alias.type);
+      }
+    }
+    if (
+      item?.inner &&
+      (item.inner as { constant?: { type?: unknown; const?: { value?: string } } })
+        .constant
+    ) {
+      const constant = (
+        item.inner as { constant?: { type?: unknown; const?: { value?: string } } }
+      ).constant;
+      const type = constant?.type ? typeToString(constant.type) : undefined;
+      const value = constant?.const?.value ?? constant?.const?.expr;
+      constantValue = {
+        type,
+        value,
+      };
+    }
     return renderRustTab({
       path,
       docs,
@@ -373,6 +444,9 @@ export function buildRustTab(props: SDKBlockProps): SDKTab {
         inputs,
         output,
       },
+      variants,
+      constantValue,
+      typeAlias,
       props,
     });
   }
@@ -384,6 +458,9 @@ function renderRustTab({
   kind,
   link,
   signature,
+  variants,
+  constantValue,
+  typeAlias,
   props,
 }: {
   path?: string;
@@ -394,9 +471,32 @@ function renderRustTab({
     inputs?: Array<{ name: string; type: string }>;
     output?: string | null;
   };
+  variants?: Array<{ name?: string; docs?: string }>;
+  constantValue?: { type?: string; value?: string };
+  typeAlias?: string;
   props: SDKBlockProps;
 }): SDKTab {
-  if (!path || docs == null) {
+  if (!path) {
+    return {
+      label: "Rust",
+      content: (
+        <Callout type="warning">
+          Rust docs unavailable for{" "}
+          <code className="nextra-code x:max-md:break-all">{props.name}</code>.
+        </Callout>
+      ),
+      example: props.children ? { content: props.children } : undefined,
+    };
+  }
+
+  const hasSignature =
+    Boolean(signature?.inputs?.length) || Boolean(signature?.output);
+  const hasVariants = Boolean(variants?.length);
+  const hasTypeAlias = Boolean(typeAlias);
+  const hasConstant = Boolean(constantValue?.type || constantValue?.value);
+  const hasDocs = docs != null && docs !== "";
+
+  if (!hasDocs && !hasSignature && !hasVariants && !hasTypeAlias && !hasConstant) {
     return {
       label: "Rust",
       content: (
@@ -418,9 +518,47 @@ function renderRustTab({
       <div>
         {renderSignatureTable(signature?.inputs ?? [])}
         {renderReturnTable(signature?.output)}
-        {docs ? null : (
-          <Callout type="info">Rust docs not available for this item.</Callout>
-        )}
+        {renderEnumVariants(variants)}
+        {constantValue ? (
+          <table className="x:mt-4 x:w-full x:text-sm">
+            <thead>
+              <tr>
+                <th>Constant</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code className="nextra-code">
+                    {constantValue.type ?? "Unknown"}
+                  </code>
+                </td>
+                <td>
+                  <code className="nextra-code">
+                    {constantValue.value ?? "-"}
+                  </code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : null}
+        {typeAlias ? (
+          <table className="x:mt-4 x:w-full x:text-sm">
+            <thead>
+              <tr>
+                <th>Type Alias</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code className="nextra-code">{typeAlias}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : null}
       </div>
     ),
     example: props.children ? { content: props.children } : undefined,
