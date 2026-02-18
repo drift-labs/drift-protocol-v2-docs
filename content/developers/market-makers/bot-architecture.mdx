@@ -290,4 +290,35 @@ A production bot typically follows this structure:
 6. Sleep until next cycle
 ```
 
-See [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) for the reference implementation of these patterns.
+## Subaccount isolation
+
+For multi-market strategies, use separate subaccounts per market to avoid order conflicts and simplify position tracking:
+
+```typescript
+// Initialize with multiple subaccounts
+const driftClient = new DriftClient({
+  connection,
+  wallet,
+  env: "mainnet-beta",
+  activeSubAccountId: 0,
+  subAccountIds: [0, 1, 2], // one per market
+});
+
+// Switch subaccount context for market-specific operations
+driftClient.switchActiveUser(subAccountId);
+```
+
+The [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) enforces a 1:1 subaccount-to-market ratio and throws if the mapping isn't configured correctly.
+
+## Gotchas
+
+- **WebSocket silent failures** — Solana WebSocket connections can stop delivering updates without disconnecting. The `resyncIntervalMs` on `OrderSubscriber` catches this, but also monitor your last-update timestamp and force-reconnect if stale for >60s.
+- **Priority fee spikes** — during congestion, priority fees can spike 100x. Set a hard cap (`maxPriorityFee`) to avoid draining your SOL balance on fees. The `PriorityFeeSubscriber` gives you the data, but you must enforce the cap.
+- **Transaction size limits** — Drift transactions reference many accounts. Without Address Lookup Tables (ALTs), you'll hit the 1232-byte transaction limit. Always fetch and use ALTs (see the ALT section above).
+- **Blockhash expiry** — Solana blockhashes expire after ~60 seconds. If your transaction is stuck in a queue, it will silently fail. Use `getLatestBlockhash` with `commitment: "confirmed"` and set `lastValidBlockHeight` for reliable expiry detection.
+- **Rate limits** — even paid RPC providers have limits. Batch reads where possible (e.g., `getMultipleAccounts`) and avoid redundant subscriptions.
+
+See [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) for the reference implementation of these patterns. Key files:
+- [`floatingMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) — mutex guards, slot-based cooldowns, watchdog timer
+- [`jitMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) — subaccount isolation, DLOB integration, volatility checks
+- [`utils.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/utils.ts) — throttling, market type conversion, volatility detection helpers

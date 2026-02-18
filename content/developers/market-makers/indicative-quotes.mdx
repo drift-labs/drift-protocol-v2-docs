@@ -164,8 +164,17 @@ quoter.setQuote({
 
 Indicative quotes show up in the [L2 orderbook](/developers/market-makers/orderbook-and-matching#rest-api-l2l3) when you request `includeIndicative=true`. They're merged with DLOB and vAMM liquidity at each price level, giving takers a fuller picture of available depth.
 
+## Gotchas
+
+- **Indicative ≠ committed** — aggregators and UIs display indicative quotes as available liquidity, but there's no onchain enforcement. If you publish quotes you can't honor, takers will experience slippage and your reputation with routing algorithms may suffer.
+- **WebSocket reconnection** — if your WebSocket connection drops, your indicative quotes disappear from the orderbook. Implement auto-reconnect and re-publish quotes on reconnection.
+- **Oracle offset mode simplifies maintenance** — using `isOracleOffset: true` means you don't need to update quotes when the oracle moves. Only update when changing spread or size. This mirrors [oracle offset orders](./normal-mm#oracle-offset-orders) for onchain quoting.
+- **Rate limiting** — the DLOB WebSocket server may throttle rapid `setQuote` updates. Publishing every 1-5 seconds is sufficient for most use cases.
+- **Null fields to clear** — sending `null` for price/size fields removes your quote. This is important for graceful shutdown — clear your indicative quotes before stopping your bot to avoid showing phantom liquidity.
+
 ## Related
 
 - [Normal MM](./normal-mm) - Resting onchain orders (committed liquidity)
-- [Orderbook & Matching](./orderbook-and-matching) - How indicative vs committed liquidity works
+- [Orderbook & Matching](./orderbook-and-matching) - How indicative vs committed liquidity works in the L2 API
 - [JIT-only MM](./jit-only) - Pair indicative quotes with JIT fills
+- [Bot Architecture](./bot-architecture) - Graceful shutdown and reconnection patterns

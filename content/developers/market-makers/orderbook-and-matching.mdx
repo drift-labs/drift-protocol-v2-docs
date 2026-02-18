@@ -376,8 +376,19 @@ Subscribing directly to onchain UserAccounts (via RPC or gRPC) can be faster tha
 
 </div>
 
+## Gotchas
+
+- **`includeVamm=true` is essential** — without it, the L2 endpoint only shows DLOB resting orders, which may be sparse for smaller markets. The vAMM provides significant depth. Always include it for a realistic view of available liquidity.
+- **`includeIndicative=true` for full picture** — indicative quotes from market makers (see [Indicative Quotes](./indicative-quotes)) are only included when this flag is set. Without it, you may underestimate available liquidity.
+- **Prices are raw precision** — L2 response prices are in `PRICE_PRECISION` (1e6) and sizes in `BASE_PRECISION` (1e9). Forgetting to divide produces nonsensical numbers.
+- **L2 `sources` is an object, not a string** — each price level's `sources` field maps source names to size strings (e.g., `{ "dlob": "5000000", "vamm": "10000000" }`). Don't try to parse it as a flat value.
+- **DLOB server can lag** — the hosted DLOB server typically updates within 1-2 seconds of onchain changes, but during high load it can lag further. For latency-sensitive strategies, build the orderbook locally using `DLOBSubscriber` + `OrderSubscriber`.
+- **Oracle offset orders in the DLOB** — oracle offset orders appear at their *effective* price (oracle + offset) in the DLOB. When the oracle moves, their DLOB price updates automatically. This means the orderbook shifts without any onchain transactions.
+
 ## Related
 
 - [JIT Auctions](./jit-auctions) - How JIT fits before DLOB matching
 - [Normal MM](./normal-mm) - Market making with resting DLOB orders
 - [JIT-only MM](./jit-only) - Active market making through auctions
+- [Indicative Quotes](./indicative-quotes) - Offchain liquidity signaling
+- [SWIFT API](./swift-api) - Pre-auction order visibility

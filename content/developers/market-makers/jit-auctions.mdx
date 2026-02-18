@@ -204,9 +204,44 @@ JIT runs first, DLOB provides backup liquidity if auction doesn't fully fill.
 - You get better prices but not instant fills
 - Use market orders for auction participation (limit orders bypass auction if they don't cross spread)
 
+## JIT Proxy library
+
+The [`@drift-labs/jit-proxy`](https://github.com/drift-labs/jit-proxy) package provides higher-level abstractions for auction participation:
+
+- **`JitterSniper`** — waits for the optimal auction slot before submitting a single fill transaction. Best for precise pricing with lower compute costs.
+- **`JitterShotgun`** — submits fill transactions at multiple auction slots simultaneously. Higher fill rate but uses more compute and SOL for fees.
+
+The [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) bot in keeper-bots-v2 demonstrates both strategies and includes market volatility checks, position sizing, and DLOB-aware pricing.
+
+```typescript
+import { JitterSniper, JitterShotgun, PriceType } from "@drift-labs/jit-proxy/lib";
+
+// Sniper: one precise fill attempt
+const jitter = new JitterSniper({
+  auctionSubscriber,
+  driftClient,
+  // ...
+});
+
+// Shotgun: multiple fill attempts across auction slots
+const jitter = new JitterShotgun({
+  auctionSubscriber,
+  driftClient,
+  // ...
+});
+```
+
+## Gotchas
+
+- **Auction slots ≠ wall-clock time** — auction duration is measured in Solana slots (~400ms each), not seconds. Network congestion can stretch slot times, affecting your timing assumptions.
+- **Partial fills are common** — multiple makers compete for the same auction. Your fill may be partial; handle `baseAssetAmountFilled < baseAssetAmount` gracefully.
+- **Compute budget for place-and-make** — these transactions are heavier than simple order placement. Budget 400-800k CU (the `JitMaker` defaults to 800k). Under-budgeting causes silent failures.
+- **Stale `takerInfo`** — if you hold a taker reference too long, the taker's order may already be filled or cancelled. Check `order.baseAssetAmount - order.baseAssetAmountFilled` for remaining size.
+
 ## Related
 
 - [Orderbook & Matching](./orderbook-and-matching) - DLOB and liquidity priority (JIT → DLOB → AMM)
 - [Matching Engine](/protocol/about-v3/matching-engine) - Full liquidity priority flow
 - [JIT-only MM](./jit-only) - Building a JIT market maker bot
 - [SWIFT API](./swift-api) - See taker orders 100-500ms before they hit the auction
+- [@drift-labs/jit-proxy](https://github.com/drift-labs/jit-proxy) - JIT proxy SDK

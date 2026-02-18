@@ -9,6 +9,8 @@ Get a simple market maker running in under 10 minutes. This guide shows how to p
 - Funded Solana account with USDC collateral
 - Basic familiarity with async/await
 
+> **⚠️ RPC choice matters:** The default `https://api.mainnet-beta.solana.com` is rate-limited and unsuitable for production bots. Use a dedicated RPC provider (Helius, Triton, etc.) or you'll hit 429 errors within minutes. For WebSocket subscriptions, you need a provider that supports `accountSubscribe`.
+
 ## Step 1: Initialize DriftClient
 
 Set up your connection and subscribe to market data.
@@ -197,7 +199,14 @@ This basic example gets you started, but production market makers need:
 - **Efficient subscriptions** — WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
 - **Multiple markets** — quote across markets simultaneously
 
+## Common pitfalls
+
+- **Forgetting `PostOnlyParams`** — without it, your "maker" orders can cross the spread and execute as taker, paying fees instead of earning rebates
+- **Using `PRICE_PRECISION` wrong** — oracle prices are in `PRICE_PRECISION` (1e6), base amounts in `BASE_PRECISION` (1e9). Mixing them up causes orders at wildly wrong prices
+- **Not initializing user account** — first-time users must call `driftClient.initializeUserAccount()` before placing orders. The SDK will throw `User account not found` otherwise
+- **32-order limit** — each Drift subaccount supports a maximum of 32 open orders. Cancel stale orders or use multiple subaccounts for multi-market strategies
+
 For production patterns and best practices, see:
-- [Normal MM](/developers/market-makers/normal-mm) - comprehensive quoting strategies
+- [Normal MM](/developers/market-makers/normal-mm) - comprehensive quoting strategies including oracle offset orders
 - [Bot Architecture](/developers/market-makers/bot-architecture) - subscription loops, throttling, priority fees
-- [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) - reference implementation
+- [keeper-bots-v2 `FloatingPerpMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) - production reference for oracle offset quoting

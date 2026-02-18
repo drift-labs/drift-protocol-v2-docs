@@ -233,9 +233,42 @@ const oracle = driftClient.getMMOracleDataForPerpMarket(0);
   </TypeScript>
 </SDKDoc>
 
+## Using JIT Proxy (JitterSniper / JitterShotgun)
+
+Instead of building fill logic from scratch, use the [`@drift-labs/jit-proxy`](https://github.com/drift-labs/jit-proxy) library which handles auction timing, transaction building, and retry logic:
+
+```typescript
+import { JitterSniper, PriceType } from "@drift-labs/jit-proxy/lib";
+
+const jitter = new JitterSniper({
+  auctionSubscriber,
+  driftClient,
+  slotSubscriber,
+});
+
+await jitter.subscribe();
+
+// The jitter handles auction timing automatically
+// You just need to configure pricing and filters
+```
+
+See the [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) bot for a complete production example using `JitterSniper`/`JitterShotgun` with:
+- Per-market subaccount isolation (1 subaccount per market)
+- Volatility-based fill rejection (`isMarketVolatile`)
+- DLOB-aware pricing (excludes own orders from best bid/ask calculation)
+- Configurable target leverage and aggressiveness
+
+## Gotchas
+
+- **Don't poll `getSlot()` per auction** — the example above calls `getSlot()` for each auction, which is expensive at scale. Instead, use a `SlotSubscriber` to cache the current slot and read from it synchronously.
+- **`isSignedMsgOrder` filtering** — if you also subscribe to SWIFT, onchain auctions for SWIFT orders will appear in `AuctionSubscriber` too. Use `isSignedMsgOrder(order)` to skip them in your onchain loop (handle them in SWIFT callback instead). See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds).
+- **One subaccount per market** — JIT fills can conflict if two markets try to use the same subaccount simultaneously. The `JitMaker` enforces 1:1 subaccount-to-market mapping.
+- **Fill rate tracking** — track your fill success rate per market. If it drops below ~20%, your pricing or latency may need adjustment.
+
 ## Related
 
 - [JIT Auctions](./jit-auctions) - Auction mechanics, pricing formula, and timeline
 - [SWIFT API](./swift-api) - Receive orders 100-500ms faster via offchain WebSocket
 - [Bot Architecture](./bot-architecture) - Priority fees, health monitoring, graceful shutdown
 - [Normal MM](./normal-mm) - Resting order approach (can be combined with JIT)
+- [@drift-labs/jit-proxy](https://github.com/drift-labs/jit-proxy) - JIT proxy SDK with `JitterSniper` and `JitterShotgun`

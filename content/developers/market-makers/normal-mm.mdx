@@ -259,4 +259,21 @@ await driftClient.cancelOrders();
   </TypeScript>
 </SDKDoc>
 
+## Reference implementation
+
+The [`FloatingPerpMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) in keeper-bots-v2 is a production example of oracle offset quoting. Key patterns it demonstrates:
+
+- **Slot-based cooldown** — waits `MARKET_UPDATE_COOLDOWN_SLOTS` (30 slots) before re-quoting a market, avoiding excessive transactions
+- **Mutex-guarded periodic tasks** — uses `async-mutex` to prevent overlapping quote updates
+- **Position-aware sizing** — adjusts order size based on `MAX_POSITION_EXPOSURE` (percentage of account collateral)
+- **Watchdog timer** — tracks last successful update to detect stale bot state
+
+## Gotchas and production tips
+
+- **Oracle offset precision** — `oraclePriceOffset` is in raw `PRICE_PRECISION` units (1e6). An offset of `500000` = $0.50, not $500,000. Double-check your math.
+- **Oracle offset orders still need updates** — while they track the oracle automatically, you must cancel and re-place when changing spread width, order size, or the number of levels. The `cancelAndPlaceOrders` method handles this atomically.
+- **32-order limit per subaccount** — if you quote 5 markets × 2 sides × 3 levels = 30 orders, you're near the limit. Use multiple subaccounts for multi-market strategies (see `JitMaker` config for subaccount-per-market pattern).
+- **`MUST_POST_ONLY` rejection** — if the oracle moves sharply and your offset order would cross the spread, it's rejected (not silently filled as taker). This is the desired behavior — catch the error and re-quote.
+- **Spot markets** — oracle offset orders work for spot markets too. Use `MarketType.SPOT` and `placeSpotOrder` / `placeAndMakeSpotOrder`.
+
 For production patterns (subscription loops, throttling, priority fees, graceful shutdown), see [Bot architecture patterns](/developers/market-makers/bot-architecture).
