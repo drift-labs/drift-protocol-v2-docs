@@ -31,7 +31,7 @@ Tracks long/short exposure in perpetual futures markets.
 **Key mechanics:**
 - Position size: `baseAssetAmount` (positive = long, negative = short)
 - Entry price: `quoteEntryAmount / baseAssetAmount`
-- Unrealized PnL: `(oraclePrice - entryPrice) × baseAssetAmount`
+- Unrealized PnL: `(oraclePrice - entryPrice) x baseAssetAmount`
 - Funding payments: Tracked via `lastCumulativeFundingRate`
 
 **Order locking:**
@@ -51,7 +51,7 @@ Represents deposits (positive) or borrows (negative) in spot markets.
 
 **Interest accrual:**
 - Uses `scaledBalance` mechanism
-- Real balance = `scaledBalance × cumulativeIndex`
+- Real balance = `scaledBalance x cumulativeIndex`
 - Avoids per-user interest calculations onchain
 - Interest compounds automatically
 
@@ -116,8 +116,8 @@ Your collateral is calculated across all spot positions:
 
 ```
 Total Collateral =
-  Σ (spot deposits × asset weight)
-  - Σ (spot borrows × liability weight)
+  Σ (spot deposits x asset weight)
+  - Σ (spot borrows x liability weight)
   + unrealized perp PnL
 ```
 
@@ -136,7 +136,7 @@ Total Collateral =
 Position margin requirements sum across all positions:
 
 ```
-Margin Requirement = Σ (position notional × initial margin ratio)
+Margin Requirement = Σ (position notional x initial margin ratio)
 ```
 
 **Initial margin ratio**
@@ -181,7 +181,7 @@ All subaccounts under the same wallet **share collateral** for cross-margin bene
 - **Flexible organization** - Separate strategies in different subaccounts
 - **Shared margin pool** - Winning positions support losing ones
 
-**SDK usage (TypeScript example — Python and Rust SDKs have equivalent methods):**
+**SDK usage (TypeScript example ,  Python and Rust SDKs have equivalent methods):**
 ```typescript
 // Switch between subaccounts
 await driftClient.switchActiveUser(1); // Switch to subaccount 1

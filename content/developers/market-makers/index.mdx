@@ -22,9 +22,9 @@ Drift supports three distinct market making approaches. The right choice depends
 |---|---|---|---|
 | **How it works** | Resting limit orders on the DLOB | React to taker auctions in real-time | Receive signed taker orders offchain before auction |
 | **Latency requirement** | Low (seconds) | Medium (sub-second) | High (100-500ms edge) |
-| **Infrastructure** | Simple — place orders, update periodically | Moderate — auction subscriber + fill logic | Advanced — WebSocket feed + fast tx submission |
+| **Infrastructure** | Simple ,  place orders, update periodically | Moderate ,  auction subscriber + fill logic | Advanced ,  WebSocket feed + fast tx submission |
 | **Capital efficiency** | Orders locked on-chain | Capital deployed only when filling | Capital deployed only when filling |
-| **Adverse selection** | Higher — resting orders can be picked off | Lower — choose which auctions to fill | Lowest — earliest look at order flow |
+| **Adverse selection** | Higher ,  resting orders can be picked off | Lower ,  choose which auctions to fill | Lowest ,  earliest look at order flow |
 | **Maker rebates** | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Txs/day (oracle offset)** | ~30 | Varies with flow | Varies with flow |
 | **Best for** | Passive MM, low-touch strategies | Active MM, inventory-aware fills | Competitive latency-sensitive MM |

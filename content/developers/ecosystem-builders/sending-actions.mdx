@@ -6,7 +6,7 @@ Once you have UI state, you can send actions using the Drift SDK. There are two 
 
 | Approach | Use when |
 |---|---|
-| High-level methods (`placePerpOrder`, `cancelOrder`) | Simple flows — one action per transaction, default compute budget |
+| High-level methods (`placePerpOrder`, `cancelOrder`) | Simple flows ,  one action per transaction, default compute budget |
 | Instruction builders (`getPlacePerpOrderIx`, `getCancelOrderIx`) | You need multiple instructions in one transaction, custom compute budget, or atomic cancel-and-replace |
 
 Most ecosystem apps start with high-level methods and move to instruction builders when they need atomic multi-step transactions or fine-grained priority fee control.
@@ -38,7 +38,7 @@ UI parity requires the same risk/health calculations:
 
 ## Step 5: Build custom transactions
 
-For advanced use cases, you can build transactions with multiple instructions. This is essential when you need atomicity — either all instructions succeed or none do.
+For advanced use cases, you can build transactions with multiple instructions. This is essential when you need atomicity ,  either all instructions succeed or none do.
 
 <SDKDoc>
   <TypeScript name="getPlacePerpOrderIx" type="method" owner="DriftClient">
@@ -140,7 +140,7 @@ console.log("Cancel + place transaction:", signature);
 
 If you're batching or sending frequent transactions, consider:
 
-- **Priority fees** — Set `ComputeUnitPrice` to land transactions faster during congestion
-- **Compute budget** — Use `setComputeUnitLimit` to allocate enough CU for multi-instruction transactions
-- **Address Lookup Tables (ALTs)** — Reduce transaction size when referencing many accounts. See SDK documentation for details.
-- **Retry logic** — Transactions can be dropped; implement retries with backoff for production systems
+- **Priority fees** ,  Set `ComputeUnitPrice` to land transactions faster during congestion
+- **Compute budget** ,  Use `setComputeUnitLimit` to allocate enough CU for multi-instruction transactions
+- **Address Lookup Tables (ALTs)** ,  Reduce transaction size when referencing many accounts. See SDK documentation for details.
+- **Retry logic** ,  Transactions can be dropped; implement retries with backoff for production systems

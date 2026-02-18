@@ -136,7 +136,7 @@ The **Decentralized Limit Order Book (DLOB)** aggregates resting limit orders fr
 
 | Class | Purpose | When to Use |
 |---|---|---|
-| **`OrderSubscriber`** | Subscribes to all user orders in real-time via WebSocket or polling | Always needed — this is the raw data source for the DLOB |
+| **`OrderSubscriber`** | Subscribes to all user orders in real-time via WebSocket or polling | Always needed ,  this is the raw data source for the DLOB |
 | **`DLOBSubscriber`** | Builds and maintains an aggregated orderbook from the order stream | When you need a continuously-updated L2/L3 orderbook view |
 | **`SlotSubscriber`** | Tracks the current Solana slot | Needed for timing-sensitive operations like JIT auctions and order expiry |
 | **`DLOB`** | Core data structure with bid/ask sides and query methods | Used internally by `DLOBSubscriber`; access via `dlobSubscriber.getDLOB()` |

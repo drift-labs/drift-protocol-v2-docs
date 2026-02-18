@@ -1,6 +1,6 @@
 # Bot Architecture Patterns
 
-Production market making bots need more than just order placement logic. This page covers the infrastructure patterns used across Drift's [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) — applicable to market making, filling, and triggering bots.
+Production market making bots need more than just order placement logic. This page covers the infrastructure patterns used across Drift's [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) ,  applicable to market making, filling, and triggering bots.
 
 ## Subscription loop + resubscribe
 
@@ -137,7 +137,7 @@ async function checkHealth() {
 
   // Emergency cancel if health is deteriorating
   if (freeCollateral < MIN_FREE_COLLATERAL || leverage > MAX_LEVERAGE) {
-    console.warn("⚠️ Health threshold breached — cancelling all orders");
+    console.warn("⚠️ Health threshold breached ,  cancelling all orders");
     await driftClient.cancelOrders(); // cancel ALL orders across all markets
     return false;
   }
@@ -190,7 +190,7 @@ process.on("uncaughtException", async (err) => {
 });
 ```
 
-**Why this matters:** If your bot crashes with orders still on the book, those orders may fill at stale prices while you're not running — classic adverse selection.
+**Why this matters:** If your bot crashes with orders still on the book, those orders may fill at stale prices while you're not running ,  classic adverse selection.
 
 ## Error handling patterns
 
@@ -208,13 +208,13 @@ async function sendWithRetry(
     } catch (err: any) {
       const errMsg = err?.message || String(err);
 
-      // Transaction expired — blockhash is stale, just retry
+      // Transaction expired ,  blockhash is stale, just retry
       if (errMsg.includes("BlockhashNotFound") || errMsg.includes("block height exceeded")) {
         console.log(`Blockhash expired (attempt ${attempt + 1}), retrying...`);
         continue;
       }
 
-      // Compute budget exceeded — increase CU limit
+      // Compute budget exceeded ,  increase CU limit
       if (errMsg.includes("exceeded CUs meter")) {
         console.warn("Compute budget exceeded, consider raising CU limit");
         continue;
@@ -226,13 +226,13 @@ async function sendWithRetry(
         return null; // don't retry, need to top up
       }
 
-      // Order would cross (post-only rejection) — price moved, skip
+      // Order would cross (post-only rejection) ,  price moved, skip
       if (errMsg.includes("PostOnlyOrderWouldBeFilled")) {
         console.log("Post-only order would cross, skipping");
         return null;
       }
 
-      // Unknown error — log and retry with backoff
+      // Unknown error ,  log and retry with backoff
       console.error(`Tx error (attempt ${attempt + 1}):`, errMsg);
       await new Promise(r => setTimeout(r, baseDelayMs * Math.pow(2, attempt)));
     }
@@ -247,7 +247,7 @@ async function sendWithRetry(
 
 For JIT and SWIFT flows, apply these filters before filling to avoid adverse selection and stay within risk limits.
 
-**Oracle validation** — Reject if oracle is stale or confidence is too wide:
+**Oracle validation** ,  Reject if oracle is stale or confidence is too wide:
 
 ```js
 const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
@@ -255,7 +255,7 @@ if (!oracle.isValid) return;
 if (oracle.confidence > maxConfidence) return;
 ```
 
-**Position limits** — Don't fill if it would exceed your max position or leverage:
+**Position limits** ,  Don't fill if it would exceed your max position or leverage:
 
 ```js
 const currentPosition = userAccount.perpPositions[marketIndex];
@@ -263,7 +263,7 @@ const newPosition = currentPosition.baseAssetAmount + fillSize;
 if (Math.abs(newPosition) > maxPositionSize) return;
 ```
 
-**Toxic flow** — Skip orders that increase risk (e.g. direction that worsens your inventory) and skip when oracle/index divergence is high:
+**Toxic flow** ,  Skip orders that increase risk (e.g. direction that worsens your inventory) and skip when oracle/index divergence is high:
 
 ```js
 if (isRiskIncreasing(order, currentPosition)) return;
@@ -312,13 +312,13 @@ The [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bo
 
 ## Gotchas
 
-- **WebSocket silent failures** — Solana WebSocket connections can stop delivering updates without disconnecting. The `resyncIntervalMs` on `OrderSubscriber` catches this, but also monitor your last-update timestamp and force-reconnect if stale for >60s.
-- **Priority fee spikes** — during congestion, priority fees can spike 100x. Set a hard cap (`maxPriorityFee`) to avoid draining your SOL balance on fees. The `PriorityFeeSubscriber` gives you the data, but you must enforce the cap.
-- **Transaction size limits** — Drift transactions reference many accounts. Without Address Lookup Tables (ALTs), you'll hit the 1232-byte transaction limit. Always fetch and use ALTs (see the ALT section above).
-- **Blockhash expiry** — Solana blockhashes expire after ~60 seconds. If your transaction is stuck in a queue, it will silently fail. Use `getLatestBlockhash` with `commitment: "confirmed"` and set `lastValidBlockHeight` for reliable expiry detection.
-- **Rate limits** — even paid RPC providers have limits. Batch reads where possible (e.g., `getMultipleAccounts`) and avoid redundant subscriptions.
+- **WebSocket silent failures** ,  Solana WebSocket connections can stop delivering updates without disconnecting. The `resyncIntervalMs` on `OrderSubscriber` catches this, but also monitor your last-update timestamp and force-reconnect if stale for >60s.
+- **Priority fee spikes** ,  during congestion, priority fees can spike 100x. Set a hard cap (`maxPriorityFee`) to avoid draining your SOL balance on fees. The `PriorityFeeSubscriber` gives you the data, but you must enforce the cap.
+- **Transaction size limits** ,  Drift transactions reference many accounts. Without Address Lookup Tables (ALTs), you'll hit the 1232-byte transaction limit. Always fetch and use ALTs (see the ALT section above).
+- **Blockhash expiry** ,  Solana blockhashes expire after ~60 seconds. If your transaction is stuck in a queue, it will silently fail. Use `getLatestBlockhash` with `commitment: "confirmed"` and set `lastValidBlockHeight` for reliable expiry detection.
+- **Rate limits** ,  even paid RPC providers have limits. Batch reads where possible (e.g., `getMultipleAccounts`) and avoid redundant subscriptions.
 
 See [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) for the reference implementation of these patterns. Key files:
-- [`floatingMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) — mutex guards, slot-based cooldowns, watchdog timer
-- [`jitMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) — subaccount isolation, DLOB integration, volatility checks
-- [`utils.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/utils.ts) — throttling, market type conversion, volatility detection helpers
+- [`floatingMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) ,  mutex guards, slot-based cooldowns, watchdog timer
+- [`jitMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) ,  subaccount isolation, DLOB integration, volatility checks
+- [`utils.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/utils.ts) ,  throttling, market type conversion, volatility detection helpers

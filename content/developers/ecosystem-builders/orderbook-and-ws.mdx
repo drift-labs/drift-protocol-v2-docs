@@ -13,11 +13,11 @@ GET https://dlob.drift.trade/l2?marketName=SOL-PERP&depth=10&includeVamm=true&in
 ```
 
 Query parameters:
-- `marketName` — Market symbol (e.g. `SOL-PERP`, `BTC-PERP`, `SOL`)
-- `depth` — Number of price levels per side (default: all)
-- `includeVamm` — Include AMM liquidity in the book (`true`/`false`)
-- `includeIndicative` — Include indicative (non-firm) quotes (`true`/`false`)
-- `grouping` — Price grouping in ticks (e.g. `10` for 0.01 increments)
+- `marketName` ,  Market symbol (e.g. `SOL-PERP`, `BTC-PERP`, `SOL`)
+- `depth` ,  Number of price levels per side (default: all)
+- `includeVamm` ,  Include AMM liquidity in the book (`true`/`false`)
+- `includeIndicative` ,  Include indicative (non-firm) quotes (`true`/`false`)
+- `grouping` ,  Price grouping in ticks (e.g. `10` for 0.01 increments)
 
 Response shape:
 ```json
@@ -40,7 +40,7 @@ Response shape:
 GET https://dlob.drift.trade/l3?marketName=SOL-PERP&includeVamm=true
 ```
 
-Returns every individual order with maker address and order ID — useful for building order-level analytics or matching simulations.
+Returns every individual order with maker address and order ID ,  useful for building order-level analytics or matching simulations.
 
 ## WebSocket connection
 
@@ -105,7 +105,7 @@ ws.onmessage = (event) => {
 // Handle connection lifecycle
 ws.onerror = (error) => console.error("DLOB WS error:", error);
 ws.onclose = () => {
-  console.log("DLOB WS closed — implement reconnection logic here");
+  console.log("DLOB WS closed ,  implement reconnection logic here");
 };
 ```
   </TypeScript>
@@ -138,4 +138,4 @@ const book = typeof parsed.data === "string"
 
 ## Map symbols consistently
 
-Market symbols (e.g. `SOL-PERP`) match the UI. The market index in response channels corresponds to the SDK's `marketIndex` — keep your market list in sync with the SDK's market metadata to avoid mismatches.
+Market symbols (e.g. `SOL-PERP`) match the UI. The market index in response channels corresponds to the SDK's `marketIndex` ,  keep your market list in sync with the SDK's market metadata to avoid mismatches.

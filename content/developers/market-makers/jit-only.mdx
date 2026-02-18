@@ -3,10 +3,10 @@
 JIT-only market making means you **do not keep a standing book**. Instead of resting limit orders on the DLOB, you compete in [JIT auctions](/protocol/about-v3/jit-faq) (see [Matching Engine](/protocol/about-v3/matching-engine) for liquidity sources) by reacting to incoming taker orders in real-time.
 
 **Why JIT-only?**
-- **No adverse selection from stale quotes** — you only commit capital when you choose to fill
-- **Selective flow** — you inspect each taker order and decide if it's profitable to fill
-- **Capital efficiency** — no capital locked in resting orders that may never fill
-- **Dynamic pricing** — price each fill based on current oracle, inventory, and market conditions
+- **No adverse selection from stale quotes** ,  you only commit capital when you choose to fill
+- **Selective flow** ,  you inspect each taker order and decide if it's profitable to fill
+- **Capital efficiency** ,  no capital locked in resting orders that may never fill
+- **Dynamic pricing** ,  price each fill based on current oracle, inventory, and market conditions
 
 **Tradeoff:** You need lower-latency infrastructure than normal MM (to react within the auction window), and you may miss fills in fast markets if your bot is slow.
 
@@ -15,9 +15,9 @@ JIT-only market making means you **do not keep a standing book**. Instead of res
 A JIT-only bot follows this loop:
 
 1. **Subscribe** to auction and order feeds (onchain via `AuctionSubscriber`, or offchain via [SWIFT](./swift-api))
-2. **Filter** incoming auctions — check oracle, position limits, toxic flow, profitability
-3. **Price** your fill — compute the best price you're willing to offer given current conditions
-4. **Fill** atomically via `placeAndMakePerpOrder` — your maker order is placed and matched against the taker in one transaction
+2. **Filter** incoming auctions ,  check oracle, position limits, toxic flow, profitability
+3. **Price** your fill ,  compute the best price you're willing to offer given current conditions
+4. **Fill** atomically via `placeAndMakePerpOrder` ,  your maker order is placed and matched against the taker in one transaction
 
 ## Subscribe to auctions / orders
 
@@ -63,7 +63,7 @@ import { OrderSubscriber } from "@drift-labs/sdk";
 
 ## Compute auction prices (helpers)
 
-Use `getAuctionPrice` to compute the current interpolated auction price at any slot. This tells you the worst price the taker would accept right now — you need to offer a price at least this good.
+Use `getAuctionPrice` to compute the current interpolated auction price at any slot. This tells you the worst price the taker would accept right now ,  you need to offer a price at least this good.
 
 <SDKDoc>
   <TypeScript name="getAuctionPrice" type="function">
@@ -90,7 +90,7 @@ See [JIT Auctions - Auction pricing](./jit-auctions#auction-pricing-formula) for
 
 ## Fill as maker (atomic place-and-make)
 
-This pattern places your maker order and fills against the taker in one transaction. You earn maker rebates and the taker gets filled — all atomic.
+This pattern places your maker order and fills against the taker in one transaction. You earn maker rebates and the taker gets filled ,  all atomic.
 
 <SDKDoc>
   <TypeScript name="placeAndMakePerpOrder" type="method" owner="DriftClient">
@@ -268,10 +268,10 @@ See the [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/sr
 
 ## Gotchas
 
-- **Don't poll `getSlot()` per auction** — the example above calls `getSlot()` for each auction, which is expensive at scale. Instead, use a `SlotSubscriber` to cache the current slot and read from it synchronously.
-- **`isSignedMsgOrder` filtering** — if you also subscribe to SWIFT, onchain auctions for SWIFT orders will appear in `AuctionSubscriber` too. Use `isSignedMsgOrder(order)` to skip them in your onchain loop (handle them in SWIFT callback instead). See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds).
-- **One subaccount per market** — JIT fills can conflict if two markets try to use the same subaccount simultaneously. The `JitMaker` enforces 1:1 subaccount-to-market mapping.
-- **Fill rate tracking** — track your fill success rate per market. If it drops below ~20%, your pricing or latency may need adjustment.
+- **Don't poll `getSlot()` per auction** ,  the example above calls `getSlot()` for each auction, which is expensive at scale. Instead, use a `SlotSubscriber` to cache the current slot and read from it synchronously.
+- **`isSignedMsgOrder` filtering** ,  if you also subscribe to SWIFT, onchain auctions for SWIFT orders will appear in `AuctionSubscriber` too. Use `isSignedMsgOrder(order)` to skip them in your onchain loop (handle them in SWIFT callback instead). See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds).
+- **One subaccount per market** ,  JIT fills can conflict if two markets try to use the same subaccount simultaneously. The `JitMaker` enforces 1:1 subaccount-to-market mapping.
+- **Fill rate tracking** ,  track your fill success rate per market. If it drops below ~20%, your pricing or latency may need adjustment.
 
 ## Related
 

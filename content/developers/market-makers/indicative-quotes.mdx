@@ -2,9 +2,9 @@
 
 Indicative quotes let market makers **signal liquidity offchain** without committing onchain orders. You publish bid/ask prices and sizes to Drift's WebSocket endpoint, where they're used for:
 
-- **UI display** — takers see available liquidity before placing orders
-- **Aggregator routing** — Jupiter and other aggregators factor indicative liquidity into routing decisions
-- **Price discovery** — helps establish fair prices in thin markets
+- **UI display** ,  takers see available liquidity before placing orders
+- **Aggregator routing** ,  Jupiter and other aggregators factor indicative liquidity into routing decisions
+- **Price discovery** ,  helps establish fair prices in thin markets
 
 **When to use indicative quotes:**
 - You want to show liquidity without paying transaction fees for onchain orders
@@ -122,7 +122,7 @@ setInterval(() => {
 
 ### Using oracle offsets
 
-If you set `isOracleOffset: true`, the `bidPrice` and `askPrice` are interpreted as offsets from the oracle price rather than absolute prices. This is analogous to [oracle offset orders](/developers/market-makers/normal-mm#oracle-offset-orders) — the quote floats with the oracle automatically.
+If you set `isOracleOffset: true`, the `bidPrice` and `askPrice` are interpreted as offsets from the oracle price rather than absolute prices. This is analogous to [oracle offset orders](/developers/market-makers/normal-mm#oracle-offset-orders) ,  the quote floats with the oracle automatically.
 
 ```typescript
 const spreadOffset = 0.25; // $0.25 from oracle
@@ -142,7 +142,7 @@ quoter.setQuote({
 To stop publishing quotes for a specific market, send a quote with any field set to `null`. The sender detects incomplete quotes and deletes the stored quote for that market:
 
 ```typescript
-// Stop quoting market 0 — setting any required field to null triggers deletion
+// Stop quoting market 0 ,  setting any required field to null triggers deletion
 quoter.setQuote({
   bidPrice: null,
   askPrice: null,
@@ -158,11 +158,11 @@ Indicative quotes show up in the [L2 orderbook](/developers/market-makers/orderb
 
 ## Gotchas
 
-- **Indicative ≠ committed** — aggregators and UIs display indicative quotes as available liquidity, but there's no onchain enforcement. If you publish quotes you can't honor, takers will experience slippage and your reputation with routing algorithms may suffer.
-- **WebSocket reconnection** — if your WebSocket connection drops, your indicative quotes disappear from the orderbook. Implement auto-reconnect and re-publish quotes on reconnection.
-- **Oracle offset mode simplifies maintenance** — using `isOracleOffset: true` means you don't need to update quotes when the oracle moves. Only update when changing spread or size. This mirrors [oracle offset orders](./normal-mm#oracle-offset-orders) for onchain quoting.
-- **Rate limiting** — the DLOB WebSocket server may throttle rapid `setQuote` updates. Publishing every 1-5 seconds is sufficient for most use cases.
-- **Null fields to clear** — sending `null` for price/size fields removes your quote. This is important for graceful shutdown — clear your indicative quotes before stopping your bot to avoid showing phantom liquidity.
+- **Indicative ≠ committed** ,  aggregators and UIs display indicative quotes as available liquidity, but there's no onchain enforcement. If you publish quotes you can't honor, takers will experience slippage and your reputation with routing algorithms may suffer.
+- **WebSocket reconnection** ,  if your WebSocket connection drops, your indicative quotes disappear from the orderbook. Implement auto-reconnect and re-publish quotes on reconnection.
+- **Oracle offset mode simplifies maintenance** ,  using `isOracleOffset: true` means you don't need to update quotes when the oracle moves. Only update when changing spread or size. This mirrors [oracle offset orders](./normal-mm#oracle-offset-orders) for onchain quoting.
+- **Rate limiting** ,  the DLOB WebSocket server may throttle rapid `setQuote` updates. Publishing every 1-5 seconds is sufficient for most use cases.
+- **Null fields to clear** ,  sending `null` for price/size fields removes your quote. This is important for graceful shutdown ,  clear your indicative quotes before stopping your bot to avoid showing phantom liquidity.
 
 ## Related
 

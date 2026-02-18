@@ -13,7 +13,7 @@ The Data API provides historical and aggregate data via simple REST endpoints. N
 
 ### Market stats
 
-Returns aggregate stats for all markets — volume, open interest, funding rate, oracle price, and market status.
+Returns aggregate stats for all markets ,  volume, open interest, funding rate, oracle price, and market status.
 
 ```
 GET https://data.api.drift.trade/stats/markets
@@ -69,9 +69,9 @@ GET https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100
 ```
 
 Query parameters:
-- `symbol` — Market symbol (required)
-- `limit` — Max results (default varies, max typically 1000)
-- `pageIndex` — For pagination
+- `symbol` ,  Market symbol (required)
+- `limit` ,  Max results (default varies, max typically 1000)
+- `pageIndex` ,  For pagination
 
 Response shape:
 ```json
@@ -161,5 +161,5 @@ ws.onerror = (error) => {
 
 For real-time orderbook and order flow, Drift uses separate services:
 
-- **DLOB server** (`https://dlob.drift.trade`) — Orderbook snapshots and streaming. See [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
-- **Swift server** (`https://swift.drift.trade`) — Signed message orders for fast execution.
+- **DLOB server** (`https://dlob.drift.trade`) ,  Orderbook snapshots and streaming. See [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
+- **Swift server** (`https://swift.drift.trade`) ,  Signed message orders for fast execution.
