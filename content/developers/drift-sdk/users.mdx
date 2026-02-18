@@ -12,7 +12,7 @@ Subaccounts are useful for separating strategies, isolating risk between differe
 
 Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you'll typically use a `User`.
 
-### Initialize a user account
+### Initialize a User Account
 
 <SDKDoc>
   <TypeScript name="initializeUserAccount" type="method" owner="DriftClient">
@@ -24,7 +24,7 @@ console.log(txSig, userAccountPublicKey.toBase58());
   </TypeScript>
 </SDKDoc>
 
-### Get the next subaccount id
+### Get the Next Subaccount ID
 
 <SDKDoc>
   <TypeScript name="getNextSubAccountId" type="method" owner="DriftClient">
@@ -35,7 +35,7 @@ console.log(nextId);
   </TypeScript>
 </SDKDoc>
 
-### Get a User and subscribe
+### Get a User and Subscribe
 
 <details>
 <summary>View User import</summary>
@@ -97,7 +97,7 @@ await user.fetchAccounts();
   </TypeScript>
 </SDKDoc>
 
-### Derived addresses (user account)
+### Derived Addresses (User Account)
 
 User accounts are **Program Derived Addresses (PDAs)** - deterministic addresses generated from seeds (the program ID, wallet authority, and subaccount ID). PDAs are a Solana concept that lets you calculate an account's address without making an RPC call.
 
@@ -114,7 +114,7 @@ console.log(userAccountPublicKey.toBase58());
   </TypeScript>
 </SDKDoc>
 
-### Query user state (orders / positions)
+### Query User State (Orders / Positions)
 
 <SDKDoc>
   <TypeScript name="getTokenAmount" type="method" owner="User">
@@ -167,7 +167,7 @@ console.log(orders.length);
   </TypeScript>
 </SDKDoc>
 
-### Active subaccount
+### Active Subaccount
 
 The **active subaccount** is the default subaccount that DriftClient methods operate on when you don't explicitly specify a subaccount ID. By default, the active subaccount is 0.
 
@@ -180,7 +180,7 @@ Many SDK methods use the active subaccount implicitly:
 
 You can change which subaccount is active using `switchActiveUser()`, or you can explicitly pass a subaccount ID to methods that support it (like `getUser(subAccountId)`).
 
-### Switch active subaccount
+### Switch Active Subaccount
 
 <SDKDoc>
   <TypeScript name="switchActiveUser" type="method" owner="DriftClient">
@@ -191,7 +191,7 @@ driftClient.switchActiveUser(1);
   </TypeScript>
 </SDKDoc>
 
-### Update delegate
+### Update Delegate
 
 A **delegate** is another wallet that can trade on behalf of your user account without being able to withdraw funds. This is useful for allowing trading bots to manage positions while keeping withdrawal authority secure.
 
@@ -207,7 +207,7 @@ await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
   </TypeScript>
 </SDKDoc>
 
-### Update margin settings
+### Update Margin Settings
 
 **Margin trading** settings control how your account can use leverage and borrow against collateral. You can enable/disable margin trading or set custom margin ratios to control risk.
 
@@ -233,7 +233,7 @@ await driftClient.updateUserCustomMarginRatio([
   </TypeScript>
 </SDKDoc>
 
-### Delete a user account
+### Delete a User Account
 
 If a subaccount has no assets/liabilities, it can be deleted to reclaim rent.
 

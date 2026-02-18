@@ -1,13 +1,22 @@
-# Precision & Types
+# Precision and Types
 
 The Drift SDK uses integer big numbers (BN) for most values. Always convert using the SDK's precision constants and helpers.
 
-### Precision constants
+## Precision Constants
+
+Each constant is a `BN` representing a power of 10. Divide a raw value by its precision constant to get the human-readable number.
+
+| Constant | Value | Used For |
+|---|---|---|
+| `PRICE_PRECISION` | 1e6 | Oracle prices, order prices |
+| `BASE_PRECISION` | 1e9 | Perp position sizes |
+| `QUOTE_PRECISION` | 1e6 | USD amounts, collateral |
 
 <SDKDoc>
-  <TypeScript name="QUOTE_PRECISION" type="variable">
+  <TypeScript name="PRICE_PRECISION" type="variable">
 ```js
-import { QUOTE_PRECISION } from "@drift-labs/sdk";
+import { PRICE_PRECISION } from "@drift-labs/sdk";
+// PRICE_PRECISION = new BN(1_000_000) — 1e6
 ```
   </TypeScript>
 </SDKDoc>
@@ -16,27 +25,65 @@ import { QUOTE_PRECISION } from "@drift-labs/sdk";
   <TypeScript name="BASE_PRECISION" type="variable">
 ```js
 import { BASE_PRECISION } from "@drift-labs/sdk";
+// BASE_PRECISION = new BN(1_000_000_000) — 1e9
 ```
   </TypeScript>
 </SDKDoc>
 
 <SDKDoc>
-  <TypeScript name="PRICE_PRECISION" type="variable">
+  <TypeScript name="QUOTE_PRECISION" type="variable">
 ```js
-import { PRICE_PRECISION } from "@drift-labs/sdk";
+import { QUOTE_PRECISION } from "@drift-labs/sdk";
+// QUOTE_PRECISION = new BN(1_000_000) — 1e6
 ```
   </TypeScript>
 </SDKDoc>
+
+## Converting Between Raw and Human-Readable Values
+
+### BN → Human Number
 
 <SDKDoc>
-  <TypeScript name="MARGIN_PRECISION" type="variable">
+  <TypeScript name="convertToNumber" type="function">
 ```js
-import { MARGIN_PRECISION } from "@drift-labs/sdk";
+import { BN, PRICE_PRECISION, BASE_PRECISION, QUOTE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+// Oracle price: raw 150_500_000 → 150.5 USD
+const rawPrice = new BN(150_500_000);
+const price = convertToNumber(rawPrice, PRICE_PRECISION);
+console.log(price); // 150.5
+
+// Position size: raw 2_500_000_000 → 2.5 SOL
+const rawBase = new BN(2_500_000_000);
+const size = convertToNumber(rawBase, BASE_PRECISION);
+console.log(size); // 2.5
+
+// Collateral: raw 10_000_000 → 10 USDC
+const rawQuote = new BN(10_000_000);
+const usd = convertToNumber(rawQuote, QUOTE_PRECISION);
+console.log(usd); // 10
 ```
   </TypeScript>
 </SDKDoc>
 
-### Token math helpers
+### Human Number → BN
+
+```js
+import { BN, BASE_PRECISION, PRICE_PRECISION } from "@drift-labs/sdk";
+
+// 1 SOL in base precision
+const oneSol = new BN(1).mul(BASE_PRECISION); // BN(1_000_000_000)
+
+// $21.23 in price precision
+const price = new BN(21_230_000); // 21.23 * 1e6
+
+// Or use DriftClient convenience helpers (available after setup):
+const size = driftClient.convertToPerpPrecision(1);     // 1 base unit as BN
+const px = driftClient.convertToPricePrecision(21.23);   // price as BN
+const spot = driftClient.convertToSpotPrecision(0, 100); // 100 USDC as BN
+```
+
+## Token Math Helpers
 
 <SDKDoc>
   <TypeScript name="getTokenAmount" type="function">
@@ -62,7 +109,7 @@ import { TEN } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-### Core enums you’ll use in bots
+## Core Enums
 
 <details>
 <summary>View OrderType import</summary>
@@ -136,4 +183,3 @@ import { OrderTriggerCondition } from "@drift-labs/sdk";
 </SDKDoc>
 
 </details>
-

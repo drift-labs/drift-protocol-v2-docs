@@ -61,24 +61,30 @@ console.log(`Oracle price: $${oraclePrice}`);
 
 ## Step 3: Place two-sided quotes
 
-Place a bid (buy) below oracle and an ask (sell) above oracle. Using `PostOnlyParams.MUST_POST_ONLY` ensures you earn maker rebates.
+Place a bid (buy) below oracle and an ask (sell) above oracle. Using `PostOnlyParams.MUST_POST_ONLY` ensures your orders never cross and you always earn maker rebates.
 
 <SDKDoc>
   <TypeScript name="placeOrders" type="method" owner="DriftClient">
 ```js
 import {
+  PRICE_PRECISION,
+  convertToNumber,
   MarketType,
   OrderType,
   PositionDirection,
   PostOnlyParams
 } from "@drift-labs/sdk";
 
-const marketIndex = 0;
+const marketIndex = 0; // SOL-PERP
 const spread = 0.5; // $0.50 spread on each side
+const size = 0.1; // 0.1 SOL per order
+
+// Fetch oracle price for spread calculation
+const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
 
 const bidPrice = oraclePrice - spread;
 const askPrice = oraclePrice + spread;
-const size = 0.1; // 0.1 SOL per order
 
 await driftClient.placeOrders([
   {
@@ -101,54 +107,95 @@ await driftClient.placeOrders([
   },
 ]);
 
-console.log("Placed two-sided quotes!");
+console.log(`Placed bid @ $${bidPrice}, ask @ $${askPrice}`);
 ```
   </TypeScript>
 </SDKDoc>
 
 ## Step 4: Monitor and update
 
-Check for fills and cancel/replace orders when the oracle moves.
+Check for fills and cancel/replace orders when the oracle moves. This complete example runs a loop that refreshes quotes every 10 seconds.
 
 <SDKDoc>
   <TypeScript name="cancelOrders" type="method" owner="DriftClient">
 ```js
-import { MarketType } from "@drift-labs/sdk";
+import {
+  PRICE_PRECISION,
+  BASE_PRECISION,
+  convertToNumber,
+  MarketType,
+  OrderType,
+  PositionDirection,
+  PostOnlyParams,
+} from "@drift-labs/sdk";
 
-// Simple update loop
+const marketIndex = 0;
+const spread = 0.5;
+const size = 0.1;
+
 setInterval(async () => {
-  const user = driftClient.getUser();
-  const position = user.getPerpPosition(marketIndex);
+  try {
+    // Check current position
+    const user = driftClient.getUser();
+    const position = user.getPerpPosition(marketIndex);
+    if (position) {
+      const posSize = convertToNumber(position.baseAssetAmount, BASE_PRECISION);
+      console.log(`Current position: ${posSize} SOL`);
+    }
 
-  // Check current position
-  if (position) {
-    console.log(`Position: ${position.baseAssetAmount.toString()}`);
+    // Cancel all existing orders for this market
+    await driftClient.cancelOrders(MarketType.PERP, marketIndex);
+
+    // Re-fetch oracle price
+    const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+    const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+
+    const bidPrice = oraclePrice - spread;
+    const askPrice = oraclePrice + spread;
+
+    // Place fresh two-sided quotes
+    await driftClient.placeOrders([
+      {
+        orderType: OrderType.LIMIT,
+        marketType: MarketType.PERP,
+        marketIndex,
+        direction: PositionDirection.LONG,
+        baseAssetAmount: driftClient.convertToPerpPrecision(size),
+        price: driftClient.convertToPricePrecision(bidPrice),
+        postOnly: PostOnlyParams.MUST_POST_ONLY,
+      },
+      {
+        orderType: OrderType.LIMIT,
+        marketType: MarketType.PERP,
+        marketIndex,
+        direction: PositionDirection.SHORT,
+        baseAssetAmount: driftClient.convertToPerpPrecision(size),
+        price: driftClient.convertToPricePrecision(askPrice),
+        postOnly: PostOnlyParams.MUST_POST_ONLY,
+      },
+    ]);
+
+    console.log(`Updated quotes: bid $${bidPrice.toFixed(2)} / ask $${askPrice.toFixed(2)}`);
+  } catch (err) {
+    console.error("Error updating quotes:", err);
   }
-
-  // Cancel existing orders
-  await driftClient.cancelOrders(MarketType.PERP, marketIndex);
-
-  // Re-fetch oracle and place new quotes
-  const newOracle = driftClient.getOracleDataForPerpMarket(marketIndex);
-  const newPrice = convertToNumber(newOracle.price, PRICE_PRECISION);
-
-  // Place new orders at updated prices...
-  // (reuse code from Step 3)
-
-}, 10000); // Update every 10 seconds
+}, 10_000); // Update every 10 seconds
 ```
   </TypeScript>
 </SDKDoc>
+
+> **Tip:** This cancel-and-replace approach sends ~2 transactions every 10 seconds. For production, consider [oracle offset orders](/developers/market-makers/normal-mm#oracle-offset-orders) which float with the oracle automatically and require only ~30 txs/day.
 
 ## Next steps
 
 This basic example gets you started, but production market makers need:
 
-- **Inventory management** - adjust spread based on position size ([Normal MM](/developers/market-makers/normal-mm))
-- **Risk controls** - position limits, health checks, emergency cancel ([Bot Architecture](/developers/market-makers/bot-architecture))
-- **JIT participation** - compete in auctions for better fills ([JIT-only MM](/developers/market-makers/jit-only))
-- **Efficient subscriptions** - WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
-- **Multiple markets** - quote across markets simultaneously
+- **Oracle offset orders** — orders that automatically track oracle price, drastically reducing transactions ([Normal MM](/developers/market-makers/normal-mm#oracle-offset-orders))
+- **Inventory management** — adjust spread based on position size ([Normal MM](/developers/market-makers/normal-mm))
+- **Risk controls** — position limits, health checks, emergency cancel ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **JIT participation** — compete in auctions for better fills ([JIT-only MM](/developers/market-makers/jit-only))
+- **Efficient subscriptions** — WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **Multiple markets** — quote across markets simultaneously
 
 For production patterns and best practices, see:
 - [Normal MM](/developers/market-makers/normal-mm) - comprehensive quoting strategies

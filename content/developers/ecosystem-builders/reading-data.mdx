@@ -2,44 +2,134 @@
 
 This page covers the core data sources used by Drift UI so external builders can mirror the same state.
 
-### Step 1: Use the Data API for history + candles
+## Data API overview
 
-Base URL:
+The Data API provides historical and aggregate data via simple REST endpoints. No authentication required.
 
-- `https://data.api.drift.trade`
-
-Common uses:
-
-- historical trades
-- funding rates
-- candles
-
-The OpenAPI explorer lives here:
-
+- Base URL: `https://data.api.drift.trade`
 - [Data API playground](/developers/data-api)
 
-### Step 2: Use Data API for fetching historical data
+## REST endpoints
+
+### Market stats
+
+Returns aggregate stats for all markets — volume, open interest, funding rate, oracle price, and market status.
+
+```
+GET https://data.api.drift.trade/stats/markets
+```
+
+Response shape:
+```json
+[
+  {
+    "marketIndex": 0,
+    "symbol": "SOL-PERP",
+    "marketType": "perp",
+    "oraclePrice": 123.456,
+    "volume24h": 50000000.0,
+    "openInterest": 12000000.0,
+    "fundingRate": 0.00012,
+    "fundingRate24hAvg": 0.00010,
+    "status": "active"
+  }
+]
+```
+
+This is the best single endpoint for building a markets overview or dashboard.
+
+### Funding rates
+
+Returns funding rate history for a specific market.
+
+```
+GET https://data.api.drift.trade/fundingRates?symbol=SOL-PERP
+```
+
+Response shape:
+```json
+[
+  {
+    "ts": 1700000000,
+    "symbol": "SOL-PERP",
+    "marketIndex": 0,
+    "fundingRate": 0.00012,
+    "oraclePrice": 123.45,
+    "markPrice": 123.50
+  }
+]
+```
+
+### Trades
+
+Returns recent trades for a market.
+
+```
+GET https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100
+```
+
+Query parameters:
+- `symbol` — Market symbol (required)
+- `limit` — Max results (default varies, max typically 1000)
+- `pageIndex` — For pagination
+
+Response shape:
+```json
+[
+  {
+    "ts": 1700000000,
+    "marketIndex": 0,
+    "marketType": "perp",
+    "filler": "...",
+    "taker": "...",
+    "maker": "...",
+    "takerOrderId": 123,
+    "makerOrderId": 456,
+    "baseAssetAmountFilled": 1000000000,
+    "quoteAssetAmountFilled": 123450000,
+    "takerFee": 50000,
+    "makerFee": -25000,
+    "action": "fill",
+    "actionExplanation": "orderFilledWithMatch"
+  }
+]
+```
+
+Note: Amounts are in protocol precision (base: 1e9, quote: 1e6). Divide accordingly for human-readable values.
+
+## Fetching data in code
 
 <SDKDoc>
   <TypeScript name="fetch" type="function">
 ```js
+// Fetch market stats for a dashboard
+const marketsRes = await fetch("https://data.api.drift.trade/stats/markets");
+const markets = await marketsRes.json();
+
+for (const m of markets) {
+  console.log(`${m.symbol}: price=${m.oraclePrice} OI=${m.openInterest} funding=${m.fundingRate}`);
+}
+
 // Fetch recent trades for a market
-const response = await fetch(
+const tradesRes = await fetch(
   "https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100"
 );
-const trades = await response.json();
-console.log(trades.length);
+const trades = await tradesRes.json();
+console.log(`Got ${trades.length} trades`);
 
 // Fetch funding rate history
 const fundingRes = await fetch(
   "https://data.api.drift.trade/fundingRates?symbol=SOL-PERP"
 );
 const fundingRates = await fundingRes.json();
+console.log(`Funding rate entries: ${fundingRates.length}`);
 ```
   </TypeScript>
 </SDKDoc>
 
-### Step 3: Use Data API websockets for live candles + trades
+## Live data via websockets
+
+The Data API also supports websocket subscriptions for live candles and trades:
 
 <SDKDoc>
   <TypeScript name="WebSocket" type="class">
@@ -67,13 +157,9 @@ ws.onerror = (error) => {
   </TypeScript>
 </SDKDoc>
 
-### Step 4: Use DLOB + Swift for live order flow
+## DLOB + Swift for live order flow
 
-For UI-parity order flow, Drift uses:
+For real-time orderbook and order flow, Drift uses separate services:
 
-- DLOB server: `https://dlob.drift.trade`
-- Swift server: `https://swift.drift.trade`
-
-See:
-
-- [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws)
+- **DLOB server** (`https://dlob.drift.trade`) — Orderbook snapshots and streaming. See [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
+- **Swift server** (`https://swift.drift.trade`) — Signed message orders for fast execution.

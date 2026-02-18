@@ -14,9 +14,24 @@ Learn how to place two-sided quotes that automatically update with oracle prices
 
 </div>
 
-## Market Making Strategies
+## Choosing a Strategy
 
-Choose your approach based on latency requirements, infrastructure, and risk tolerance:
+Drift supports three distinct market making approaches. The right choice depends on your latency infrastructure, capital efficiency goals, and operational complexity tolerance.
+
+| | Normal MM | JIT-only | SWIFT |
+|---|---|---|---|
+| **How it works** | Resting limit orders on the DLOB | React to taker auctions in real-time | Receive signed taker orders offchain before auction |
+| **Latency requirement** | Low (seconds) | Medium (sub-second) | High (100-500ms edge) |
+| **Infrastructure** | Simple — place orders, update periodically | Moderate — auction subscriber + fill logic | Advanced — WebSocket feed + fast tx submission |
+| **Capital efficiency** | Orders locked on-chain | Capital deployed only when filling | Capital deployed only when filling |
+| **Adverse selection** | Higher — resting orders can be picked off | Lower — choose which auctions to fill | Lowest — earliest look at order flow |
+| **Maker rebates** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Txs/day (oracle offset)** | ~30 | Varies with flow | Varies with flow |
+| **Best for** | Passive MM, low-touch strategies | Active MM, inventory-aware fills | Competitive latency-sensitive MM |
+
+**Recommendation:** Start with **Normal MM** using oracle offset orders (orders float with the oracle automatically, requiring very few transactions). Add **JIT** participation when you want to capture auction flow. Add **SWIFT** when you need the latency edge over other JIT makers.
+
+## Market Making Strategies
 
 <div className="doc-card-grid">
 
@@ -26,7 +41,7 @@ Choose your approach based on latency requirements, infrastructure, and risk tol
 
 **Resting orders on the DLOB**
 
-Place limit orders that rest on the orderbook until filled. Earn maker rebates while providing committed liquidity.
+Place limit orders that rest on the orderbook until filled. Use oracle offset orders to automatically track the oracle price with minimal transactions. Earn maker rebates while providing committed liquidity.
 
 **Best for:**
 - Passive market making
@@ -42,13 +57,13 @@ Place limit orders that rest on the orderbook until filled. Earn maker rebates w
 
 **Active market making through auctions**
 
-React to incoming taker orders during JIT auctions without maintaining resting orders. Compete for fills at better prices.
+React to incoming taker orders during JIT auctions without maintaining resting orders. Compete for fills at better prices. Capital is only deployed when you choose to fill.
 
 **Best for:**
 - Active market making
-- Low latency requirements
 - Dynamic pricing strategies
 - Avoiding adverse selection
+- Selective flow participation
 
 </div>
 
@@ -58,7 +73,7 @@ React to incoming taker orders during JIT auctions without maintaining resting o
 
 ### [Bot Architecture](./bot-architecture)
 
-Production patterns and best practices for building reliable market making bots. Covers infrastructure, monitoring, and operational considerations.
+Production patterns and best practices for building reliable market making bots. Covers priority fees, health monitoring, graceful shutdown, error handling, and operational considerations.
 
 </div>
 
@@ -114,7 +129,7 @@ Receive signed taker orders offchain via WebSocket before they hit the auction. 
 
 **Offchain liquidity signaling**
 
-Signal intent to provide liquidity at certain prices without committing onchain orders. Helps with price discovery for takers.
+Signal intent to provide liquidity at certain prices without committing onchain orders. Helps with price discovery for takers and aggregator routing.
 
 **Use case:** Show liquidity for UI/aggregators
 

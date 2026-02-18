@@ -1,8 +1,8 @@
 # Transfers
 
-Transfers let you move balances/positions between subaccounts owned by the same authority.
+Transfers let you move balances and positions between subaccounts owned by the same authority.
 
-## Why use subaccount transfers?
+## Why Use Subaccount Transfers?
 
 Subaccounts let you isolate risk and organize trading strategies. Common use cases for transfers include:
 
@@ -16,7 +16,7 @@ All subaccounts under the same wallet share cross-margin, but transfers let you 
 
 ## SDK Usage
 
-### Transfer a spot deposit between subaccounts
+### Transfer a Spot Deposit Between Subaccounts
 
 <SDKDoc>
   <TypeScript name="transferDeposit" type="method" owner="DriftClient">
@@ -24,24 +24,44 @@ All subaccounts under the same wallet share cross-margin, but transfers let you 
 const marketIndex = 0; // e.g. USDC
 const amount = driftClient.convertToSpotPrecision(marketIndex, 100);
 
+// transferDeposit(amount, marketIndex, fromSubAccountId, toSubAccountId)
 await driftClient.transferDeposit(amount, marketIndex, 0, 1);
 ```
   </TypeScript>
 </SDKDoc>
 
-### Transfer a perp position between subaccounts
+### Transfer a Perp Position Between Subaccounts
 
 <SDKDoc>
   <TypeScript name="transferPerpPosition" type="method" owner="DriftClient">
 ```js
-// Example: transfer 1 base unit of perp position from subaccount 0 -> 1
-await driftClient.transferPerpPosition({
-  fromSubAccountId: 0,
-  toSubAccountId: 1,
-  marketIndex: 0,
-  amount: driftClient.convertToPerpPrecision(1),
-});
+import { BASE_PRECISION, BN } from "@drift-labs/sdk";
+
+// transferPerpPosition(fromSubAccountId, toSubAccountId, marketIndex, amount)
+const amount = new BN(1).mul(BASE_PRECISION); // 1 base unit
+await driftClient.transferPerpPosition(0, 1, 0, amount);
 ```
   </TypeScript>
 </SDKDoc>
 
+### Transfer Between Insurance Fund Pools
+
+<SDKDoc>
+  <TypeScript name="transferPools" type="method" owner="DriftClient">
+```js
+// Transfer between insurance fund pools (admin only)
+await driftClient.transferPools();
+```
+  </TypeScript>
+</SDKDoc>
+
+### Transfer Isolated Perp Position Deposit
+
+<SDKDoc>
+  <TypeScript name="transferIsolatedPerpPositionDeposit" type="method" owner="DriftClient">
+```js
+// Move deposits associated with an isolated perp position between subaccounts
+await driftClient.transferIsolatedPerpPositionDeposit(0, 1, 0);
+```
+  </TypeScript>
+</SDKDoc>

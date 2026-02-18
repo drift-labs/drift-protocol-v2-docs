@@ -2,36 +2,59 @@
 
 This workflow is for teams building apps, analytics, or integrations that mirror Drift UI functionality. The goal: use the same data sources the UI uses, and send actions via the SDK.
 
-### Step 1: Decide your data sources
+## What you can build
+
+Drift's open data APIs and SDK let you build fully custom front-ends and tools:
+
+- **Portfolio tracker** — Display user positions, PnL, funding payments, and account health using the Data API and onchain account subscriptions
+- **Trading terminal** — A custom order entry UI with real-time orderbook from the DLOB websocket, candle charts from the Data API, and order execution via the SDK
+- **Analytics dashboard** — Market-level stats (volume, open interest, funding rates, oracle prices) pulled from the Data API REST endpoints
+- **Liquidation bot UI** — Monitor at-risk accounts and trigger liquidations, with a dashboard showing liquidation history and profit tracking
+- **Notification service** — Watch for fills, liquidations, or funding events via event subscriptions and push alerts to users
+
+## Step 1: Decide your data sources
 
 For UI-parity data, Drift uses a mix of:
 
-- **Data API** (historical data, candles, trades)
-- **DLOB server** (orderbook + trades websocket)
-- **Swift** (signed message orders)
+- **Data API** — Historical data, candles, trades, market stats (`https://data.api.drift.trade`)
+- **DLOB server** — Real-time orderbook and trades websocket (`https://dlob.drift.trade`)
+- **Swift** — Signed message orders for fast execution (`https://swift.drift.trade`)
 
 Start here:
 
 - [Reading data (API + websockets)](/developers/ecosystem-builders/reading-data)
 - [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws)
-- [drift-common (GitHub)](https://github.com/drift-labs/drift-common)
 
-### Step 2: Use drift-common UI building blocks
+## Step 2: Use drift-common UI building blocks
 
-If you want UI parity, the fastest path is `drift-common` - it contains shared UI utilities, hooks, and components used to render markets, accounts, health, and funding views. 
+If you want UI parity, the fastest path is [`drift-common`](https://github.com/drift-labs/drift-common) — a monorepo of shared packages used by the official Drift UI. Key packages include:
 
-### Step 3: Build UI models
+- **`@drift-labs/react`** — React hooks for subscribing to Drift accounts, positions, and market data. Handles connection lifecycle and account caching.
+- **`@drift-labs/common-ts`** — TypeScript utilities for number formatting (precision conversions), market name resolution, PDA derivation helpers, and common SDK patterns.
+- **`@drift-labs/icons`** — Market and token icons used across the Drift UI.
 
-Translate protocol data into UI shapes (markets, accounts, positions, funding, health). 
+Install from npm:
 
-### Step 4: Send actions with the SDK
+```bash
+npm install @drift-labs/react @drift-labs/common-ts
+```
+
+These packages reduce boilerplate significantly — instead of manually subscribing to accounts and formatting numbers, you get the same abstractions the Drift team uses internally.
+
+## Step 3: Build UI models
+
+Translate protocol data into UI shapes (markets, accounts, positions, funding, health). Use the SDK's `User` class for position and PnL calculations, and market account data for funding rates and oracle prices.
+
+## Step 4: Send actions with the SDK
 
 Once the UI state is ready, use the SDK to place orders, cancel, and manage accounts:
 
 - [Sending actions](/developers/ecosystem-builders/sending-actions)
 
-### Step 5: Keep parity over time
+## Step 5: Keep parity over time
 
 Track API changes and SDK updates, and review the official Data API docs:
 
 - [Data API playground](/developers/data-api)
+- [GitHub: protocol-v2](https://github.com/drift-labs/protocol-v2) — watch releases for breaking changes
+- [GitHub: drift-common](https://github.com/drift-labs/drift-common) — shared UI packages
