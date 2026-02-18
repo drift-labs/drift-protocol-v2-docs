@@ -23,6 +23,17 @@
 
 **Key benefit:** Market makers see orders 100-500ms before they land onchain, allowing faster response times and better fills.
 
+### SWIFT vs standard JIT: why the latency matters
+
+In the standard JIT flow, the taker submits a transaction to Solana → it lands onchain → your RPC/gRPC subscription fires → you compute and submit your fill. This takes 1-2 seconds minimum.
+
+With SWIFT, the taker broadcasts the signed order offchain to the SWIFT WebSocket *simultaneously* with submitting it onchain. You receive it over WebSocket in 100-500ms — before it even lands onchain. This head start lets you:
+- **Price more accurately** — you see the order while the oracle is fresher
+- **Win more auctions** — your fill tx can land at the same slot or even before other makers who rely on onchain feeds
+- **React to flow faster** — critical for inventory management and toxic flow avoidance
+
+The tradeoff: you need fast infrastructure (dedicated RPC node, low-latency WebSocket connection) to capitalize on this advantage. If your fill tx doesn't land quickly, the latency edge is wasted.
+
 </div>
 
 ## Subscribing to SWIFT orders
@@ -60,7 +71,7 @@ await swiftSubscriber.subscribe(
 
 ### With UserAccount getter
 
-Optionally provide a `userAccountGetter` to resolve taker UserAccount details:
+Optionally provide a `userAccountGetter` to resolve taker UserAccount details. This lets you inspect the taker's positions, collateral, and health before deciding to fill — useful for toxic flow filtering.
 
 ```typescript
 import { UserMap } from "@drift-labs/sdk";
@@ -81,42 +92,47 @@ const swiftSubscriber = new SwiftOrderSubscriber({
 });
 ```
 
-This allows you to check taker's positions, collateral, and other account details before filling.
-
 </div>
 
 ## Place-and-make with SWIFT
 
 <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
-For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-make](./jit-auctions#place-and-make-pattern). When filling a SWIFT order, you must submit an ed25519 verification instruction followed by the place-and-make instruction. The SDK handles this automatically.
+SWIFT fills use a special instruction (`placeAndMakeSignedMsgPerpOrder`) that includes an ed25519 signature verification — proving the taker actually signed this order offchain. The SDK handles building this instruction for you.
+
+For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-make](./jit-auctions#place-and-make-pattern). The SWIFT variant adds the signature verification step.
 
 ### Using DriftClient (recommended)
 
 ```typescript
-import { getLimitOrderParams } from "@drift-labs/sdk";
+import {
+  getLimitOrderParams,
+  PositionDirection,
+  PostOnlyParams,
+} from "@drift-labs/sdk";
 
 // From the SWIFT subscription callback
 async function fillSwiftOrder(signedMessage) {
   const { signedMsgOrderParams, uuid: signedMsgOrderUuid } = signedMessage;
 
-  // Build your maker order params
+  // Build your maker order params (opposite direction of taker)
+  const takerIsLong = signedMsgOrderParams.direction === PositionDirection.LONG;
   const makerOrderParams = getLimitOrderParams({
     marketIndex: signedMsgOrderParams.marketIndex,
-    direction: /* opposite of taker */,
-    baseAssetAmount: /* size you want to fill */,
-    price: /* your fill price */,
+    direction: takerIsLong ? PositionDirection.SHORT : PositionDirection.LONG,
+    baseAssetAmount: signedMsgOrderParams.baseAssetAmount, // fill full size
+    price: myFillPrice, // your calculated fill price
     postOnly: PostOnlyParams.MUST_POST_ONLY,
   });
 
   // Get taker info
   const takerInfo = {
     order: signedMsgOrderParams,
-    userAccount: /* taker's user account */,
+    userAccount: takerUserAccount, // from userAccountGetter or userMap
     userAccountPublicKey: signedMsgOrderParams.takerUserAccount,
   };
 
-  // Submit place-and-make
+  // Submit place-and-make (SDK handles ed25519 verification ix)
   const txSig = await driftClient.placeAndMakeSignedMsgPerpOrder(
     signedMsgOrderParams,
     signedMsgOrderUuid,
@@ -130,9 +146,11 @@ async function fillSwiftOrder(signedMessage) {
 
 ### Build instructions manually
 
-If you need more control:
+If you need more control over transaction construction (e.g., custom priority fees, specific ALTs, or bundling multiple instructions):
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
+
 const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
   signedMsgOrderParams,
   signedMsgOrderUuid,
@@ -141,8 +159,8 @@ const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
 );
 
 // ixs includes:
-// 1. ed25519 verification instruction
-// 2. place-and-make instruction
+// 1. ed25519 verification instruction (proves taker signature)
+// 2. place-and-make instruction (places your order + fills taker)
 
 // Send transaction with your preferred method
 const tx = new Transaction().add(...ixs);
@@ -159,22 +177,24 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 
 ### SWIFT flow
 
-**Timing:**
-- Order signed offchain
-- Broadcast to WebSocket
-- Makers receive in 100-500ms
-- Makers submit place-and-make
-- Order lands onchain
+**Timeline:**
+1. Taker signs order offchain
+2. Broadcast to SWIFT WebSocket (~50ms)
+3. Maker receives order (~100-500ms total)
+4. Maker submits place-and-make tx
+5. Taker's order lands onchain (~1-2s total)
+6. Maker's fill tx lands (ideally same slot)
 
 **Latency advantage:**
-- Makers see orders before they're onchain
-- Faster reaction time
-- Better prices for competitive fills
+- Makers see orders 100-500ms before onchain
+- Faster reaction time → better auction slot
+- Competitive edge for pricing and flow selection
 
 **Requirements:**
 - Subscribe to SWIFT WebSocket
-- Handle ed25519 verification
+- Handle ed25519 verification (SDK does this)
 - Fast infrastructure to capitalize on latency advantage
+- Dedicated RPC node recommended
 
 </div>
 
@@ -182,7 +202,17 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 
 ### Standard onchain auction
 
-Order lands onchain first; makers see it via RPC/gRPC (1–2s delay) and submit place-and-make. See [JIT Auctions](./jit-auctions) for auction mechanics and participation.
+**Timeline:**
+1. Taker submits tx to Solana
+2. Tx lands onchain (~1-2s)
+3. RPC/gRPC subscription fires
+4. Maker sees auction, computes fill
+5. Maker submits place-and-make tx
+6. Fill lands (~1-2s later)
+
+**Total latency:** 2-4 seconds from taker intent to maker fill
+
+See [JIT Auctions](./jit-auctions) for full auction mechanics.
 
 </div>
 
@@ -200,7 +230,7 @@ When subscribed to both SWIFT and onchain feeds, you may see the same order twic
 1. First via SWIFT WebSocket (offchain)
 2. Again when it lands onchain
 
-Use `isSignedMsgOrder()` to identify SWIFT-origin orders:
+Use `isSignedMsgOrder()` to identify SWIFT-origin orders and avoid double-handling:
 
 ```typescript
 import { isSignedMsgOrder } from "@drift-labs/sdk";
@@ -210,7 +240,8 @@ const auctions = auctionSubscriber.getAuctionOrders();
 
 for (const auction of auctions) {
   if (isSignedMsgOrder(auction.order)) {
-    // This came from SWIFT, you may have already seen it
+    // This came from SWIFT — you already saw it via WebSocket
+    // Skip to avoid submitting a duplicate fill
     continue;
   }
 
@@ -228,13 +259,14 @@ for (const auction of auctions) {
 **Latency optimization:**
 - Use dedicated RPC nodes for fastest transaction submission
 - Pre-compute oracle prices and risk checks
-- Keep WebSocket connection persistent
+- Keep WebSocket connection persistent (auto-reconnect on disconnect)
 - Use `commitment: "processed"` for fastest confirmations
 
 **Reliability:**
 - Handle WebSocket reconnections gracefully
-- Have fallback to standard auction participation
+- Have fallback to standard auction participation (via `AuctionSubscriber`)
 - Monitor fill rates and adjust strategy
+- Track SWIFT vs onchain fill success rates separately
 
 **Cost:**
 - SWIFT fills pay same maker rebates as regular fills
@@ -245,6 +277,6 @@ for (const auction of auctions) {
 
 ## Related
 
-- [JIT Auctions](./jit-auctions) - Understanding auction mechanics
+- [JIT Auctions](./jit-auctions) - Understanding auction mechanics and pricing
 - [JIT-only MM](./jit-only) - JIT market making strategy
 - [Orderbook & Matching](./orderbook-and-matching) - How orders are matched

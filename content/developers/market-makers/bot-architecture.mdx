@@ -1,57 +1,246 @@
 # Bot Architecture Patterns
 
-These patterns are used across keeper-bots (market making, fillers, triggers), and can potentially be useful to copy.
+Production market making bots need more than just order placement logic. This page covers the infrastructure patterns used across Drift's [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) — applicable to market making, filling, and triggering bots.
 
-### Subscription loop + resubscribe
+## Subscription loop + resubscribe
+
+WebSocket connections drop. RPC nodes restart. Your bot must handle reconnections automatically. The `OrderSubscriber` supports automatic resubscription and periodic resync to catch any missed updates.
 
 ```js
+import { OrderSubscriber } from "@drift-labs/sdk";
+
 const orderSubscriber = new OrderSubscriber({
   driftClient,
   subscriptionConfig: {
     type: "websocket",
-    resubTimeoutMs: 30_000,
-    resyncIntervalMs: 300_000,
+    resubTimeoutMs: 30_000,    // resubscribe if no update in 30s
+    resyncIntervalMs: 300_000, // full resync every 5 minutes
   },
 });
 await orderSubscriber.subscribe();
 ```
 
-### Periodic tasks + mutex guard
+**Why `resyncIntervalMs`?** WebSocket subscriptions can silently miss updates (dropped messages, RPC hiccups). Periodic resync ensures your local state doesn't drift from onchain reality.
+
+## Periodic tasks + mutex guard
+
+Many bot operations (refreshing quotes, running risk checks, rebalancing) should run on a timer but must not overlap. Use a mutex to prevent concurrent execution:
 
 ```js
-if (await tryAcquire(periodicTaskMutex)) {
-  try {
-    // refresh quotes, run risk checks, rebalance
-  } finally {
-    // update watchdog timestamp
+import { Mutex } from "async-mutex";
+
+const periodicTaskMutex = new Mutex();
+let lastWatchdogTs = Date.now();
+
+setInterval(async () => {
+  if (periodicTaskMutex.isLocked()) {
+    console.log("Previous cycle still running, skipping");
+    return;
   }
+
+  const release = await periodicTaskMutex.acquire();
+  try {
+    await refreshQuotes();
+    await runRiskChecks();
+    lastWatchdogTs = Date.now();
+  } catch (err) {
+    console.error("Periodic task error:", err);
+  } finally {
+    release();
+  }
+}, 10_000);
+```
+
+## Throttling / backoff
+
+When filling auctions or reacting to events, avoid hammering the same order repeatedly. Track recent attempts and enforce a cooldown:
+
+```js
+const throttledNodes = new Map<string, number>();
+
+function shouldAttemptFill(nodeKey: string, cooldownMs = 1000): boolean {
+  const lastAttempt = throttledNodes.get(nodeKey) ?? 0;
+  if (lastAttempt + cooldownMs > Date.now()) return false;
+  throttledNodes.set(nodeKey, Date.now());
+  return true;
 }
 ```
 
-### Throttling / backoff
+## Priority fees and compute budget
+
+Solana transactions compete for block space via priority fees. During congestion, your transactions will be dropped without adequate fees. The SDK provides a `PriorityFeeSubscriber` that tracks recent fee levels.
 
 ```js
-const lastAttempt = throttledNodes.get(nodeKey) ?? 0;
-if (lastAttempt + 1000 > Date.now()) return;
-throttledNodes.set(nodeKey, Date.now());
-```
+import { ComputeBudgetProgram } from "@solana/web3.js";
+import { PriorityFeeSubscriber } from "@drift-labs/sdk";
 
-### Priority fees and tx sending
+// Subscribe to priority fee data
+const priorityFeeSubscriber = new PriorityFeeSubscriber({
+  connection,
+  frequencyMs: 5000,
+});
+await priorityFeeSubscriber.subscribe();
 
-```js
+// When building transactions, set compute budget
 const priorityFee = priorityFeeSubscriber.getCustomStrategyResult();
-const ix = ComputeBudgetProgram.setComputeUnitPrice({
-  microLamports: Math.floor(priorityFee * driftClient.txSender.getSuggestedPriorityFeeMultiplier()),
+const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
+  microLamports: Math.floor(
+    priorityFee * driftClient.txSender.getSuggestedPriorityFeeMultiplier()
+  ),
+});
+
+// Also set compute unit limit to avoid overpaying
+const computeLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
+  units: 400_000, // typical for place-and-make
 });
 ```
 
-### ALT and blockhash lifecycle
+**Tip:** Place-and-make transactions typically use 200-400k compute units. Set the limit explicitly rather than defaulting to 200k (which may fail) or 1.4M (which overpays).
+
+## Address Lookup Tables (ALTs) and blockhash
+
+Drift transactions reference many accounts. Use Address Lookup Tables to compress transaction size and stay under Solana's 1232-byte limit:
 
 ```js
+// Fetch ALTs once at startup (or periodically refresh)
 const lookupTableAccounts = await driftClient.fetchAllLookupTableAccounts();
+
+// Get fresh blockhash for each transaction
 const { blockhash } = await driftClient.connection.getLatestBlockhash({
   commitment: "confirmed",
 });
+```
+
+## Health monitoring
+
+Your bot should continuously monitor its own account health and cancel orders before liquidation:
+
+```js
+import { QUOTE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+async function checkHealth() {
+  const user = driftClient.getUser();
+
+  // Check free collateral
+  const freeCollateral = convertToNumber(
+    user.getFreeCollateral(),
+    QUOTE_PRECISION
+  );
+
+  // Check leverage
+  const leverage = convertToNumber(user.getLeverage(), new BN(10_000)); // 4 decimals
+
+  // Check margin ratio
+  const marginRatio = user.getMarginRatio();
+
+  console.log(`Free collateral: $${freeCollateral.toFixed(2)}, Leverage: ${leverage.toFixed(2)}x`);
+
+  // Emergency cancel if health is deteriorating
+  if (freeCollateral < MIN_FREE_COLLATERAL || leverage > MAX_LEVERAGE) {
+    console.warn("⚠️ Health threshold breached — cancelling all orders");
+    await driftClient.cancelOrders(); // cancel ALL orders across all markets
+    return false;
+  }
+
+  return true;
+}
+
+// Run health check every cycle
+setInterval(checkHealth, 5_000);
+```
+
+## Graceful shutdown
+
+When your bot stops (deploy, crash, SIGINT), it should cancel all resting orders to avoid being picked off while offline:
+
+```js
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`Received ${signal}, shutting down gracefully...`);
+
+  try {
+    // Cancel all orders across all markets
+    console.log("Cancelling all orders...");
+    await driftClient.cancelOrders();
+    console.log("All orders cancelled");
+
+    // Unsubscribe from feeds
+    await orderSubscriber.unsubscribe();
+    await driftClient.unsubscribe();
+
+    console.log("Shutdown complete");
+  } catch (err) {
+    console.error("Error during shutdown:", err);
+  } finally {
+    process.exit(0);
+  }
+}
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
+// Also handle uncaught errors
+process.on("uncaughtException", async (err) => {
+  console.error("Uncaught exception:", err);
+  await gracefulShutdown("uncaughtException");
+});
+```
+
+**Why this matters:** If your bot crashes with orders still on the book, those orders may fill at stale prices while you're not running — classic adverse selection.
+
+## Error handling patterns
+
+Solana transactions fail for many reasons. Your bot should handle these gracefully:
+
+```js
+async function sendWithRetry(
+  fn: () => Promise<string>,
+  maxRetries = 3,
+  baseDelayMs = 500
+): Promise<string | null> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+
+      // Transaction expired — blockhash is stale, just retry
+      if (errMsg.includes("BlockhashNotFound") || errMsg.includes("block height exceeded")) {
+        console.log(`Blockhash expired (attempt ${attempt + 1}), retrying...`);
+        continue;
+      }
+
+      // Compute budget exceeded — increase CU limit
+      if (errMsg.includes("exceeded CUs meter")) {
+        console.warn("Compute budget exceeded, consider raising CU limit");
+        continue;
+      }
+
+      // Insufficient funds for priority fee
+      if (errMsg.includes("insufficient lamports")) {
+        console.error("Insufficient SOL for transaction fees");
+        return null; // don't retry, need to top up
+      }
+
+      // Order would cross (post-only rejection) — price moved, skip
+      if (errMsg.includes("PostOnlyOrderWouldBeFilled")) {
+        console.log("Post-only order would cross, skipping");
+        return null;
+      }
+
+      // Unknown error — log and retry with backoff
+      console.error(`Tx error (attempt ${attempt + 1}):`, errMsg);
+      await new Promise(r => setTimeout(r, baseDelayMs * Math.pow(2, attempt)));
+    }
+  }
+
+  console.error("Max retries exceeded");
+  return null;
+}
 ```
 
 ## Risk and filtering
@@ -82,3 +271,23 @@ if (Math.abs(oraclePrice - indexPrice) > maxDivergence) return;
 ```
 
 When subscribed to both SWIFT and onchain feeds, use `isSignedMsgOrder(order)` to avoid double-handling the same order. See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds) for details.
+
+## Putting it all together
+
+A production bot typically follows this structure:
+
+```
+1. Initialize DriftClient + subscribe
+2. Start OrderSubscriber (websocket + resync)
+3. Start PriorityFeeSubscriber
+4. Register SIGINT/SIGTERM handlers
+5. Main loop:
+   a. Check health → emergency cancel if needed
+   b. Refresh oracle prices
+   c. Update quotes (cancel-and-place or oracle offset)
+   d. Process JIT auctions (if participating)
+   e. Log metrics (position, PnL, fill rate)
+6. Sleep until next cycle
+```
+
+See [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2) for the reference implementation of these patterns.

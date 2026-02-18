@@ -1,12 +1,27 @@
 # JIT-only MM
 
-JIT-only market making means you **do not keep a standing book**. You compete in [JIT auctions](/protocol/about-v3/jit-faq) (see [Matching Engine](/protocol/about-v3/matching-engine) for liquidity sources). Instead, you:
+JIT-only market making means you **do not keep a standing book**. Instead of resting limit orders on the DLOB, you compete in [JIT auctions](/protocol/about-v3/jit-faq) (see [Matching Engine](/protocol/about-v3/matching-engine) for liquidity sources) by reacting to incoming taker orders in real-time.
 
-- subscribe to on-chain auction / order feeds,
-- compute the current “auction price” / acceptable fill price,
-- atomically fill as maker (and optionally post liquidity) when opportunities arise.
+**Why JIT-only?**
+- **No adverse selection from stale quotes** — you only commit capital when you choose to fill
+- **Selective flow** — you inspect each taker order and decide if it's profitable to fill
+- **Capital efficiency** — no capital locked in resting orders that may never fill
+- **Dynamic pricing** — price each fill based on current oracle, inventory, and market conditions
 
-### Subscribe to auctions / orders
+**Tradeoff:** You need lower-latency infrastructure than normal MM (to react within the auction window), and you may miss fills in fast markets if your bot is slow.
+
+## Architecture overview
+
+A JIT-only bot follows this loop:
+
+1. **Subscribe** to auction and order feeds (onchain via `AuctionSubscriber`, or offchain via [SWIFT](./swift-api))
+2. **Filter** incoming auctions — check oracle, position limits, toxic flow, profitability
+3. **Price** your fill — compute the best price you're willing to offer given current conditions
+4. **Fill** atomically via `placeAndMakePerpOrder` — your maker order is placed and matched against the taker in one transaction
+
+## Subscribe to auctions / orders
+
+The `AuctionSubscriber` gives you a stream of active JIT auctions. Use `commitment: "processed"` for lowest latency.
 
 <details>
 <summary>View AuctionSubscriber import</summary>
@@ -21,6 +36,18 @@ import { AuctionSubscriber } from "@drift-labs/sdk";
 
 </details>
 
+```typescript
+import { AuctionSubscriber } from "@drift-labs/sdk";
+
+const auctionSubscriber = new AuctionSubscriber({
+  driftClient,
+  opts: { commitment: "processed" },
+});
+await auctionSubscriber.subscribe();
+```
+
+For even lower latency, subscribe to [SWIFT](./swift-api) to receive signed taker orders 100-500ms before they land onchain.
+
 <details>
 <summary>View OrderSubscriber import</summary>
 
@@ -34,7 +61,9 @@ import { OrderSubscriber } from "@drift-labs/sdk";
 
 </details>
 
-### Compute auction prices (helpers)
+## Compute auction prices (helpers)
+
+Use `getAuctionPrice` to compute the current interpolated auction price at any slot. This tells you the worst price the taker would accept right now — you need to offer a price at least this good.
 
 <SDKDoc>
   <TypeScript name="getAuctionPrice" type="function">
@@ -44,21 +73,147 @@ import { getAuctionPrice } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-### Fill as maker (atomic place-and-make)
+```typescript
+import { getAuctionPrice, convertToNumber, PRICE_PRECISION } from "@drift-labs/sdk";
 
-This pattern places your maker order and fills against the taker in one transaction.
+const currentSlot = await connection.getSlot();
+const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+
+// Get the current auction price at this slot
+const auctionPriceBN = getAuctionPrice(takerOrder, currentSlot, oracle.price);
+const auctionPrice = convertToNumber(auctionPriceBN, PRICE_PRECISION);
+
+console.log(`Auction price at slot ${currentSlot}: $${auctionPrice.toFixed(4)}`);
+```
+
+See [JIT Auctions - Auction pricing](./jit-auctions#auction-pricing-formula) for the full interpolation formula and timeline explanation.
+
+## Fill as maker (atomic place-and-make)
+
+This pattern places your maker order and fills against the taker in one transaction. You earn maker rebates and the taker gets filled — all atomic.
 
 <SDKDoc>
   <TypeScript name="placeAndMakePerpOrder" type="method" owner="DriftClient">
 ```js
-// makerOrderParams: OptionalOrderParams
-// takerInfo: TakerInfo (includes taker user account + the order to fill)
+import {
+  OrderType,
+  PositionDirection,
+  PostOnlyParams,
+} from "@drift-labs/sdk";
+
+// Build your maker order (opposite direction of taker)
+const makerOrderParams = {
+  orderType: OrderType.LIMIT,
+  marketIndex: takerOrder.marketIndex,
+  direction: PositionDirection.SHORT, // if taker is LONG
+  baseAssetAmount: takerOrder.baseAssetAmount,
+  price: driftClient.convertToPricePrecision(myFillPrice),
+  postOnly: PostOnlyParams.MUST_POST_ONLY,
+};
+
+// takerInfo: includes taker's user account + the order to fill
+const takerInfo = {
+  order: takerOrder,
+  userAccount: takerUserAccount,
+};
+
 await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
 ```
   </TypeScript>
 </SDKDoc>
 
-### Practical filters
+## Complete fill loop
+
+Here's a more complete example that ties the pieces together:
+
+```typescript
+import {
+  AuctionSubscriber,
+  getAuctionPrice,
+  isSignedMsgOrder,
+  convertToNumber,
+  PRICE_PRECISION,
+  BASE_PRECISION,
+  OrderType,
+  PositionDirection,
+  PostOnlyParams,
+} from "@drift-labs/sdk";
+
+const MAX_POSITION = 100; // max 100 SOL position
+const MIN_SPREAD = 0.02;  // minimum $0.02 edge required
+
+const auctionSubscriber = new AuctionSubscriber({
+  driftClient,
+  opts: { commitment: "processed" },
+});
+await auctionSubscriber.subscribe();
+
+setInterval(async () => {
+  const auctions = auctionSubscriber.getAuctionOrders();
+
+  for (const auction of auctions) {
+    const { order, userAccount } = auction;
+
+    // Skip SWIFT orders if handling them via SwiftOrderSubscriber
+    if (isSignedMsgOrder(order)) continue;
+
+    const marketIndex = order.marketIndex;
+    const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+
+    // Check oracle validity
+    if (!oracle.isValid) continue;
+
+    // Check position limits
+    const user = driftClient.getUser();
+    const position = user.getPerpPosition(marketIndex);
+    const currentSize = position
+      ? Math.abs(convertToNumber(position.baseAssetAmount, BASE_PRECISION))
+      : 0;
+    const fillSize = convertToNumber(order.baseAssetAmount, BASE_PRECISION);
+    if (currentSize + fillSize > MAX_POSITION) continue;
+
+    // Get current auction price
+    const currentSlot = await driftClient.connection.getSlot();
+    const auctionPriceBN = getAuctionPrice(order, currentSlot, oracle.price);
+    const auctionPrice = convertToNumber(auctionPriceBN, PRICE_PRECISION);
+    const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+
+    // Calculate our fill price (oracle + small edge)
+    const takerIsLong = order.direction === PositionDirection.LONG;
+    const edge = MIN_SPREAD;
+    const myFillPrice = takerIsLong
+      ? oraclePrice + edge   // sell to long taker above oracle
+      : oraclePrice - edge;  // buy from short taker below oracle
+
+    // Check if our price is within the auction range
+    const isCompetitive = takerIsLong
+      ? myFillPrice <= auctionPrice
+      : myFillPrice >= auctionPrice;
+
+    if (!isCompetitive) continue;
+
+    // Fill!
+    try {
+      await driftClient.placeAndMakePerpOrder(
+        {
+          orderType: OrderType.LIMIT,
+          marketIndex,
+          direction: takerIsLong ? PositionDirection.SHORT : PositionDirection.LONG,
+          baseAssetAmount: order.baseAssetAmount,
+          price: driftClient.convertToPricePrecision(myFillPrice),
+          postOnly: PostOnlyParams.MUST_POST_ONLY,
+        },
+        { order, userAccount }
+      );
+      console.log(`Filled ${fillSize} @ $${myFillPrice.toFixed(4)}`);
+    } catch (err) {
+      console.error("Fill failed:", err);
+    }
+  }
+}, 1_000); // check every second
+```
+
+## Practical filters
 
 Apply risk and filtering checks before filling: oracle validity, position limits, toxic-flow detection, and (if you use both feeds) skip Swift-origin orders via `isSignedMsgOrder()` so you don't double-handle. See [Bot Architecture - Risk and filtering](./bot-architecture#risk-and-filtering) for shared patterns and code.
 
@@ -78,3 +233,9 @@ const oracle = driftClient.getMMOracleDataForPerpMarket(0);
   </TypeScript>
 </SDKDoc>
 
+## Related
+
+- [JIT Auctions](./jit-auctions) - Auction mechanics, pricing formula, and timeline
+- [SWIFT API](./swift-api) - Receive orders 100-500ms faster via offchain WebSocket
+- [Bot Architecture](./bot-architecture) - Priority fees, health monitoring, graceful shutdown
+- [Normal MM](./normal-mm) - Resting order approach (can be combined with JIT)
