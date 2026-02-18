@@ -59,6 +59,9 @@ const keypair = loadKeypair("<KEYPAIR_PATH>");
   </TypeScript>
 </SDKDoc>
 
+<details>
+<summary>View Wallet import</summary>
+
 <SDKDoc>
   <TypeScript name="Wallet" type="class">
 ```js
@@ -68,6 +71,11 @@ const wallet = new Wallet(loadKeypair("<KEYPAIR_PATH>"));
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
+
+<details>
+<summary>View DriftClient import</summary>
 
 <SDKDoc>
   <TypeScript name="DriftClient" type="class">
@@ -88,6 +96,8 @@ await driftClient.subscribe();
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
 
 <SDKDoc>
   <TypeScript name="subscribe" type="method" owner="DriftClient">
@@ -118,6 +128,9 @@ await driftClient.unsubscribe();
 
 For most bots, websocket subscriptions are the easiest way to keep markets and users up to date. For read-only workflows or when you need tighter control over RPC load, you can switch to polling with a `BulkAccountLoader`.
 
+<details>
+<summary>View BulkAccountLoader import</summary>
+
 <SDKDoc>
   <TypeScript name="BulkAccountLoader" type="class">
 ```js
@@ -125,6 +138,8 @@ import { BulkAccountLoader } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
 
 ```js
 import { BulkAccountLoader } from "@drift-labs/sdk";

@@ -53,3 +53,32 @@ const { blockhash } = await driftClient.connection.getLatestBlockhash({
   commitment: "confirmed",
 });
 ```
+
+## Risk and filtering
+
+For JIT and SWIFT flows, apply these filters before filling to avoid adverse selection and stay within risk limits.
+
+**Oracle validation** — Reject if oracle is stale or confidence is too wide:
+
+```js
+const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+if (!oracle.isValid) return;
+if (oracle.confidence > maxConfidence) return;
+```
+
+**Position limits** — Don't fill if it would exceed your max position or leverage:
+
+```js
+const currentPosition = userAccount.perpPositions[marketIndex];
+const newPosition = currentPosition.baseAssetAmount + fillSize;
+if (Math.abs(newPosition) > maxPositionSize) return;
+```
+
+**Toxic flow** — Skip orders that increase risk (e.g. direction that worsens your inventory) and skip when oracle/index divergence is high:
+
+```js
+if (isRiskIncreasing(order, currentPosition)) return;
+if (Math.abs(oraclePrice - indexPrice) > maxDivergence) return;
+```
+
+When subscribed to both SWIFT and onchain feeds, use `isSignedMsgOrder(order)` to avoid double-handling the same order. See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds) for details.

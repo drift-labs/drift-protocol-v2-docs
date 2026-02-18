@@ -190,7 +190,7 @@ const META = {
     "type": "page",
     "items": {
       "drift-sdk": {
-        "title": "Drift TS SDK",
+        "title": "Drift SDK",
         "items": {
           "setup": "",
           "precision-and-types": "",
@@ -203,7 +203,8 @@ const META = {
           "events": "",
           "swaps": "",
           "swift": "",
-          "builder-codes": ""
+          "builder-codes": "",
+          "sdk-internals": ""
         },
       },
       "data-api": {
@@ -213,6 +214,14 @@ const META = {
           "glossary": ""
         }
       },
+      "concepts": {
+        "title": "Concepts",
+        "items": {
+          "index": "",
+          "program-structure": "",
+          "account-model": ""
+        }
+      },
       "--- guides": {
         "title": "GUIDES",
         "type": "separator"
@@ -220,13 +229,15 @@ const META = {
       "market-makers": {
         "title": "Market Makers",
         "items": {
+          "index": "",
+          "quickstart": "",
           "normal-mm": "",
-          "orderbook": "",
           "jit-only": "",
-          "swift-order-feed": "",
-          "swift-place-and-make": "",
-          "indicative-quotes": "",
-          "bot-architecture": ""
+          "bot-architecture": "",
+          "orderbook-and-matching": "",
+          "jit-auctions": "",
+          "swift-api": "",
+          "indicative-quotes": ""
         }
       },
       "vault-managers": {
@@ -277,13 +288,7 @@ const META = {
       "architecture": {
         "title": "Architecture",
         "items": {
-          "index": "",
-          "program-structure": "",
-          "account-model": "",
-          "dlob-architecture": "",
-          "matching-engine": "",
-          "jit-auctions": "",
-          "sdk-internals": ""
+          "index": ""
         }
       },
       "builder-codes": "Builder Codes",

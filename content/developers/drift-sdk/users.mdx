@@ -37,6 +37,9 @@ console.log(nextId);
 
 ### Get a User and subscribe
 
+<details>
+<summary>View User import</summary>
+
 <SDKDoc>
   <TypeScript name="User" type="class">
 ```js
@@ -47,6 +50,8 @@ await user.subscribe();
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
 
 <SDKDoc>
   <TypeScript name="getUser" type="method" owner="DriftClient">
@@ -93,6 +98,12 @@ await user.fetchAccounts();
 </SDKDoc>
 
 ### Derived addresses (user account)
+
+User accounts are **Program Derived Addresses (PDAs)** - deterministic addresses generated from seeds (the program ID, wallet authority, and subaccount ID). PDAs are a Solana concept that lets you calculate an account's address without making an RPC call.
+
+This is useful when you need to reference a user account address before fetching it, such as when constructing transactions or querying multiple accounts in parallel.
+
+For a deeper understanding of PDAs and program structure, see [Program Structure](/developers/concepts/program-structure).
 
 <SDKDoc>
   <TypeScript name="getUserAccountPublicKey" type="method" owner="DriftClient">
@@ -156,6 +167,19 @@ console.log(orders.length);
   </TypeScript>
 </SDKDoc>
 
+### Active subaccount
+
+The **active subaccount** is the default subaccount that DriftClient methods operate on when you don't explicitly specify a subaccount ID. By default, the active subaccount is 0.
+
+Many SDK methods use the active subaccount implicitly:
+- `driftClient.getUser()` - returns the User for the active subaccount
+- `driftClient.getUserAccount()` - returns the account data for the active subaccount
+- `driftClient.placePerpOrder(orderParams)` - places an order on the active subaccount
+- `driftClient.getSpotPosition(marketIndex)` - gets position from the active subaccount
+- `driftClient.getPerpPosition(marketIndex)` - gets position from the active subaccount
+
+You can change which subaccount is active using `switchActiveUser()`, or you can explicitly pass a subaccount ID to methods that support it (like `getUser(subAccountId)`).
+
 ### Switch active subaccount
 
 <SDKDoc>
@@ -167,7 +191,11 @@ driftClient.switchActiveUser(1);
   </TypeScript>
 </SDKDoc>
 
-### Update user settings (delegate / margin)
+### Update delegate
+
+A **delegate** is another wallet that can trade on behalf of your user account without being able to withdraw funds. This is useful for allowing trading bots to manage positions while keeping withdrawal authority secure.
+
+Learn more: [Delegated Accounts](/protocol/getting-started/delegated-accounts)
 
 <SDKDoc>
   <TypeScript name="updateUserDelegate" type="method" owner="DriftClient">
@@ -178,6 +206,12 @@ await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
 ```
   </TypeScript>
 </SDKDoc>
+
+### Update margin settings
+
+**Margin trading** settings control how your account can use leverage and borrow against collateral. You can enable/disable margin trading or set custom margin ratios to control risk.
+
+Learn more: [Margin](/protocol/trading/margin)
 
 <SDKDoc>
   <TypeScript name="updateUserMarginTradingEnabled" type="method" owner="DriftClient">

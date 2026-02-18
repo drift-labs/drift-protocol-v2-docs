@@ -8,6 +8,9 @@ JIT-only market making means you **do not keep a standing book**. You compete in
 
 ### Subscribe to auctions / orders
 
+<details>
+<summary>View AuctionSubscriber import</summary>
+
 <SDKDoc>
   <TypeScript name="AuctionSubscriber" type="class">
 ```js
@@ -16,6 +19,11 @@ import { AuctionSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
+</details>
+
+<details>
+<summary>View OrderSubscriber import</summary>
+
 <SDKDoc>
   <TypeScript name="OrderSubscriber" type="class">
 ```js
@@ -23,6 +31,8 @@ import { OrderSubscriber } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
 
 ### Compute auction prices (helpers)
 
@@ -50,12 +60,7 @@ await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
 
 ### Practical filters
 
-In JIT-only workflows you’ll usually want filters like:
-
-- **risk-increasing vs reducing** (skip toxic flow)
-- **max position size / leverage / free collateral**
-- **oracle validity / divergence checks**
-- **skip Swift-origin orders** if you’re already handling them via the Swift websocket feed
+Apply risk and filtering checks before filling: oracle validity, position limits, toxic-flow detection, and (if you use both feeds) skip Swift-origin orders via `isSignedMsgOrder()` so you don't double-handle. See [Bot Architecture - Risk and filtering](./bot-architecture#risk-and-filtering) for shared patterns and code.
 
 <SDKDoc>
   <TypeScript name="isSignedMsgOrder" type="function">
@@ -72,15 +77,4 @@ const oracle = driftClient.getMMOracleDataForPerpMarket(0);
 ```
   </TypeScript>
 </SDKDoc>
-
-```js
-const marketIndex = 0;
-const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
-const perpMarket = driftClient.getPerpMarketAccount(marketIndex);
-
-if (!oracle.isValid) return;
-if (!perpMarket) return;
-
-// Example: skip if oracle is stale or market is volatile for your strategy.
-```
 

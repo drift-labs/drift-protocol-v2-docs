@@ -87,23 +87,30 @@ console.log(txSig);
   </TypeScript>
 </SDKDoc>
 
-### Oracle / auction-style orders (example shape)
+### Oracle / auction-style orders
+
+Oracle orders have prices that track the oracle feed with an optional offset. They go through a JIT auction before execution, with auction prices that gradually converge to the oracle price.
 
 ```js
-// Example shape from older docs: auction params + oracle offset.
-// This is a usage pattern example; verify fields against the `OrderParams` type.
-const oraclePrice = driftClient.getOracleDataForPerpMarket(18).price;
-const auctionStartPrice = oraclePrice.neg().divn(1000);
-const auctionEndPrice = oraclePrice.divn(1000);
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
+
+// Get the current oracle price for the market
+const marketIndex = 18;
+const oracleData = driftClient.getOracleDataForPerpMarket(marketIndex);
+const oraclePrice = oracleData.price;
+
+// Set up auction parameters (start and end prices)
+const auctionStartPrice = oraclePrice.muln(9950).divn(10000); // 0.5% below oracle
+const auctionEndPrice = oraclePrice.muln(10050).divn(10000); // 0.5% above oracle
 
 const orderParams = {
   orderType: OrderType.ORACLE,
   baseAssetAmount: driftClient.convertToPerpPrecision(10),
   direction: PositionDirection.LONG,
-  marketIndex: 18,
+  marketIndex,
   auctionStartPrice,
   auctionEndPrice,
-  oraclePriceOffset: oraclePrice.divn(500).toNumber(),
+  oraclePriceOffset: oraclePrice.divn(500).toNumber(), // 0.2% offset
   auctionDuration: 30,
 };
 
@@ -318,26 +325,6 @@ const orderParams = {
   baseAssetAmount: driftClient.convertToPerpPrecision(1),
   triggerPrice: driftClient.convertToPricePrecision(95),
   triggerCondition: OrderTriggerCondition.BELOW,
-};
-
-await driftClient.placePerpOrder(orderParams);
-```
-
-### Oracle / auction orders (shape)
-
-```js
-import { OrderType, PositionDirection } from "@drift-labs/sdk";
-
-const oracle = driftClient.getOracleDataForPerpMarket(0);
-const orderParams = {
-  orderType: OrderType.ORACLE,
-  marketIndex: 0,
-  direction: PositionDirection.LONG,
-  baseAssetAmount: driftClient.convertToPerpPrecision(1),
-  auctionStartPrice: oracle.price.muln(9950).divn(10000),
-  auctionEndPrice: oracle.price.muln(10050).divn(10000),
-  auctionDuration: 50,
-  oraclePriceOffset: driftClient.convertToPricePrecision(0.05).toNumber(),
 };
 
 await driftClient.placePerpOrder(orderParams);

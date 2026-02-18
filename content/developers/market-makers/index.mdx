@@ -1,0 +1,129 @@
+# Market Makers
+
+Market making on Drift involves providing liquidity through resting orders, JIT auctions, or both. This section covers strategies, architecture, and trading mechanisms.
+
+## Getting Started
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+### [Quickstart Guide](./quickstart)
+
+**Get a market maker running in 10 minutes**
+
+Learn how to place two-sided quotes that automatically update with oracle prices. Perfect for understanding the basics before diving into advanced strategies.
+
+</div>
+
+## Market Making Strategies
+
+Choose your approach based on latency requirements, infrastructure, and risk tolerance:
+
+<div className="doc-card-grid">
+
+<div className="doc-card">
+
+### [Normal Market Making](./normal-mm)
+
+**Resting orders on the DLOB**
+
+Place limit orders that rest on the orderbook until filled. Earn maker rebates while providing committed liquidity.
+
+**Best for:**
+- Passive market making
+- Earning maker rebates
+- Lower infrastructure requirements
+- Traditional orderbook strategies
+
+</div>
+
+<div className="doc-card">
+
+### [JIT-Only Market Making](./jit-only)
+
+**Active market making through auctions**
+
+React to incoming taker orders during JIT auctions without maintaining resting orders. Compete for fills at better prices.
+
+**Best for:**
+- Active market making
+- Low latency requirements
+- Dynamic pricing strategies
+- Avoiding adverse selection
+
+</div>
+
+</div>
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+### [Bot Architecture](./bot-architecture)
+
+Production patterns and best practices for building reliable market making bots. Covers infrastructure, monitoring, and operational considerations.
+
+</div>
+
+## Understanding Drift's Trading Mechanisms
+
+<div className="doc-card-grid">
+
+<div className="doc-card">
+
+### [Orderbook & Matching](./orderbook-and-matching)
+
+**How orders are matched and filled**
+
+Learn about the DLOB architecture, liquidity priority (JIT → DLOB → AMM), and how to access orderbook data via HTTP, WebSocket, or SDK.
+
+*Essential reading for understanding execution flow*
+
+</div>
+
+<div className="doc-card">
+
+### [JIT Auctions](./jit-auctions)
+
+**Just-In-Time auction mechanics**
+
+Deep dive into how JIT auctions work, auction pricing, maker participation, and place-and-make patterns.
+
+*Critical for competitive market making*
+
+</div>
+
+</div>
+
+## Advanced Features
+
+<div className="doc-card-grid">
+
+<div className="doc-card">
+
+### [SWIFT API](./swift-api)
+
+**Ultra-low-latency order feed**
+
+Receive signed taker orders offchain via WebSocket before they hit the auction. Enable sub-second reaction times with SWIFT place-and-make.
+
+**Latency advantage:** 100-500ms faster than onchain feeds
+
+</div>
+
+<div className="doc-card">
+
+### [Indicative Quotes](./indicative-quotes)
+
+**Offchain liquidity signaling**
+
+Signal intent to provide liquidity at certain prices without committing onchain orders. Helps with price discovery for takers.
+
+**Use case:** Show liquidity for UI/aggregators
+
+</div>
+
+</div>
+
+## Related Resources
+
+- [Drift SDK](/developers/drift-sdk) - SDK reference for orders and positions
+- [Protocol Concepts](/developers/concepts) - Understanding accounts and onchain data
+- [Keeper Bots](https://github.com/drift-labs/keeper-bots-v2) - Open source keeper bot infrastructure

@@ -1,0 +1,250 @@
+# SWIFT API
+
+**SWIFT** (Signed Wrapped Instant Fulfillment Transactions) allows market makers to receive signed taker orders offchain via WebSocket before they hit the JIT auction. This enables ultra-low-latency market making.
+
+## How SWIFT works
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+### Flow overview
+
+1. **Taker signs order offchain**
+   - Order signed with user's private key
+   - Broadcast to SWIFT WebSocket feed
+
+2. **Makers receive order via WebSocket**
+   - Order arrives before hitting onchain auction
+   - Makers inspect order (direction, size, auction params)
+
+3. **Makers submit place-and-make**
+   - Places maker order onchain
+   - Includes ed25519 verification instruction
+   - Fills taker atomically
+
+**Key benefit:** Market makers see orders 100-500ms before they land onchain, allowing faster response times and better fills.
+
+</div>
+
+## Subscribing to SWIFT orders
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+### Basic subscription
+
+```typescript
+import { SwiftOrderSubscriber } from "@drift-labs/sdk";
+
+const swiftSubscriber = new SwiftOrderSubscriber({
+  url: "wss://swift.drift.trade",
+  driftClient,
+});
+
+await swiftSubscriber.subscribe(
+  async (orderMessageRaw, signedMessage, isDelegateSigner) => {
+    // Inspect the incoming signed order
+    const orderParams = signedMessage.signedMsgOrderParams;
+
+    console.log("Market:", orderParams.marketIndex);
+    console.log("Direction:", orderParams.direction);
+    console.log("Size:", orderParams.baseAssetAmount);
+    console.log("Auction start:", orderParams.auctionStartPrice);
+    console.log("Auction end:", orderParams.auctionEndPrice);
+
+    // Decide if you want to fill it
+    if (shouldFill(orderParams)) {
+      await fillSwiftOrder(signedMessage);
+    }
+  }
+);
+```
+
+### With UserAccount getter
+
+Optionally provide a `userAccountGetter` to resolve taker UserAccount details:
+
+```typescript
+import { UserMap } from "@drift-labs/sdk";
+
+const userMap = new UserMap({
+  driftClient,
+  connection,
+  subscriptionConfig: { type: "websocket" },
+});
+await userMap.subscribe();
+
+const swiftSubscriber = new SwiftOrderSubscriber({
+  url: "wss://swift.drift.trade",
+  driftClient,
+  userAccountGetter: (authority, subaccountId) => {
+    return userMap.getUserAccount(authority, subaccountId);
+  },
+});
+```
+
+This allows you to check taker's positions, collateral, and other account details before filling.
+
+</div>
+
+## Place-and-make with SWIFT
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-make](./jit-auctions#place-and-make-pattern). When filling a SWIFT order, you must submit an ed25519 verification instruction followed by the place-and-make instruction. The SDK handles this automatically.
+
+### Using DriftClient (recommended)
+
+```typescript
+import { getLimitOrderParams } from "@drift-labs/sdk";
+
+// From the SWIFT subscription callback
+async function fillSwiftOrder(signedMessage) {
+  const { signedMsgOrderParams, uuid: signedMsgOrderUuid } = signedMessage;
+
+  // Build your maker order params
+  const makerOrderParams = getLimitOrderParams({
+    marketIndex: signedMsgOrderParams.marketIndex,
+    direction: /* opposite of taker */,
+    baseAssetAmount: /* size you want to fill */,
+    price: /* your fill price */,
+    postOnly: PostOnlyParams.MUST_POST_ONLY,
+  });
+
+  // Get taker info
+  const takerInfo = {
+    order: signedMsgOrderParams,
+    userAccount: /* taker's user account */,
+    userAccountPublicKey: signedMsgOrderParams.takerUserAccount,
+  };
+
+  // Submit place-and-make
+  const txSig = await driftClient.placeAndMakeSignedMsgPerpOrder(
+    signedMsgOrderParams,
+    signedMsgOrderUuid,
+    takerInfo,
+    makerOrderParams
+  );
+
+  console.log("Filled SWIFT order:", txSig);
+}
+```
+
+### Build instructions manually
+
+If you need more control:
+
+```typescript
+const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
+  signedMsgOrderParams,
+  signedMsgOrderUuid,
+  takerInfo,
+  makerOrderParams
+);
+
+// ixs includes:
+// 1. ed25519 verification instruction
+// 2. place-and-make instruction
+
+// Send transaction with your preferred method
+const tx = new Transaction().add(...ixs);
+const txSig = await connection.sendTransaction(tx, [wallet.payer]);
+```
+
+</div>
+
+## SWIFT vs onchain auction flow
+
+<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem'}}>
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
+
+### SWIFT flow
+
+**Timing:**
+- Order signed offchain
+- Broadcast to WebSocket
+- Makers receive in 100-500ms
+- Makers submit place-and-make
+- Order lands onchain
+
+**Latency advantage:**
+- Makers see orders before they're onchain
+- Faster reaction time
+- Better prices for competitive fills
+
+**Requirements:**
+- Subscribe to SWIFT WebSocket
+- Handle ed25519 verification
+- Fast infrastructure to capitalize on latency advantage
+
+</div>
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
+
+### Standard onchain auction
+
+Order lands onchain first; makers see it via RPC/gRPC (1–2s delay) and submit place-and-make. See [JIT Auctions](./jit-auctions) for auction mechanics and participation.
+
+</div>
+
+</div>
+
+## Filtering and risk management
+
+Use the same filters as other JIT flows: oracle validation, position limits, and toxic-flow detection. See [Bot Architecture - Risk and filtering](./bot-architecture#risk-and-filtering) for shared patterns and code.
+
+## Detecting SWIFT orders in onchain feeds
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+When subscribed to both SWIFT and onchain feeds, you may see the same order twice:
+1. First via SWIFT WebSocket (offchain)
+2. Again when it lands onchain
+
+Use `isSignedMsgOrder()` to identify SWIFT-origin orders:
+
+```typescript
+import { isSignedMsgOrder } from "@drift-labs/sdk";
+
+// In your AuctionSubscriber callback
+const auctions = auctionSubscriber.getAuctionOrders();
+
+for (const auction of auctions) {
+  if (isSignedMsgOrder(auction.order)) {
+    // This came from SWIFT, you may have already seen it
+    continue;
+  }
+
+  // Handle regular onchain auction
+  await handleAuction(auction);
+}
+```
+
+</div>
+
+## Performance considerations
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+**Latency optimization:**
+- Use dedicated RPC nodes for fastest transaction submission
+- Pre-compute oracle prices and risk checks
+- Keep WebSocket connection persistent
+- Use `commitment: "processed"` for fastest confirmations
+
+**Reliability:**
+- Handle WebSocket reconnections gracefully
+- Have fallback to standard auction participation
+- Monitor fill rates and adjust strategy
+
+**Cost:**
+- SWIFT fills pay same maker rebates as regular fills
+- No additional fees for SWIFT participation
+- Transaction costs same as place-and-make
+
+</div>
+
+## Related
+
+- [JIT Auctions](./jit-auctions) - Understanding auction mechanics
+- [JIT-only MM](./jit-only) - JIT market making strategy
+- [Orderbook & Matching](./orderbook-and-matching) - How orders are matched

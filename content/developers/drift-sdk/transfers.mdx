@@ -2,6 +2,20 @@
 
 Transfers let you move balances/positions between subaccounts owned by the same authority.
 
+## Why use subaccount transfers?
+
+Subaccounts let you isolate risk and organize trading strategies. Common use cases for transfers include:
+
+- **Strategy isolation**: Separate market making from directional trading to prevent one strategy's losses from affecting another's collateral
+- **Risk management**: Move profits from an active trading account to a safer holding account
+- **Rebalancing**: Redistribute collateral when one subaccount needs more margin
+- **Bot separation**: Isolate automated trading bots on separate subaccounts while keeping manual trades separate
+- **Experimentation**: Test new strategies on a subaccount with limited capital, then transfer funds if successful
+
+All subaccounts under the same wallet share cross-margin, but transfers let you explicitly move balances and positions to reorganize your capital.
+
+## SDK Usage
+
 ### Transfer a spot deposit between subaccounts
 
 <SDKDoc>

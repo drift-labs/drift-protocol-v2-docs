@@ -1,0 +1,298 @@
+# Orderbook & Matching
+
+Understanding how Drift's orderbook and matching engine work is essential for market makers. This page covers the DLOB architecture, liquidity priority, and how to access orderbook data.
+
+## What is the DLOB?
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+The **DLOB** (Decentralized Limit Order Book) is Drift's offchain orderbook that aggregates all resting limit orders across user accounts. It provides a unified orderbook view for matching and price discovery while keeping order storage onchain.
+
+**Why offchain?**
+
+Storing a sorted orderbook onchain would be prohibitively expensive. Instead, Drift stores orders in user accounts (up to 32 per user), and the DLOB server:
+1. Scans all user accounts
+2. Extracts resting limit orders
+3. Sorts them by price into a bid/ask orderbook
+4. Serves this orderbook via WebSocket and HTTP
+
+This gives you Binance-style orderbook depth without onchain sorting costs.
+
+</div>
+
+## How matching works
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+When a taker order arrives, it's matched in this **liquidity priority order**:
+
+### 1. JIT Auction (first 5-10 slots)
+- Market makers compete to fill at best price
+- Multiple makers can participate
+- Dynamic pricing interpolates toward oracle
+- See [JIT Auctions](./jit-auctions) for details
+
+### 2. DLOB (Decentralized Limit Order Book)
+- Resting limit orders from all users
+- Sorted by price-time priority
+- Onchain commitment
+- Provides committed liquidity
+
+### 3. AMM (Automated Market Maker)
+- Fallback liquidity at formula-based price
+- Uses constant product curve adjusted by oracle
+- Always available (can't be "empty")
+- Most expensive option (fees + price impact)
+
+### 4. External fulfillment (spot markets only)
+- Phoenix DEX
+- Jupiter aggregator
+- Used when external sources offer better prices
+
+This waterfall ensures best execution: JIT makers compete first, DLOB provides backup, and AMM guarantees fills.
+
+</div>
+
+## DLOB architecture
+
+<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem'}}>
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
+
+### DLOB responsibilities
+
+**Orderbook state:**
+- Bids sorted descending by price
+- Asks sorted ascending by price
+- Grouped by price levels
+- Market depth aggregation
+
+**Order filtering:**
+- Excludes expired orders
+- Filters by market type
+- Handles order flags (post-only, reduce-only)
+- Shows only valid, fillable orders
+
+**Real-time updates:**
+- Subscribes to UserAccount changes via RPC
+- Updates orderbook when orders placed/canceled/filled
+- Publishes updates via WebSocket
+
+</div>
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
+
+### Order lifecycle
+
+1. **User places limit order**
+   - UserAccount updated onchain
+
+2. **DLOB detects new order**
+   - Scans UserAccount via RPC subscription
+
+3. **Order added to DLOB**
+   - Inserted at correct price level
+
+4. **Orderbook update broadcast**
+   - WebSocket clients receive new depth
+
+5. **Order fills**
+   - UserAccount marked filled
+   - DLOB removes order
+
+6. **Update broadcast**
+   - Clients see reduced depth
+
+*The DLOB never modifies onchain state—it's read-only.*
+
+</div>
+
+</div>
+
+## DLOB vs onchain state
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem'}}>
+
+<div>
+
+**Onchain (source of truth)**
+
+- Orders stored in UserAccount
+- Fills processed by Drift program
+- Settlement and PnL calculation
+- Collateral and margin checks
+
+</div>
+
+<div>
+
+**DLOB (aggregated view)**
+
+- Sorted orderbook for matching
+- Depth aggregation
+- Real-time orderbook updates
+- Convenient API for UIs and bots
+
+</div>
+
+</div>
+
+If DLOB goes down, orders are still onchain and valid—they just won't be visible in the aggregated orderbook until DLOB recovers.
+
+</div>
+
+## Accessing the DLOB
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+### Hosted DLOB server (HTTP)
+
+Simplest option for getting orderbook snapshots:
+
+```typescript
+const orderbook = await fetch(
+  "https://dlob.drift.trade/orderbook?marketType=perp&marketIndex=0"
+).then(r => r.json());
+
+console.log("Bids:", orderbook.bids);  // [[price, size], ...]
+console.log("Asks:", orderbook.asks);
+```
+
+### WebSocket (real-time updates)
+
+For live orderbook feeds:
+
+```typescript
+const ws = new WebSocket("wss://dlob.drift.trade/ws");
+ws.send(JSON.stringify({
+  type: "subscribe",
+  channel: "orderbook",
+  marketType: "perp",
+  market: "SOL-PERP",
+  grouping: 10
+}));
+
+ws.onmessage = (event) => {
+  const update = JSON.parse(event.data);
+  // Handle orderbook update
+};
+```
+
+### SDK DLOB class (local orderbook)
+
+Build and maintain orderbook locally for maximum control:
+
+```typescript
+import {
+  DLOBSubscriber,
+  OrderSubscriber,
+  SlotSubscriber
+} from "@drift-labs/sdk";
+
+const slotSubscriber = new SlotSubscriber(connection);
+await slotSubscriber.subscribe();
+
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: { type: "websocket" },
+  fastDecode: true,
+  decodeData: true,
+});
+await orderSubscriber.subscribe();
+
+const dlobSubscriber = new DLOBSubscriber({
+  driftClient,
+  dlobSource: orderSubscriber,
+  slotSource: slotSubscriber,
+  updateFrequency: 1000,
+});
+await dlobSubscriber.subscribe();
+
+// Get best bid/ask
+const bestBid = dlobSubscriber.getBestBid(marketIndex);
+const bestAsk = dlobSubscriber.getBestAsk(marketIndex);
+```
+
+### Auction subscriber (JIT auctions)
+
+Subscribe via `AuctionSubscriber` to get active auctions; see [JIT Auctions](./jit-auctions) for setup and place-and-make flow.
+
+### Detecting Swift orders
+
+Use `isSignedMsgOrder(order)` to identify SWIFT-origin orders when subscribed to both SWIFT and onchain feeds. See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds) for details.
+
+</div>
+
+## Matching examples
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+### Example 1: Market order (long)
+
+1. Order enters JIT auction at oracle + 0.1%
+2. Two JIT makers fill 60% at oracle + 0.02%
+3. Remaining 40% fills against DLOB at oracle + 0.05%
+4. AMM not needed (fully filled)
+
+### Example 2: Large market order
+
+1. JIT auction fills 40% at oracle + 0.03%
+2. DLOB fills 30% at oracle + 0.08%
+3. AMM fills remaining 30% at oracle + 0.15% (price impact)
+
+### Example 3: Limit order at DLOB price
+
+1. Order bypasses JIT (not crossing spread)
+2. Rests on DLOB as maker order
+3. Earns maker rebate when filled
+
+</div>
+
+## DLOB matching mechanics
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+After JIT auction, orders match against DLOB using **price-time priority**:
+
+1. **Best price wins**
+   - Lowest ask for buys
+   - Highest bid for sells
+
+2. **Time priority for tied prices**
+   - Earlier orders win
+   - Fill up to available liquidity at each level
+
+3. **Walk the book**
+   - Continue until taker filled or book exhausted
+
+**Example** (taker buying 10 SOL):
+- DLOB has: 3 SOL @ $100, 5 SOL @ $100.10, 4 SOL @ $100.20
+- Taker fills: 3 @ $100, 5 @ $100.10, 2 @ $100.20
+
+If DLOB doesn't fully fill, remaining size goes to AMM.
+
+</div>
+
+## Performance characteristics
+
+<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
+
+**DLOB performance:**
+- **Latency**: 1-2 seconds from onchain placement to DLOB update
+- **Depth**: Aggregates thousands of orders across hundreds of users
+- **Uptime**: Redundant servers ensure high availability
+- **WebSocket**: Handles thousands of concurrent connections
+
+**For low-latency bots:**
+
+Subscribing directly to onchain UserAccounts (via RPC or gRPC) can be faster than waiting for DLOB updates.
+
+</div>
+
+## Related
+
+- [JIT Auctions](./jit-auctions) - How JIT fits before DLOB matching
+- [Normal MM](./normal-mm) - Market making with resting DLOB orders
+- [JIT-only MM](./jit-only) - Active market making through auctions

@@ -11,19 +11,29 @@ Whether you're building integrations, running high-performance bots, or contribu
 - **Debug effectively** - trace issues from SDK calls through to onchain state changes
 - **Contribute confidently** - understand the system well enough to propose improvements
 
+## Architecture Overview
+
+Drift's architecture spans three layers:
+
+**Protocol Layer** - Solana program accounts and onchain logic. See [Concepts](/developers/concepts) for program structure and account models.
+
+**SDK Layer** - Client libraries for interacting with the protocol. See [SDK Internals](/developers/drift-sdk/sdk-internals) for subscription patterns and transaction construction.
+
+**Trading Layer** - Orderbook, auctions, and matching engine. See [Market Makers](/developers/market-makers) for DLOB, JIT, and liquidity mechanisms.
+
 ## Topics
 
-### Program Structure
-- [Program Structure](./program-structure) - Solana accounts, PDAs, and onchain data model
-- [Account Model](./account-model) - Deep dive on user accounts, positions, and orders
+### Protocol Concepts
+- [Program Structure](/developers/concepts/program-structure) - Solana accounts, PDAs, and onchain data model
+- [Account Model](/developers/concepts/account-model) - User accounts, positions, and orders
+
+### SDK Architecture
+- [SDK Internals](/developers/drift-sdk/sdk-internals) - DriftClient, subscriptions, and transactions
 
 ### Trading Mechanisms
-- [DLOB Architecture](./dlob-architecture) - How the Decentralized Limit Order Book works
-- [JIT Auctions](./jit-auctions) - Just-In-Time auction mechanism for price discovery
-- [Matching Engine](./matching-engine) - Liquidity priority and order fulfillment flow
-
-### SDK Internals
-- [SDK Internals](./sdk-internals) - DriftClient architecture, subscriptions, and transaction patterns
+- [DLOB Architecture](/developers/market-makers/dlob-architecture) - Decentralized Limit Order Book
+- [JIT Auctions](/developers/market-makers/jit-auctions) - Just-In-Time price discovery
+- [Matching Engine](/developers/market-makers/matching-engine) - Liquidity priority flow
 
 ## Related resources
 
