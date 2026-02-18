@@ -69,19 +69,19 @@ console.log(txSig);
 
 ### Oracle / Auction-Style Orders
 
-Oracle orders have prices that track the oracle feed with an optional offset. They go through a JIT auction before execution, with auction prices that gradually converge to the oracle price.
+Oracle orders have prices that track the oracle feed with an offset. They go through a JIT auction before execution, with auction prices that gradually converge from the start offset to the end offset relative to oracle.
+
+**Important:** For `OrderType.ORACLE`, `auctionStartPrice`, `auctionEndPrice`, and `oraclePriceOffset` are all **offsets** from the oracle price (in PRICE_PRECISION, 1e6), not absolute prices.
 
 ```js
-import { OrderType, PositionDirection } from "@drift-labs/sdk";
+import { BN, OrderType, PositionDirection, PRICE_PRECISION } from "@drift-labs/sdk";
 
-// Get the current oracle price for the market
 const marketIndex = 18;
-const oracleData = driftClient.getOracleDataForPerpMarket(marketIndex);
-const oraclePrice = oracleData.price;
 
-// Set up auction parameters (start and end prices)
-const auctionStartPrice = oraclePrice.muln(9950).divn(10000); // 0.5% below oracle
-const auctionEndPrice = oraclePrice.muln(10050).divn(10000); // 0.5% above oracle
+// Offsets are relative to oracle price (in PRICE_PRECISION)
+// For a long: auction starts at a better (lower) price and ends at a worse (higher) price
+const auctionStartPrice = PRICE_PRECISION.muln(-5).divn(10); // -$0.50 below oracle
+const auctionEndPrice = PRICE_PRECISION.muln(5).divn(10);    // +$0.50 above oracle
 
 const orderParams = {
   orderType: OrderType.ORACLE,
@@ -90,8 +90,8 @@ const orderParams = {
   marketIndex,
   auctionStartPrice,
   auctionEndPrice,
-  oraclePriceOffset: oraclePrice.divn(500).toNumber(), // 0.2% offset
-  auctionDuration: 30,
+  oraclePriceOffset: driftClient.convertToPricePrecision(0.30).toNumber(), // +$0.30 from oracle
+  auctionDuration: 30, // slots
 };
 
 await driftClient.placePerpOrder(orderParams);
@@ -182,11 +182,14 @@ const ix = await driftClient.getJupiterSwapIxV6({
 <SDKDoc>
   <TypeScript name="placeSpotOrder" type="method" owner="DriftClient">
 ```js
-// Example uses a simplified object; adjust fields to your strategy.
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
+
 await driftClient.placeSpotOrder({
-  marketIndex: 1,
+  orderType: OrderType.LIMIT,
+  marketIndex: 1, // e.g. SOL spot
   direction: PositionDirection.LONG,
-  // ... order fields (amount/price/etc)
+  baseAssetAmount: driftClient.convertToSpotPrecision(1, 1), // 1 SOL
+  price: driftClient.convertToPricePrecision(150),
 });
 ```
   </TypeScript>
@@ -276,7 +279,7 @@ await driftClient.cancelAndPlaceOrders(
 ```js
 await driftClient.modifyOrder({
   orderId: 1,
-  newBaseAssetAmount: driftClient.convertToPerpPrecision(2),
+  newBaseAmount: driftClient.convertToPerpPrecision(2),
 });
 ```
   </TypeScript>
@@ -287,7 +290,7 @@ await driftClient.modifyOrder({
 ```js
 await driftClient.modifyOrderByUserOrderId({
   userOrderId: 1,
-  newBaseAssetAmount: driftClient.convertToPerpPrecision(2),
+  newBaseAmount: driftClient.convertToPerpPrecision(2),
 });
 ```
   </TypeScript>

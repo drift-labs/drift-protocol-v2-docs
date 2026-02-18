@@ -33,12 +33,16 @@ The SDK supports multiple subscription strategies, each with different performan
 **How it works**: Periodically calls `connection.getAccountInfo()` for each account
 
 ```typescript
+import { BulkAccountLoader } from "@drift-labs/sdk";
+
+const accountLoader = new BulkAccountLoader(connection, "confirmed", 1000);
+
 const driftClient = new DriftClient({
   connection,
   wallet,
   accountSubscription: {
     type: "polling",
-    frequency: 1000,  // Poll every 1000ms
+    accountLoader,
   },
 });
 ```
@@ -86,19 +90,15 @@ const driftClient = new DriftClient({
 **How it works**: Uses Yellowstone gRPC plugin for Solana validators
 
 ```typescript
-import { GrpcSubscription } from "@drift-labs/sdk";
-
-const grpcConfig = {
-  endpoint: "grpc.mainnet.jito.wtf",
-  token: process.env.GRPC_TOKEN,
-};
-
 const driftClient = new DriftClient({
   connection,
   wallet,
   accountSubscription: {
     type: "grpc",
-    grpcConfig,
+    grpcConfigs: {
+      endpoint: "https://grpc.mainnet.jito.wtf",
+      token: process.env.GRPC_TOKEN,
+    },
   },
 });
 ```
@@ -122,24 +122,19 @@ For loading many accounts efficiently, the SDK provides `BulkAccountLoader`:
 ```typescript
 import { BulkAccountLoader } from "@drift-labs/sdk";
 
-const bulkAccountLoader = new BulkAccountLoader(
+// Constructor: (connection, commitment, pollingFrequencyMs)
+const bulkAccountLoader = new BulkAccountLoader(connection, "confirmed", 1000);
+
+// Typically you don't call addAccount directly. Instead, pass the loader
+// to DriftClient and it registers the accounts it needs automatically.
+const driftClient = new DriftClient({
   connection,
-  "confirmed",
-  1000  // Polling frequency
-);
-
-// Add accounts to load
-bulkAccountLoader.addAccount(userAccountPubkey, (buffer) => {
-  // Callback when account updates
-  const account = program.coder.accounts.decode("User", buffer);
-  console.log("User updated:", account);
+  wallet,
+  accountSubscription: { type: "polling", accountLoader: bulkAccountLoader },
 });
-
-// Start loading
-await bulkAccountLoader.load();
 ```
 
-This batches multiple `getMultipleAccounts` calls for efficiency.
+The loader batches multiple accounts into single `getMultipleAccounts` RPC calls for efficiency.
 
 ## Transaction construction
 
@@ -198,22 +193,26 @@ This handles oracle accounts, market accounts, and cross-position accounts autom
 The SDK can subscribe to onchain program events:
 
 ```typescript
-import { EventSubscriber } from "@drift-labs/sdk";
+import { EventSubscriber, isVariant } from "@drift-labs/sdk";
 
-const eventSubscriber = new EventSubscriber(connection, program);
+const eventSubscriber = new EventSubscriber(connection, driftClient.program, {
+  commitment: "confirmed",
+  logProviderConfig: { type: "websocket" },
+});
 await eventSubscriber.subscribe();
 
-eventSubscriber.eventEmitter.on("OrderFillRecord", (event) => {
-  console.log("Order filled:", event);
-  console.log("  User:", event.user.toString());
-  console.log("  Market:", event.marketIndex);
-  console.log("  Fill price:", event.price.toString());
+// All events come through "newEvent", filter by eventType
+eventSubscriber.eventEmitter.on("newEvent", (event) => {
+  if (event.eventType === "OrderActionRecord" && isVariant(event.action, "fill")) {
+    console.log("Order filled:", event);
+    console.log("  Market:", event.marketIndex);
+  }
 });
 ```
 
-Events include:
-- `OrderFillRecord` - Order executions
-- `DepositRecord` - Deposits
+Common event types:
+- `OrderActionRecord` (with action: `fill`, `place`, `cancel`, etc.) - Order lifecycle events
+- `DepositRecord` - Deposits and withdrawals
 - `FundingPaymentRecord` - Funding payments
 - `LiquidationRecord` - Liquidations
 
