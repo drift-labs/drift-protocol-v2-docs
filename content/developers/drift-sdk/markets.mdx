@@ -241,13 +241,14 @@ import { MarketType, PRICE_PRECISION, BASE_PRECISION, convertToNumber } from "@d
 
 const dlob = dlobSubscriber.getDLOB();
 const marketIndex = 0; // SOL-PERP
-const oracleData = driftClient.getOracleDataForPerpMarket(marketIndex);
+// For perp markets, use getMMOracleDataForPerpMarket (returns MMOraclePriceData)
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
 const slot = slotSubscriber.getSlot();
 
 const l2 = dlob.getL2({
   marketIndex,
   marketType: MarketType.PERP,
-  oracleData,
+  oraclePriceData,
   slot,
   depth: 10, // number of price levels per side
 });
@@ -268,13 +269,16 @@ import { MarketType, PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
 
 const dlob = dlobSubscriber.getDLOB();
 const marketIndex = 0;
-const oracleData = driftClient.getOracleDataForPerpMarket(marketIndex);
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
 const slot = slotSubscriber.getSlot();
 
-const bestBid = dlob.getBestBid(marketIndex, slot, MarketType.PERP, oracleData);
-const bestAsk = dlob.getBestAsk(marketIndex, slot, MarketType.PERP, oracleData);
+// Returns BN | undefined (undefined if no orders on that side)
+const bestBid = dlob.getBestBid(marketIndex, slot, MarketType.PERP, oraclePriceData);
+const bestAsk = dlob.getBestAsk(marketIndex, slot, MarketType.PERP, oraclePriceData);
 
-console.log("Best bid:", convertToNumber(bestBid, PRICE_PRECISION));
-console.log("Best ask:", convertToNumber(bestAsk, PRICE_PRECISION));
-console.log("Spread:", convertToNumber(bestAsk.sub(bestBid), PRICE_PRECISION));
+if (bestBid && bestAsk) {
+  console.log("Best bid:", convertToNumber(bestBid, PRICE_PRECISION));
+  console.log("Best ask:", convertToNumber(bestAsk, PRICE_PRECISION));
+  console.log("Spread:", convertToNumber(bestAsk.sub(bestBid), PRICE_PRECISION));
+}
 ```

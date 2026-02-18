@@ -186,7 +186,7 @@ You can change which subaccount is active using `switchActiveUser()`, or you can
   <TypeScript name="switchActiveUser" type="method" owner="DriftClient">
 ```js
 // Switch to subaccount 1.
-driftClient.switchActiveUser(1);
+await driftClient.switchActiveUser(1);
 ```
   </TypeScript>
 </SDKDoc>
@@ -216,7 +216,9 @@ Learn more: [Margin](/protocol/trading/margin)
 <SDKDoc>
   <TypeScript name="updateUserMarginTradingEnabled" type="method" owner="DriftClient">
 ```js
-await driftClient.updateUserMarginTradingEnabled(true, 0);
+await driftClient.updateUserMarginTradingEnabled([
+  { marginTradingEnabled: true, subAccountId: 0 },
+]);
 ```
   </TypeScript>
 </SDKDoc>
@@ -224,10 +226,10 @@ await driftClient.updateUserMarginTradingEnabled(true, 0);
 <SDKDoc>
   <TypeScript name="updateUserCustomMarginRatio" type="method" owner="DriftClient">
 ```js
-import { MARGIN_PRECISION } from "@drift-labs/sdk";
-
+// marginRatio is a number scaled by 10000 (MARGIN_PRECISION)
+// e.g. 10000 = 1x max leverage, 5000 = 2x, 2000 = 5x
 await driftClient.updateUserCustomMarginRatio([
-  { marginRatio: MARGIN_PRECISION, subAccountId: 0 },
+  { marginRatio: 5000, subAccountId: 0 }, // 2x max leverage
 ]);
 ```
   </TypeScript>

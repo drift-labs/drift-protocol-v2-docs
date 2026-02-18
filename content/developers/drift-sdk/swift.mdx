@@ -36,14 +36,14 @@ const response = await fetch(swiftUrl, {
   body: JSON.stringify({
     market_index: orderParams.marketIndex,
     market_type: "perp",
-    message: message.toString(),
-    signature: signature.toString("base64"),
+    message: message.toString("hex"),
+    signature: signature.toString("hex"),
     taker_authority: driftClient.wallet.publicKey.toBase58(),
   }),
 });
 
 if (!response.ok) {
-  throw new Error(`Swift error: ${response.status}`);
+  throw new Error(`Swift error: ${response.status} ${await response.text()}`);
 }
 ```
 
