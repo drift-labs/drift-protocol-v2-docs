@@ -38,17 +38,21 @@ import {
   BASE_PRECISION,
   BN,
   convertToNumber,
+  loadKeypair,
 } from "@drift-labs/sdk";
 
-const quoter = new IndicativeQuotesSender({
-  driftClient,
-  url: "wss://dlob.drift.trade/ws",
-});
+// Constructor takes the WebSocket endpoint and your keypair (for auth)
+const keypair = loadKeypair("<KEYPAIR_PATH>");
+const quoter = new IndicativeQuotesSender(
+  "wss://dlob.drift.trade/ws",
+  keypair
+);
 ```
 
 <SDKDoc>
   <TypeScript name="connect" type="method" owner="IndicativeQuotesSender">
 ```js
+// Connects to WebSocket, authenticates via challenge-response with your keypair
 await quoter.connect();
 ```
   </TypeScript>
@@ -84,16 +88,15 @@ import {
   BASE_PRECISION,
   BN,
   convertToNumber,
+  loadKeypair,
 } from "@drift-labs/sdk";
 
 const marketIndex = 0; // SOL-PERP
 const spread = 0.25;   // $0.25 on each side
 const quoteSize = 10;  // 10 SOL per side
 
-const quoter = new IndicativeQuotesSender({
-  driftClient,
-  url: "wss://dlob.drift.trade/ws",
-});
+const keypair = loadKeypair("<KEYPAIR_PATH>");
+const quoter = new IndicativeQuotesSender("wss://dlob.drift.trade/ws", keypair);
 await quoter.connect();
 
 // Update quotes periodically
@@ -136,27 +139,16 @@ quoter.setQuote({
 
 ## Stopping quotes
 
-To stop publishing quotes for a specific market, send a quote with `null` fields. To stop all quotes across all markets, set `marketIndex` to `null`:
+To stop publishing quotes for a specific market, send a quote with any field set to `null`. The sender detects incomplete quotes and deletes the stored quote for that market:
 
 ```typescript
-// Stop quoting a specific market
+// Stop quoting market 0 — setting any required field to null triggers deletion
 quoter.setQuote({
   bidPrice: null,
   askPrice: null,
   bidBaseAssetAmount: null,
   askBaseAssetAmount: null,
   marketIndex: 0,
-  isOracleOffset: false,
-});
-
-// Stop all quotes across all markets
-quoter.setQuote({
-  bidPrice: null,
-  askPrice: null,
-  bidBaseAssetAmount: null,
-  askBaseAssetAmount: null,
-  marketIndex: null,
-  isOracleOffset: false,
 });
 ```
 

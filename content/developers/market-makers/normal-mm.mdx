@@ -165,14 +165,12 @@ import {
   PostOnlyParams,
 } from "@drift-labs/sdk";
 
-// Atomically cancel all perp orders for market 0 and place new quotes
-const { cancelTxSig, placeTxSig } = await driftClient.cancelAndPlaceOrders(
-  // Cancel params
+// Atomically cancel all perp orders for market 0 and place new quotes (single tx)
+const txSig = await driftClient.cancelAndPlaceOrders(
   {
     marketType: MarketType.PERP,
     marketIndex: 0,
   },
-  // New orders to place
   [
     {
       orderType: OrderType.ORACLE,

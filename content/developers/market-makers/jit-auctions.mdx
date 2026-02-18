@@ -117,22 +117,26 @@ await auctionSubscriber.subscribe();
 
 **2. Filter and price auctions**
 ```typescript
-import { getAuctionPrice } from "@drift-labs/sdk";
+import { getAuctionPrice, isVariant } from "@drift-labs/sdk";
 
-const auctions = auctionSubscriber.getAuctionOrders();
+// AuctionSubscriber emits 'onAccountUpdate' with UserAccount data
+auctionSubscriber.eventEmitter.on("onAccountUpdate", (userAccount, pubkey, slot) => {
+  // Find orders in auction (hasAuction flag is set by the memcmp filter)
+  for (const order of userAccount.orders) {
+    if (order.status === 0 || order.baseAssetAmount.eq(order.baseAssetAmountFilled)) continue;
 
-for (const auction of auctions) {
-  // Calculate current auction price at this slot
-  const currentSlot = driftClient.connection.slot;
-  const auctionPrice = getAuctionPrice(auction.order, currentSlot, oracle.price);
+    // Calculate current auction price at this slot
+    const oracleData = driftClient.getOracleDataForPerpMarket(order.marketIndex);
+    const auctionPrice = getAuctionPrice(order, slot, oracleData.price);
 
-  // Check if your desired fill price is within the current auction range
-  const myFillPrice = calculateMyPrice(oracle, inventory);
+    // Check if your desired fill price is within the current auction range
+    const myFillPrice = calculateMyPrice(oracleData, inventory);
 
-  if (isProfitable(myFillPrice, auctionPrice, auction.order.direction)) {
-    await fillAuction(auction, myFillPrice);
+    if (isProfitable(myFillPrice, auctionPrice, order.direction)) {
+      fillAuction(order, userAccount, pubkey, myFillPrice);
+    }
   }
-}
+});
 ```
 
 **3. Risk management**
@@ -163,8 +167,10 @@ const makerOrderParams = {
 };
 
 const takerInfo = {
-  order: takerOrder,
-  userAccount: takerUserAccount,
+  taker: takerPubkey,                // PublicKey of taker's user account
+  takerStats: takerStatsPubkey,      // PublicKey of taker's UserStats PDA
+  takerUserAccount: takerUserAccount, // decoded UserAccount
+  order: takerOrder,                  // the specific Order to fill
 };
 
 await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);

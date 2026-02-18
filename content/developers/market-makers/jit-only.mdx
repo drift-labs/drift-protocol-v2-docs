@@ -111,10 +111,12 @@ const makerOrderParams = {
   postOnly: PostOnlyParams.MUST_POST_ONLY,
 };
 
-// takerInfo: includes taker's user account + the order to fill
+// takerInfo: includes taker's public keys, user account, and the order to fill
 const takerInfo = {
-  order: takerOrder,
-  userAccount: takerUserAccount,
+  taker: takerPubkey,                 // PublicKey of taker's user account PDA
+  takerStats: takerStatsPubkey,       // PublicKey of taker's UserStats PDA
+  takerUserAccount: takerUserAccount, // decoded UserAccount data
+  order: takerOrder,                  // the specific Order to fill against
 };
 
 await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
@@ -130,7 +132,9 @@ Here's a more complete example that ties the pieces together:
 import {
   AuctionSubscriber,
   getAuctionPrice,
+  getUserStatsAccountPublicKey,
   isSignedMsgOrder,
+  isVariant,
   convertToNumber,
   PRICE_PRECISION,
   BASE_PRECISION,
@@ -148,11 +152,11 @@ const auctionSubscriber = new AuctionSubscriber({
 });
 await auctionSubscriber.subscribe();
 
-setInterval(async () => {
-  const auctions = auctionSubscriber.getAuctionOrders();
-
-  for (const auction of auctions) {
-    const { order, userAccount } = auction;
+// Listen for auction events instead of polling
+auctionSubscriber.eventEmitter.on("onAccountUpdate", async (takerUserAccount, pubkey, slot) => {
+  for (const order of takerUserAccount.orders) {
+    if (order.baseAssetAmount.isZero() || order.baseAssetAmount.eq(order.baseAssetAmountFilled)) continue;
+    const userAccount = takerUserAccount;
 
     // Skip SWIFT orders if handling them via SwiftOrderSubscriber
     if (isSignedMsgOrder(order)) continue;
@@ -172,14 +176,13 @@ setInterval(async () => {
     const fillSize = convertToNumber(order.baseAssetAmount, BASE_PRECISION);
     if (currentSize + fillSize > MAX_POSITION) continue;
 
-    // Get current auction price
-    const currentSlot = await driftClient.connection.getSlot();
-    const auctionPriceBN = getAuctionPrice(order, currentSlot, oracle.price);
+    // Get current auction price (use slot from the event, not an RPC call)
+    const auctionPriceBN = getAuctionPrice(order, slot, oracle.price);
     const auctionPrice = convertToNumber(auctionPriceBN, PRICE_PRECISION);
     const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
 
     // Calculate our fill price (oracle + small edge)
-    const takerIsLong = order.direction === PositionDirection.LONG;
+    const takerIsLong = isVariant(order.direction, "long");
     const edge = MIN_SPREAD;
     const myFillPrice = takerIsLong
       ? oraclePrice + edge   // sell to long taker above oracle
@@ -199,18 +202,23 @@ setInterval(async () => {
           orderType: OrderType.LIMIT,
           marketIndex,
           direction: takerIsLong ? PositionDirection.SHORT : PositionDirection.LONG,
-          baseAssetAmount: order.baseAssetAmount,
+          baseAssetAmount: order.baseAssetAmount.sub(order.baseAssetAmountFilled),
           price: driftClient.convertToPricePrecision(myFillPrice),
           postOnly: PostOnlyParams.MUST_POST_ONLY,
         },
-        { order, userAccount }
+        {
+          taker: pubkey,
+          takerStats: getUserStatsAccountPublicKey(driftClient.program.programId, userAccount.authority),
+          takerUserAccount: userAccount,
+          order,
+        }
       );
       console.log(`Filled ${fillSize} @ $${myFillPrice.toFixed(4)}`);
     } catch (err) {
       console.error("Fill failed:", err);
     }
   }
-}, 1_000); // check every second
+});
 ```
 
 ## Practical filters

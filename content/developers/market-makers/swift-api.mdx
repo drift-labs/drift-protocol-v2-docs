@@ -43,11 +43,14 @@ The tradeoff: you need fast infrastructure (dedicated RPC node, low-latency WebS
 ### Basic subscription
 
 ```typescript
-import { SwiftOrderSubscriber } from "@drift-labs/sdk";
+import { SwiftOrderSubscriber, loadKeypair } from "@drift-labs/sdk";
 
 const swiftSubscriber = new SwiftOrderSubscriber({
-  url: "wss://swift.drift.trade",
   driftClient,
+  driftEnv: "mainnet-beta",
+  marketIndexes: [0, 1, 2], // SOL, BTC, ETH perp markets to listen to
+  keypair: loadKeypair("<KEYPAIR_PATH>"), // used for WebSocket auth
+  // endpoint: "wss://swift.drift.trade/ws", // optional, defaults based on driftEnv
 });
 
 await swiftSubscriber.subscribe(
@@ -74,7 +77,7 @@ await swiftSubscriber.subscribe(
 Optionally provide a `userAccountGetter` to resolve taker UserAccount details. This lets you inspect the taker's positions, collateral, and health before deciding to fill — useful for toxic flow filtering.
 
 ```typescript
-import { UserMap } from "@drift-labs/sdk";
+import { UserMap, loadKeypair } from "@drift-labs/sdk";
 
 const userMap = new UserMap({
   driftClient,
@@ -84,11 +87,12 @@ const userMap = new UserMap({
 await userMap.subscribe();
 
 const swiftSubscriber = new SwiftOrderSubscriber({
-  url: "wss://swift.drift.trade",
   driftClient,
-  userAccountGetter: (authority, subaccountId) => {
-    return userMap.getUserAccount(authority, subaccountId);
-  },
+  driftEnv: "mainnet-beta",
+  marketIndexes: [0, 1, 2],
+  keypair: loadKeypair("<KEYPAIR_PATH>"),
+  // userAccountGetter implements { mustGetUserAccount(publicKey: string): Promise<UserAccount> }
+  userAccountGetter: userMap,
 });
 ```
 
@@ -107,37 +111,61 @@ For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-m
 ```typescript
 import {
   getLimitOrderParams,
+  getUserAccountPublicKey,
+  getUserStatsAccountPublicKey,
+  isVariant,
   PositionDirection,
   PostOnlyParams,
 } from "@drift-labs/sdk";
+import { PublicKey } from "@solana/web3.js";
 
 // From the SWIFT subscription callback
-async function fillSwiftOrder(signedMessage) {
-  const { signedMsgOrderParams, uuid: signedMsgOrderUuid } = signedMessage;
+async function fillSwiftOrder(orderMessageRaw, signedMessage, isDelegateSigner) {
+  const takerAuthority = new PublicKey(orderMessageRaw.taker_authority);
+  const signingAuthority = new PublicKey(orderMessageRaw.signing_authority);
+  const subAccountId = signedMessage.subAccountId;
+
+  // Build the signed order params (message + signature from the raw order)
+  const signedOrderParams = {
+    orderParams: Buffer.from(orderMessageRaw.order_message, "hex"),
+    signature: Buffer.from(orderMessageRaw.order_signature, "base64"),
+  };
+
+  // Build UUID as Uint8Array
+  const uuidBytes = new TextEncoder().encode(orderMessageRaw.uuid);
+
+  // Resolve taker account addresses
+  const takerPubkey = await getUserAccountPublicKey(
+    driftClient.program.programId, takerAuthority, subAccountId
+  );
+  const takerStatsPubkey = getUserStatsAccountPublicKey(
+    driftClient.program.programId, takerAuthority
+  );
 
   // Build your maker order params (opposite direction of taker)
-  const takerIsLong = signedMsgOrderParams.direction === PositionDirection.LONG;
+  const takerIsLong = isVariant(signedMessage.signedMsgOrderParams.direction, "long");
   const makerOrderParams = getLimitOrderParams({
-    marketIndex: signedMsgOrderParams.marketIndex,
+    marketIndex: signedMessage.signedMsgOrderParams.marketIndex,
     direction: takerIsLong ? PositionDirection.SHORT : PositionDirection.LONG,
-    baseAssetAmount: signedMsgOrderParams.baseAssetAmount, // fill full size
-    price: myFillPrice, // your calculated fill price
+    baseAssetAmount: signedMessage.signedMsgOrderParams.baseAssetAmount,
+    price: myFillPrice,
     postOnly: PostOnlyParams.MUST_POST_ONLY,
   });
 
-  // Get taker info
-  const takerInfo = {
-    order: signedMsgOrderParams,
-    userAccount: takerUserAccount, // from userAccountGetter or userMap
-    userAccountPublicKey: signedMsgOrderParams.takerUserAccount,
-  };
+  // Resolve taker user account (from UserMap or userAccountGetter)
+  const takerUserAccount = await userMap.mustGetUserAccount(takerPubkey.toString());
 
   // Submit place-and-make (SDK handles ed25519 verification ix)
   const txSig = await driftClient.placeAndMakeSignedMsgPerpOrder(
-    signedMsgOrderParams,
-    signedMsgOrderUuid,
-    takerInfo,
-    makerOrderParams
+    signedOrderParams,          // { orderParams: Buffer, signature: Buffer }
+    uuidBytes,                  // Uint8Array
+    {
+      taker: takerPubkey,
+      takerStats: takerStatsPubkey,
+      takerUserAccount,
+      signingAuthority,
+    },
+    makerOrderParams,           // your maker order
   );
 
   console.log("Filled SWIFT order:", txSig);
@@ -151,11 +179,12 @@ If you need more control over transaction construction (e.g., custom priority fe
 ```typescript
 import { Transaction } from "@solana/web3.js";
 
+// Same params as placeAndMakeSignedMsgPerpOrder, returns instruction array
 const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
-  signedMsgOrderParams,
-  signedMsgOrderUuid,
-  takerInfo,
-  makerOrderParams
+  signedOrderParams,  // { orderParams, signature }
+  uuidBytes,          // Uint8Array
+  { taker: takerPubkey, takerStats: takerStatsPubkey, takerUserAccount, signingAuthority },
+  makerOrderParams,
 );
 
 // ixs includes:
@@ -236,18 +265,20 @@ Use `isSignedMsgOrder()` to identify SWIFT-origin orders and avoid double-handli
 import { isSignedMsgOrder } from "@drift-labs/sdk";
 
 // In your AuctionSubscriber callback
-const auctions = auctionSubscriber.getAuctionOrders();
+auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey, slot) => {
+  for (const order of userAccount.orders) {
+    if (order.baseAssetAmount.isZero()) continue;
 
-for (const auction of auctions) {
-  if (isSignedMsgOrder(auction.order)) {
-    // This came from SWIFT — you already saw it via WebSocket
-    // Skip to avoid submitting a duplicate fill
-    continue;
+    if (isSignedMsgOrder(order)) {
+      // This came from SWIFT — you already saw it via WebSocket
+      // Skip to avoid submitting a duplicate fill
+      continue;
+    }
+
+    // Handle regular onchain auction
+    await handleAuction(order, userAccount, pubkey, slot);
   }
-
-  // Handle regular onchain auction
-  await handleAuction(auction);
-}
+});
 ```
 
 </div>
