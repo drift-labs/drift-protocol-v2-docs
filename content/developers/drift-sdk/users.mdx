@@ -24,78 +24,59 @@ console.log(txSig, userAccountPublicKey.toBase58());
   </TypeScript>
 </SDKDoc>
 
-### Get the Next Subaccount ID
+#### Get the Next Subaccount ID
 
-<SDKDoc>
-  <TypeScript name="getNextSubAccountId" type="method" owner="DriftClient">
 ```js
 const nextId = driftClient.getNextSubAccountId();
 console.log(nextId);
 ```
-  </TypeScript>
-</SDKDoc>
 
 ### Get a User and Subscribe
 
 <details>
 <summary>View User import</summary>
 
-<SDKDoc>
-  <TypeScript name="User" type="class">
 ```js
 import { User } from "@drift-labs/sdk";
 
-const user = driftClient.getUser(); // convenience helper
+const user = driftClient.getUser();
 await user.subscribe();
 ```
-  </TypeScript>
-</SDKDoc>
 
 </details>
 
-<SDKDoc>
-  <TypeScript name="getUser" type="method" owner="DriftClient">
-```js
-const user = driftClient.getUser(); // active subaccount
-```
-  </TypeScript>
-</SDKDoc>
+#### Get active subaccount user
 
-<SDKDoc>
-  <TypeScript name="getUser" type="method" owner="DriftClient">
 ```js
-// Fetch a specific subaccount.
+const user = driftClient.getUser();
+```
+
+#### Get a specific subaccount user
+
+```js
 const user = driftClient.getUser(1);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUserAccount" type="method" owner="User">
+#### Read account via `User`
+
 ```js
 const account = driftClient.getUser().getUserAccount();
 console.log(account);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUserAccount" type="method" owner="DriftClient">
+#### Read account via `DriftClient`
+
 ```js
-const account = driftClient.getUserAccount(); // active subaccount
+const account = driftClient.getUserAccount();
 console.log(account);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="fetchAccounts" type="method" owner="User">
+#### Refresh user accounts
+
 ```js
 const user = driftClient.getUser(0);
 await user.fetchAccounts();
 ```
-  </TypeScript>
-</SDKDoc>
 
 ### Derived Addresses (User Account)
 
@@ -116,8 +97,8 @@ console.log(userAccountPublicKey.toBase58());
 
 ### Query User State (Orders / Positions)
 
-<SDKDoc>
-  <TypeScript name="getTokenAmount" type="method" owner="User">
+#### Get token amount (deposit vs borrow)
+
 ```js
 import { BN } from "@drift-labs/sdk";
 
@@ -128,44 +109,34 @@ const isDeposit = tokenAmount.gte(new BN(0));
 const isBorrow = tokenAmount.lt(new BN(0));
 console.log({ tokenAmount: tokenAmount.toString(), isDeposit, isBorrow });
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getPerpPosition" type="method" owner="User">
+#### Get a perp position
+
 ```js
 const position = driftClient.getUser().getPerpPosition(0);
 console.log(position?.baseAssetAmount.toString());
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOrder" type="method" owner="User">
+#### Get an order by order id
+
 ```js
 const order = driftClient.getUser().getOrder(1);
 console.log(order);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOrderByUserOrderId" type="method" owner="User">
+#### Get an order by user order id
+
 ```js
 const order = driftClient.getUser().getOrderByUserOrderId(1);
 console.log(order);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOpenOrders" type="method" owner="User">
+#### Get all open orders
+
 ```js
 const orders = driftClient.getUser().getOpenOrders();
 console.log(orders.length);
 ```
-  </TypeScript>
-</SDKDoc>
 
 ### Active Subaccount
 

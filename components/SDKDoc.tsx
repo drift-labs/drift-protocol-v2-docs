@@ -51,6 +51,8 @@ function sanitizeDefinition<T extends ReturnType<typeof generateDefinition>>(def
 function getTsDocLink(ts: { name: string; type?: SDKBlockProps["type"]; owner?: string }) {
   const name = ts.name;
   switch (ts.type ?? "function") {
+    case "example":
+      return undefined;
     case "class":
       return `${SDK_BASE_URL}/classes/${name}.html`;
     case "enum":
@@ -71,7 +73,7 @@ function getTsDocLink(ts: { name: string; type?: SDKBlockProps["type"]; owner?: 
 
 type SDKBlockProps = {
   name: string;
-  type?: "function" | "class" | "method" | "enum" | "variable" | "type";
+  type?: "function" | "class" | "method" | "enum" | "variable" | "type" | "example";
   owner?: string;
   children?: React.ReactNode;
 };
@@ -113,6 +115,7 @@ export function SDKDoc({ children }: SDKDocProps) {
     const props = childTs.props as SDKBlockProps;
     const tsType = props.type ?? "function";
     const tsModule = "@drift-labs/sdk";
+    const isExampleOnly = tsType === "example";
     let code: string | undefined;
     let exportName = props.name;
     const displayType = tsType.charAt(0).toUpperCase() + tsType.slice(1);
@@ -129,17 +132,20 @@ export function SDKDoc({ children }: SDKDocProps) {
       } else {
         code = `export { ${props.name} } from '${tsModule}'`;
       }
-    } else {
+    } else if (!isExampleOnly) {
       code = `export { ${props.name} } from '${tsModule}'`;
     }
 
     tabs.push({
       label: "TypeScript",
-      heading: `${displayType} ${displayName}`,
+      heading: isExampleOnly ? undefined : `${displayType} ${displayName}`,
       content: (() => {
+        if (isExampleOnly) {
+          return null;
+        }
         try {
           const definition = generateDefinition({
-            code,
+            code: code ?? "",
             exportName,
           });
           return <TSDoc definition={sanitizeDefinition(definition)} />;

@@ -41,7 +41,7 @@ const driftClient = new DriftClient({
 await driftClient.subscribe();
 ```
 
-[`DriftClient` class reference](https://drift-labs.github.io/protocol-v2/sdk/classes/DriftClient.html)
+`DriftClient` class reference https://drift-labs.github.io/protocol-v2/sdk/classes/DriftClient.html
 
 ```js
 await driftClient.unsubscribe();
@@ -108,10 +108,7 @@ await driftClient.addUser(1);
   </TypeScript>
 </SDKDoc>
 
-### Program Accounts (Advanced)
-
-<SDKDoc>
-  <TypeScript name="DRIFT_PROGRAM_ID" type="variable">
+### Program ID
 ```js
 import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
 
@@ -119,28 +116,12 @@ import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
 // Use this when deriving PDAs or referencing the program directly.
 console.log(DRIFT_PROGRAM_ID.toBase58());
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getHighLeverageModeConfigPublicKey" type="function">
+### High Leverage Mode
 ```js
 import { getHighLeverageModeConfigPublicKey } from "@drift-labs/sdk";
 
 const pda = getHighLeverageModeConfigPublicKey(driftClient.program.programId);
 const config = await driftClient.program.account.highLeverageModeConfig.fetch(pda);
 ```
-  </TypeScript>
-</SDKDoc>
-
-<SDKDoc>
-  <TypeScript name="initialize" type="function">
-```js
-import { initialize } from "@drift-labs/sdk";
-
-const sdkConfig = initialize({ env: "mainnet-beta" });
-console.log(sdkConfig.DRIFT_PROGRAM_ID);
-```
-  </TypeScript>
-</SDKDoc>
 
