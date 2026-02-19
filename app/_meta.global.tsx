@@ -155,7 +155,7 @@ const META = {
           "index": "",
           "referral-links": "",
           "wlfi-trading-campaign": {
-            "display": displayWip
+            "display": displayWip,
           },
         },
       },
@@ -205,7 +205,10 @@ const META = {
           "events": "",
           "swaps": "",
           "swift": "",
-          "builder-codes": ""
+          "builder-codes": "",
+          "rust": {
+            "display": displayWip,
+          },
         },
       },
       "data-api": {
