@@ -32,7 +32,9 @@ The SDK supports multiple subscription strategies, each with different performan
 
 **How it works**: Periodically calls `connection.getAccountInfo()` for each account
 
-```typescript
+<SDKDoc>
+  <TypeScript name="Polling subscription" type="example">
+```js
 import { BulkAccountLoader } from "@drift-labs/sdk";
 
 const accountLoader = new BulkAccountLoader(connection, "confirmed", 1000);
@@ -46,6 +48,8 @@ const driftClient = new DriftClient({
   },
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 **Pros**:
 - Simple and reliable
@@ -63,7 +67,9 @@ const driftClient = new DriftClient({
 
 **How it works**: Uses Solana's `onAccountChange` WebSocket notifications
 
-```typescript
+<SDKDoc>
+  <TypeScript name="WebSocket subscription" type="example">
+```js
 const driftClient = new DriftClient({
   connection,
   wallet,
@@ -72,6 +78,8 @@ const driftClient = new DriftClient({
   },
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 **Pros**:
 - Lower latency than polling
@@ -89,7 +97,9 @@ const driftClient = new DriftClient({
 
 **How it works**: Uses Yellowstone gRPC plugin for Solana validators
 
-```typescript
+<SDKDoc>
+  <TypeScript name="gRPC subscription" type="example">
+```js
 const driftClient = new DriftClient({
   connection,
   wallet,
@@ -97,11 +107,13 @@ const driftClient = new DriftClient({
     type: "grpc",
     grpcConfigs: {
       endpoint: "https://grpc.mainnet.jito.wtf",
-      token: process.env.GRPC_TOKEN,
+      token: "YOUR_GRPC_TOKEN",
     },
   },
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 **Pros**:
 - Lowest latency (sub-second updates)
@@ -119,7 +131,9 @@ const driftClient = new DriftClient({
 
 For loading many accounts efficiently, the SDK provides `BulkAccountLoader`:
 
-```typescript
+<SDKDoc>
+  <TypeScript name="BulkAccountLoader" type="example">
+```js
 import { BulkAccountLoader } from "@drift-labs/sdk";
 
 // Constructor: (connection, commitment, pollingFrequencyMs)
@@ -133,6 +147,8 @@ const driftClient = new DriftClient({
   accountSubscription: { type: "polling", accountLoader: bulkAccountLoader },
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 The loader batches multiple accounts into single `getMultipleAccounts` RPC calls for efficiency.
 
@@ -140,28 +156,28 @@ The loader batches multiple accounts into single `getMultipleAccounts` RPC calls
 
 The SDK builds transactions in several layers:
 
-**1. Get instruction**
-```typescript
+<SDKDoc>
+  <TypeScript name="Transaction construction layers" type="example">
+```js
+// 1. Get instruction
 const ix = await driftClient.getPlacePerpOrderIx(orderParams);
-```
 
-**2. Build transaction**
-```typescript
+// 2. Build transaction
 const tx = await driftClient.txSender.getVersionedTransaction(
   [ix],
   [], // lookup tables
   wallet.publicKey
 );
-```
 
-**3. Send transaction**
-```typescript
-const signature = await driftClient.txSender.sendVersionedTransaction(
+// 3. Send transaction
+const { txSig } = await driftClient.txSender.sendVersionedTransaction(
   tx,
   [],
   driftClient.opts
 );
 ```
+  </TypeScript>
+</SDKDoc>
 
 Higher-level methods like `placePerpOrder()` do all three steps automatically.
 
@@ -169,14 +185,16 @@ Higher-level methods like `placePerpOrder()` do all three steps automatically.
 
 Many Drift instructions need dynamic account lists (oracles, markets, positions). The SDK's `getRemainingAccounts()` method builds this list:
 
-```typescript
+<SDKDoc>
+  <TypeScript name="Remaining accounts" type="example">
+```js
 const remainingAccounts = driftClient.getRemainingAccounts({
   userAccounts: [user.getUserAccount()],
   writableSpotMarketIndexes: [0],  // USDC market
 });
 
 // These accounts get passed to the instruction
-const ix = await program.methods
+const ix = await driftClient.program.methods
   .placePerpOrder(params)
   .accounts({
     user: userAccountPubkey,
@@ -185,6 +203,8 @@ const ix = await program.methods
   .remainingAccounts(remainingAccounts)
   .instruction();
 ```
+  </TypeScript>
+</SDKDoc>
 
 This handles oracle accounts, market accounts, and cross-position accounts automatically.
 
@@ -192,7 +212,9 @@ This handles oracle accounts, market accounts, and cross-position accounts autom
 
 The SDK can subscribe to onchain program events:
 
-```typescript
+<SDKDoc>
+  <TypeScript name="Event subscriptions" type="example">
+```js
 import { EventSubscriber, isVariant } from "@drift-labs/sdk";
 
 const eventSubscriber = new EventSubscriber(connection, driftClient.program, {
@@ -209,6 +231,8 @@ eventSubscriber.eventEmitter.on("newEvent", (event) => {
   }
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 Common event types:
 - `OrderActionRecord` (with action: `fill`, `place`, `cancel`, etc.) - Order lifecycle events
@@ -218,29 +242,26 @@ Common event types:
 
 ## Caching and performance
 
-**Market account caching**:
-```typescript
-// First call: RPC request
+<SDKDoc>
+  <TypeScript name="Caching examples" type="example">
+```js
+// Market account caching:
+// First call after subscribe: data from subscription cache (no extra RPC)
 const market = driftClient.getPerpMarketAccount(0);
-
-// Subsequent calls: cached (no RPC)
+// Subsequent calls: same cached data, updates via subscription
 const market2 = driftClient.getPerpMarketAccount(0);
-```
 
-Markets update via subscription, so cache stays fresh.
-
-**Oracle price caching**:
-```typescript
+// Oracle price caching:
 const oracle = driftClient.getOracleDataForPerpMarket(0);
 // Price is cached from account subscription
-```
 
-**User account caching**:
-```typescript
+// User account caching:
 const user = driftClient.getUser();
 const position = user.getPerpPosition(0);
-// No RPC call - data from subscription
+// No RPC call, data from subscription
 ```
+  </TypeScript>
+</SDKDoc>
 
 This makes queries fast (microseconds vs milliseconds for RPC).
 
@@ -248,7 +269,9 @@ This makes queries fast (microseconds vs milliseconds for RPC).
 
 To track many user accounts efficiently:
 
-```typescript
+<SDKDoc>
+  <TypeScript name="UserMap" type="example">
+```js
 import { UserMap } from "@drift-labs/sdk";
 
 const userMap = new UserMap({
@@ -265,51 +288,54 @@ await userMap.addUserAccount(userAccountPubkey);
 const user = userMap.get(userAccountPubkey.toString());
 const position = user.getPerpPosition(0);
 ```
+  </TypeScript>
+</SDKDoc>
 
 UserMap handles subscription lifecycle for all users automatically.
 
 ## Common patterns
 
-**Initialize and subscribe**:
-```typescript
+<SDKDoc>
+  <TypeScript name="Common patterns" type="example">
+```js
+import { ComputeBudgetProgram } from "@solana/web3.js";
+
+// Initialize and subscribe
 const driftClient = new DriftClient({
   connection,
   wallet,
   env: "mainnet-beta",
 });
-
 await driftClient.subscribe();
 
 const user = driftClient.getUser();
 await user.subscribe();
-```
 
-**Transaction with priority fee**:
-```typescript
-import { ComputeBudgetProgram } from "@solana/web3.js";
-
+// Transaction with priority fee
 const ix = await driftClient.getPlacePerpOrderIx(orderParams);
-
 const tx = await driftClient.txSender.getVersionedTransaction([
   ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50000 }),
   ix,
 ], [], wallet.publicKey);
+const { txSig } = await driftClient.txSender.sendVersionedTransaction(
+  tx, [], driftClient.opts
+);
 
-const signature = await driftClient.txSender.sendVersionedTransaction(tx, [], driftClient.opts);
-```
-
-**Switch subaccounts**:
-```typescript
+// Switch subaccounts
 await driftClient.switchActiveUser(1);  // Switch to subaccount 1
-const user = driftClient.getUser();  // Now returns subaccount 1
+const user1 = driftClient.getUser();  // Now returns subaccount 1
 ```
+  </TypeScript>
+</SDKDoc>
 
 ## Error handling
 
 Common error scenarios:
 
-**Insufficient collateral**:
-```typescript
+<SDKDoc>
+  <TypeScript name="Error handling" type="example">
+```js
+// Insufficient collateral
 try {
   await driftClient.placePerpOrder(params);
 } catch (e) {
@@ -317,21 +343,15 @@ try {
     console.log("Need to deposit more collateral");
   }
 }
-```
 
-**Slippage exceeded**:
-```typescript
-// Order rejected if execution price is too far from expectation
-// Add slippage tolerance to order params
-```
-
-**Account subscription errors**:
-```typescript
+// Account subscription errors
 driftClient.eventEmitter.on("error", (e) => {
   console.error("Subscription error:", e);
   // Reconnect logic here
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 ## Performance tips
 
@@ -340,29 +360,26 @@ driftClient.eventEmitter.on("error", (e) => {
 - `confirmed` - Balanced (recommended)
 - `finalized` - Slowest, most secure
 
-**Batch operations**:
-```typescript
-// Place multiple orders in one transaction
+<SDKDoc>
+  <TypeScript name="Performance tips" type="example">
+```js
+// Batch operations: place multiple orders in one transaction
 await driftClient.placeOrders([order1, order2, order3]);
-```
 
-**Precompute values**:
-```typescript
-// Convert once, reuse
+// Precompute values: convert once, reuse
 const size = driftClient.convertToPerpPrecision(1);
 const price = driftClient.convertToPricePrecision(100);
-```
 
-**Use lookup tables (ALTs)**:
-```typescript
-// Reduce transaction size for frequently used accounts
-const lookupTables = [/* your ALT addresses */];
+// Use lookup tables (ALTs) to reduce transaction size
+const lookupTables = [/* your AddressLookupTableAccount objects */];
 const tx = await driftClient.txSender.getVersionedTransaction(
   instructions,
   lookupTables,
   wallet.publicKey
 );
 ```
+  </TypeScript>
+</SDKDoc>
 
 ## Related
 

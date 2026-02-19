@@ -6,7 +6,9 @@ Builder Codes (DBC) let integrators earn fees by routing flow through their appl
 
 First, initialize the DriftClient for both the builder and user:
 
-```typescript
+<SDKDoc>
+  <TypeScript name="Builder codes setup" type="example">
+```js
 import { DriftClient } from "@drift-labs/sdk";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 
@@ -37,6 +39,8 @@ const userClient = new DriftClient({
 });
 await userClient.subscribe();
 ```
+  </TypeScript>
+</SDKDoc>
 
 ## SDK Usage
 

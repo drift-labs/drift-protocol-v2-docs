@@ -27,6 +27,8 @@ const { orderParams: message, signature } =
 
 ### Submit to the Swift API
 
+<SDKDoc>
+  <TypeScript name="Swift API submit" type="example">
 ```js
 const swiftUrl = "https://swift.drift.trade/orders";
 
@@ -43,9 +45,12 @@ const response = await fetch(swiftUrl, {
 });
 
 if (!response.ok) {
-  throw new Error(`Swift error: ${response.status} ${await response.text()}`);
+  const errorText = await response.text();
+  throw new Error("Swift error: " + response.status + " " + errorText);
 }
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### Signed message accounts (delegate flow)
 
