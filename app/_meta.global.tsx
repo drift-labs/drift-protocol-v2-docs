@@ -1,8 +1,8 @@
 import { MetaRecord } from "nextra";
 
-const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
 /*
 Conditionally hide items in production
+const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
 USAGE:
 {
   ...,
@@ -154,9 +154,7 @@ const META = {
         "items": {
           "index": "",
           "referral-links": "",
-          "wlfi-trading-campaign": {
-            "display": displayWip
-          },
+          "wlfi-trading-campaign": "",
         },
       },
       "risk-and-safety": {
@@ -205,7 +203,8 @@ const META = {
           "events": "",
           "swaps": "",
           "swift": "",
-          "builder-codes": ""
+          "builder-codes": "",
+          "sdk-internals": ""
         },
       },
       "data-api": {
@@ -215,6 +214,14 @@ const META = {
           "glossary": ""
         }
       },
+      "concepts": {
+        "title": "Concepts",
+        "items": {
+          "index": "",
+          "program-structure": "",
+          "account-model": ""
+        }
+      },
       "--- guides": {
         "title": "GUIDES",
         "type": "separator"
@@ -222,13 +229,15 @@ const META = {
       "market-makers": {
         "title": "Market Makers",
         "items": {
+          "index": "",
+          "quickstart": "",
           "normal-mm": "",
-          "orderbook": "",
           "jit-only": "",
-          "swift-order-feed": "",
-          "swift-place-and-make": "",
-          "indicative-quotes": "",
-          "bot-architecture": ""
+          "bot-architecture": "",
+          "orderbook-and-matching": "",
+          "jit-auctions": "",
+          "swift-api": "",
+          "indicative-quotes": ""
         }
       },
       "vault-managers": {
@@ -275,6 +284,12 @@ const META = {
           "orderbook-and-ws": "",
           "sending-actions": ""
         },
+      },
+      "architecture": {
+        "title": "Architecture",
+        "items": {
+          "index": ""
+        }
       },
       "builder-codes": "Builder Codes",
       "--- Contribute": {
