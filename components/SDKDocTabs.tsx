@@ -30,7 +30,7 @@ export function SDKDocTabs({ tabs }: SDKDocTabsProps) {
   }
 
   return (
-    <Tabs items={tabs.map((tab) => tab.label)}>
+    <Tabs items={tabs.map((tab) => tab.label)} storageKey="sdk-tabs">
       {tabs.map((tab) => (
         <Tabs.Tab key={tab.label} title={tab.label}>
           {tab.example ? <div>{tab.example.content}</div> : null}

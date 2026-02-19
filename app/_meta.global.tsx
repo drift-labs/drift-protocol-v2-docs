@@ -1,8 +1,9 @@
 import { MetaRecord } from "nextra";
 
+const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
+
 /*
 Conditionally hide items in production
-const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
 USAGE:
 {
   ...,
@@ -154,7 +155,9 @@ const META = {
         "items": {
           "index": "",
           "referral-links": "",
-          "wlfi-trading-campaign": "",
+          "wlfi-trading-campaign": {
+            "display": displayWip,
+          },
         },
       },
       "risk-and-safety": {
@@ -204,7 +207,10 @@ const META = {
           "swaps": "",
           "swift": "",
           "builder-codes": "",
-          "sdk-internals": ""
+          "sdk-internals": "",
+          "rust": {
+            "display": displayWip,
+          },
         },
       },
       "data-api": {
