@@ -1,0 +1,353 @@
+# Account Model
+
+This page dives deep into how Drift tracks positions, manages orders, and calculates collateral onchain. For account type definitions and structure, see [Program Structure](./program-structure).
+
+## Overview
+
+Drift's account model is built around a few key principles:
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+**Key Design Principles**
+
+- **Cross-margin** - All positions within a wallet share collateral
+- **Subaccounts** - Each wallet can have multiple isolated trading accounts (0, 1, 2...)
+- **Interest-bearing** - Spot balances accrue interest via scaled balance mechanism
+- **Inline orders** - Orders are stored directly in UserAccount (no separate order accounts)
+- **Account size limits** - Fixed limits (8 perp, 8 spot, 32 orders) keep transactions predictable
+
+</div>
+
+## Position accounting
+
+<div className="doc-card-grid">
+
+<div className="doc-card">
+
+### PerpPosition
+
+Tracks long/short exposure in perpetual futures markets.
+
+**Key mechanics:**
+- Position size: `baseAssetAmount` (positive = long, negative = short)
+- Entry price: `quoteEntryAmount / baseAssetAmount`
+- Unrealized PnL: `(oraclePrice - entryPrice) x baseAssetAmount`
+- Funding payments: Tracked via `lastCumulativeFundingRate`
+
+**Order locking:**
+- `openBids` - Notional value locked in buy orders
+- `openAsks` - Notional value locked in sell orders
+
+**Liquidity provision:**
+- `lpShares` - If providing liquidity to the AMM
+
+</div>
+
+<div className="doc-card">
+
+### SpotPosition
+
+Represents deposits (positive) or borrows (negative) in spot markets.
+
+**Interest accrual:**
+- Uses `scaledBalance` mechanism
+- Real balance = `scaledBalance x cumulativeIndex`
+- Avoids per-user interest calculations onchain
+- Interest compounds automatically
+
+**Balance types:**
+- `DepositBalance` - You've deposited/lent tokens
+- `BorrowBalance` - You've borrowed tokens
+
+**Order locking:**
+- Tokens locked in open spot orders tracked separately
+
+</div>
+
+</div>
+
+## Order mechanics
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+Orders are stored inline in UserAccount (no separate order accounts). Up to **32 orders per user** including both resting orders and trigger orders.
+
+### Order types
+
+**Limit orders** - Resting orders at a specific price
+- `postOnly` - Only execute as maker (reject if would take)
+- `immediateOrCancel` - Fill immediately or cancel
+
+**Market orders** - Execute immediately at best available price
+
+**Oracle orders** - Price moves with oracle: `oraclePrice + oraclePriceOffset`
+- Useful for market makers who want to maintain a spread without constant updates
+- Price automatically adjusts as oracle updates
+
+**Trigger orders** - Activate when oracle price crosses trigger price
+- `triggerMarket` - Becomes market order when triggered
+- `triggerLimit` - Becomes limit order when triggered
+
+### JIT auctions
+
+Every order goes through a **Just-In-Time (JIT) auction** to improve price:
+- `auctionStartPrice` - Most aggressive price
+- `auctionEndPrice` - Least aggressive price (limit price)
+- `auctionDuration` - Slots for auction to run
+- Price linearly improves from start to end over the duration
+
+This gives better prices while maintaining MEV resistance. See [JIT Auctions](/developers/market-makers/jit-auctions) for details.
+
+### Order flags
+
+- `reduceOnly` - Order can only reduce position size, not increase or flip it
+- `postOnly` - Order must be maker, rejected if would match immediately
+- `immediateOrCancel` - Fill what you can immediately, cancel the rest
+
+</div>
+
+## Collateral and margin
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+### Total collateral calculation
+
+Your collateral is calculated across all spot positions:
+
+```
+Total Collateral =
+  Σ (spot deposits x asset weight)
+  - Σ (spot borrows x liability weight)
+  + unrealized perp PnL
+```
+
+**Asset weights** (< 1.0)
+- Safety buffer for deposits used as collateral
+- Example: SOL might have 0.9 weight (90% of value counts)
+- Protects against price volatility
+
+**Liability weights** (> 1.0)
+- Extra buffer for borrowed funds
+- Example: Borrowed SOL might have 1.1 weight (110% of debt counts)
+- Accounts for repayment risk
+
+### Margin requirement
+
+Position margin requirements sum across all positions:
+
+```
+Margin Requirement = Σ (position notional x initial margin ratio)
+```
+
+**Initial margin ratio**
+- Determines minimum collateral to open a position
+- Varies by market (e.g., 5% for BTC-PERP = 20x max leverage)
+- Higher for riskier/less liquid markets
+
+**Maintenance margin ratio**
+- Lower threshold that triggers liquidation
+- Typically ~half of initial margin
+- Example: 2.5% maintenance if 5% initial
+
+### Account health
+
+```
+Health = Total Collateral / Margin Requirement
+```
+
+**Health states:**
+- **> 1.0** - Healthy, can open new positions
+- **< 1.0** - Liquidation eligible
+- **< 0.0** - Underwater (negative collateral)
+
+When health drops below 1.0, liquidators can close your positions to bring the account back to health.
+
+</div>
+
+## Cross-margin and subaccounts
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+All subaccounts under the same wallet **share collateral** for cross-margin benefits:
+
+**How it works:**
+- Each wallet can create multiple subaccounts (0, 1, 2, ...)
+- Deposits in subaccount 0 can back positions in subaccount 1
+- Total collateral and margin requirement are calculated across ALL subaccounts
+- Liquidation considers all subaccounts together
+
+**Benefits:**
+- **Capital efficiency** - Don't need to split funds across accounts
+- **Flexible organization** - Separate strategies in different subaccounts
+- **Shared margin pool** - Winning positions support losing ones
+
+**SDK usage (TypeScript example ,  Python and Rust SDKs have equivalent methods):**
+```typescript
+// Switch between subaccounts
+await driftClient.switchActiveUser(1); // Switch to subaccount 1
+await driftClient.placePerpOrder(/* order params */); // Order goes to subaccount 1
+```
+
+**Important:**
+- Each subaccount has its own positions and orders
+- But they all share the same collateral/margin pool
+- Liquidation affects all subaccounts if total health drops below 1.0
+
+</div>
+
+## State transitions
+
+<div className="doc-card-grid">
+
+<div className="doc-card">
+
+### Deposit
+
+Adds collateral to your account:
+
+1. Transfers tokens from wallet to Drift vault
+2. Increases spot position `scaledBalance`
+3. Updates cumulative deposit tracking
+4. Improves account health
+
+*Interest starts accruing immediately on deposits*
+
+</div>
+
+<div className="doc-card">
+
+### Withdraw
+
+Removes collateral from your account:
+
+1. Checks account health allows withdrawal
+2. Decreases spot position `scaledBalance`
+3. Transfers tokens from vault to wallet
+4. May require settling PnL first
+
+*Can't withdraw if it would make health < 1.0*
+
+</div>
+
+<div className="doc-card">
+
+### Place order
+
+Adds a new order to your account:
+
+1. Adds Order to orders array (max 32)
+2. Increases `openBids` or `openAsks` on position
+3. Locks collateral for the order
+4. Checks account health
+5. Starts JIT auction
+
+*Order appears on DLOB immediately*
+
+</div>
+
+<div className="doc-card">
+
+### Order fill
+
+When an order matches:
+
+1. Updates position `baseAssetAmount` and `quoteAssetAmount`
+2. Reduces `openBids` or `openAsks`
+3. Marks order as filled (not removed)
+4. Emits `OrderFillRecord` event
+5. Updates account health
+
+*Filled orders remain for history tracking*
+
+</div>
+
+<div className="doc-card">
+
+### Settle PnL
+
+Converts unrealized perp PnL to realized:
+
+1. Calculates unrealized PnL from perp positions
+2. Moves quote from perp to spot balance
+3. Updates `settledPerpPnl` tracking
+4. Makes profit/loss withdrawable
+
+*Required before withdrawing perp profits*
+
+</div>
+
+<div className="doc-card">
+
+### Liquidation
+
+When health < 1.0, liquidators can:
+
+1. Close perp positions at oracle price
+2. Reduce borrows by seizing collateral
+3. Earn liquidation fee (2-5%)
+4. Bring account back to health
+5. Remaining positions stay open
+
+*Partial liquidations are common*
+
+</div>
+
+</div>
+
+## Account size limits
+
+<div className="doc-card" style={{marginBottom: '2rem'}}>
+
+Drift enforces fixed limits to keep account size manageable and transaction costs predictable:
+
+<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginTop: '1rem'}}>
+
+<div>
+
+**Perp positions**
+
+Maximum: **8 positions**
+
+Opening a 9th market fails unless you close an existing position first.
+
+</div>
+
+<div>
+
+**Spot positions**
+
+Maximum: **8 positions**
+
+Includes both deposits and borrows across all spot markets.
+
+</div>
+
+<div>
+
+**Orders**
+
+Maximum: **32 orders**
+
+Includes both resting orders and trigger orders combined.
+
+</div>
+
+</div>
+
+**Why limits?**
+- Keeps account data size predictable
+- Ensures transaction compute fits in Solana limits
+- Makes liquidation calculations feasible
+- Prevents account bloat
+
+**Workaround:**
+- Use multiple subaccounts for more positions
+- Each subaccount has its own 8/8/32 limits
+- Still shares margin across all subaccounts
+
+</div>
+
+## Related
+
+- [Program Structure](./program-structure) - Account types and PDAs
+- [SDK Internals](../drift-sdk/sdk-internals) - How SDK reads and interprets account data

@@ -1,0 +1,212 @@
+# Market Maker Quickstart
+
+Get a simple market maker running in under 10 minutes. This guide shows how to place two-sided quotes that automatically update with oracle prices.
+
+## Prerequisites
+
+- Node.js + TypeScript project
+- Drift SDK installed: `npm i @drift-labs/sdk`
+- Funded Solana account with USDC collateral
+- Basic familiarity with async/await
+
+> **⚠️ RPC choice matters:** The default `https://api.mainnet-beta.solana.com` is rate-limited and unsuitable for production bots. Use a dedicated RPC provider (Helius, Triton, etc.) or you'll hit 429 errors within minutes. For WebSocket subscriptions, you need a provider that supports `accountSubscribe`.
+
+## Step 1: Initialize DriftClient
+
+Set up your connection and subscribe to market data.
+
+<details>
+<summary>View DriftClient import</summary>
+
+<SDKDoc>
+  <TypeScript name="DriftClient" type="class">
+```js
+import { Connection } from "@solana/web3.js";
+import { Wallet, DriftClient, loadKeypair } from "@drift-labs/sdk";
+
+const connection = new Connection("https://api.mainnet-beta.solana.com");
+const wallet = new Wallet(loadKeypair("~/.config/solana/id.json"));
+
+const driftClient = new DriftClient({
+  connection,
+  wallet,
+  env: "mainnet-beta",
+});
+
+await driftClient.subscribe();
+
+// Initialize your user account (if first time)
+// const [txSig] = await driftClient.initializeUserAccount(0);
+```
+  </TypeScript>
+</SDKDoc>
+
+</details>
+
+## Step 2: Get oracle price
+
+Read the current oracle price to calculate your bid/ask spread.
+
+<SDKDoc>
+  <TypeScript name="getOracleDataForPerpMarket" type="method" owner="DriftClient">
+```js
+import { PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const marketIndex = 0; // SOL-PERP
+const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+
+console.log(`Oracle price: $${oraclePrice}`);
+```
+  </TypeScript>
+</SDKDoc>
+
+## Step 3: Place two-sided quotes
+
+Place a bid (buy) below oracle and an ask (sell) above oracle. Using `PostOnlyParams.MUST_POST_ONLY` ensures your orders never cross and you always earn maker rebates.
+
+<SDKDoc>
+  <TypeScript name="placeOrders" type="method" owner="DriftClient">
+```js
+import {
+  PRICE_PRECISION,
+  convertToNumber,
+  MarketType,
+  OrderType,
+  PositionDirection,
+  PostOnlyParams
+} from "@drift-labs/sdk";
+
+const marketIndex = 0; // SOL-PERP
+const spread = 0.5; // $0.50 spread on each side
+const size = 0.1; // 0.1 SOL per order
+
+// Fetch oracle price for spread calculation
+const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+
+const bidPrice = oraclePrice - spread;
+const askPrice = oraclePrice + spread;
+
+await driftClient.placeOrders([
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex,
+    direction: PositionDirection.LONG,
+    baseAssetAmount: driftClient.convertToPerpPrecision(size),
+    price: driftClient.convertToPricePrecision(bidPrice),
+    postOnly: PostOnlyParams.MUST_POST_ONLY,
+  },
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex,
+    direction: PositionDirection.SHORT,
+    baseAssetAmount: driftClient.convertToPerpPrecision(size),
+    price: driftClient.convertToPricePrecision(askPrice),
+    postOnly: PostOnlyParams.MUST_POST_ONLY,
+  },
+]);
+
+console.log(`Placed bid @ $${bidPrice}, ask @ $${askPrice}`);
+```
+  </TypeScript>
+</SDKDoc>
+
+## Step 4: Monitor and update
+
+Check for fills and cancel/replace orders when the oracle moves. This complete example runs a loop that refreshes quotes every 10 seconds.
+
+<SDKDoc>
+  <TypeScript name="cancelOrders" type="method" owner="DriftClient">
+```js
+import {
+  PRICE_PRECISION,
+  BASE_PRECISION,
+  convertToNumber,
+  MarketType,
+  OrderType,
+  PositionDirection,
+  PostOnlyParams,
+} from "@drift-labs/sdk";
+
+const marketIndex = 0;
+const spread = 0.5;
+const size = 0.1;
+
+setInterval(async () => {
+  try {
+    // Check current position
+    const user = driftClient.getUser();
+    const position = user.getPerpPosition(marketIndex);
+    if (position) {
+      const posSize = convertToNumber(position.baseAssetAmount, BASE_PRECISION);
+      console.log(`Current position: ${posSize} SOL`);
+    }
+
+    // Cancel all existing orders for this market
+    await driftClient.cancelOrders(MarketType.PERP, marketIndex);
+
+    // Re-fetch oracle price
+    const oracle = driftClient.getOracleDataForPerpMarket(marketIndex);
+    const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+
+    const bidPrice = oraclePrice - spread;
+    const askPrice = oraclePrice + spread;
+
+    // Place fresh two-sided quotes
+    await driftClient.placeOrders([
+      {
+        orderType: OrderType.LIMIT,
+        marketType: MarketType.PERP,
+        marketIndex,
+        direction: PositionDirection.LONG,
+        baseAssetAmount: driftClient.convertToPerpPrecision(size),
+        price: driftClient.convertToPricePrecision(bidPrice),
+        postOnly: PostOnlyParams.MUST_POST_ONLY,
+      },
+      {
+        orderType: OrderType.LIMIT,
+        marketType: MarketType.PERP,
+        marketIndex,
+        direction: PositionDirection.SHORT,
+        baseAssetAmount: driftClient.convertToPerpPrecision(size),
+        price: driftClient.convertToPricePrecision(askPrice),
+        postOnly: PostOnlyParams.MUST_POST_ONLY,
+      },
+    ]);
+
+    console.log(`Updated quotes: bid $${bidPrice.toFixed(2)} / ask $${askPrice.toFixed(2)}`);
+  } catch (err) {
+    console.error("Error updating quotes:", err);
+  }
+}, 10_000); // Update every 10 seconds
+```
+  </TypeScript>
+</SDKDoc>
+
+> **Tip:** This cancel-and-replace approach sends ~2 transactions every 10 seconds. For production, consider [oracle offset orders](/developers/market-makers/normal-mm#oracle-offset-orders) which float with the oracle automatically and require only ~30 txs/day.
+
+## Next steps
+
+This basic example gets you started, but production market makers need:
+
+- **Oracle offset orders** ,  orders that automatically track oracle price, drastically reducing transactions ([Normal MM](/developers/market-makers/normal-mm#oracle-offset-orders))
+- **Inventory management** ,  adjust spread based on position size ([Normal MM](/developers/market-makers/normal-mm))
+- **Risk controls** ,  position limits, health checks, emergency cancel ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **JIT participation** ,  compete in auctions for better fills ([JIT-only MM](/developers/market-makers/jit-only))
+- **Efficient subscriptions** ,  WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **Multiple markets** ,  quote across markets simultaneously
+
+## Common pitfalls
+
+- **Forgetting `PostOnlyParams`** ,  without it, your "maker" orders can cross the spread and execute as taker, paying fees instead of earning rebates
+- **Using `PRICE_PRECISION` wrong** ,  oracle prices are in `PRICE_PRECISION` (1e6), base amounts in `BASE_PRECISION` (1e9). Mixing them up causes orders at wildly wrong prices
+- **Not initializing user account** ,  first-time users must call `driftClient.initializeUserAccount()` before placing orders. The SDK will throw `User account not found` otherwise
+- **32-order limit** ,  each Drift subaccount supports a maximum of 32 open orders. Cancel stale orders or use multiple subaccounts for multi-market strategies
+
+For production patterns and best practices, see:
+- [Normal MM](/developers/market-makers/normal-mm) - comprehensive quoting strategies including oracle offset orders
+- [Bot Architecture](/developers/market-makers/bot-architecture) - subscription loops, throttling, priority fees
+- [keeper-bots-v2 `FloatingPerpMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) - production reference for oracle offset quoting

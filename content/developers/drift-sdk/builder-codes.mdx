@@ -1,8 +1,50 @@
 # Builder Codes
 
-Builder Codes (DBC) let integrators earn fees by routing flow. In practice, you initialize a revenue share account for the builder, and users initialize a revenue share escrow and approve builders.
+Builder Codes (DBC) let integrators earn fees by routing flow through their application. The workflow has 3 steps: **builder initializes revenue share** → **user creates escrow** → **user approves builder with max fee**.
 
-### Builder: initialize revenue share
+## Setup
+
+First, initialize the DriftClient for both the builder and user:
+
+<SDKDoc>
+  <TypeScript name="Builder codes setup" type="example">
+```js
+import { DriftClient } from "@drift-labs/sdk";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+
+// Initialize connection
+const connection = new Connection("https://api.mainnet-beta.solana.com");
+
+// Builder wallet (revenue share provider)
+const builderWallet = Keypair.fromSecretKey(/* builder secret key */);
+const builderAuthority = builderWallet.publicKey;
+
+// User wallet (end user)
+const userWallet = Keypair.fromSecretKey(/* user secret key */);
+const takerAuthority = userWallet.publicKey;
+
+// Builder client
+const builderClient = new DriftClient({
+  connection,
+  wallet: builderWallet,
+  env: "mainnet-beta"
+});
+await builderClient.subscribe();
+
+// User client
+const userClient = new DriftClient({
+  connection,
+  wallet: userWallet,
+  env: "mainnet-beta"
+});
+await userClient.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+## SDK Usage
+
+### Builder: Initialize Revenue Share
 
 <SDKDoc>
   <TypeScript name="initializeRevenueShare" type="method" owner="DriftClient">
@@ -12,7 +54,7 @@ await builderClient.initializeRevenueShare(builderAuthority);
   </TypeScript>
 </SDKDoc>
 
-### User: initialize escrow
+### User: Initialize Escrow
 
 <SDKDoc>
   <TypeScript name="initializeRevenueShareEscrow" type="method" owner="DriftClient">
@@ -22,7 +64,7 @@ await userClient.initializeRevenueShareEscrow(takerAuthority, 16);
   </TypeScript>
 </SDKDoc>
 
-### User: approve a builder (max fee)
+### User: Approve a Builder (Max Fee)
 
 <SDKDoc>
   <TypeScript name="changeApprovedBuilder" type="method" owner="DriftClient">

@@ -1,0 +1,253 @@
+# JIT Auctions
+
+**JIT** (Just-In-Time) auctions are Drift's price discovery mechanism. When a taker order arrives (market order or aggressive limit crossing the spread), it enters an auction where market makers compete to fill it at better prices before it hits the DLOB or AMM.
+
+## Why JIT auctions?
+
+Without JIT, taker orders would immediately execute against resting DLOB orders or the AMM at potentially worse prices. JIT auctions:
+
+- **Improve price execution** for takers by giving makers time to offer better prices
+- **Reduce adverse selection** by letting makers react to toxic flow
+- **Increase competition** among market makers for the same fill
+- **Enable offchain quoting** where makers don't need to rest orders, just respond to auctions
+
+This makes Drift's pricing more efficient than traditional limit order books.
+
+## Auction parameters
+
+Every taker order that enters a JIT auction has three key parameters that define the auction:
+
+| Parameter | Description |
+|---|---|
+| `auctionDuration` | Number of slots the auction runs (typically 10 slots ≈ 5 seconds). After this, unfilled size falls through to DLOB/AMM. |
+| `auctionStartPrice` | The price at **slot 0** of the auction. For a long, this is the *best* price for the taker (highest they'd pay). For a short, it's the lowest they'd accept. |
+| `auctionEndPrice` | The price at **slot N** (end of auction). This is the *worst* price for the taker ,  closer to the limit price or oracle. |
+
+**The key insight:** The auction starts at the taker's best price and deteriorates toward their worst acceptable price. This creates a **reverse Dutch auction** ,  early in the auction, makers must offer great prices to fill. As the auction progresses, the bar lowers and more makers can compete.
+
+## Auction timeline
+
+```
+Slot 0          Slot 5          Slot 10 (end)
+  |               |               |
+  Best price ──────────────────► Worst price (for taker)
+  for taker                       Falls to DLOB/AMM
+
+  Hardest for     Easier for      Auction over,
+  makers to       makers to       remaining size
+  win fills       win fills       goes to DLOB
+```
+
+**For a taker going LONG:**
+- Slot 0: auction price = `auctionStartPrice` (e.g., oracle + 0.10%) ,  taker pays above oracle
+- Slot 5: auction price = midpoint (e.g., oracle + 0.05%)
+- Slot 10: auction price = `auctionEndPrice` (e.g., oracle) ,  taker at their limit
+
+**For a taker going SHORT:**
+- Slot 0: auction price = `auctionStartPrice` (e.g., oracle - 0.10%) ,  taker sells below oracle
+- Slot 10: auction price = `auctionEndPrice` (e.g., oracle) ,  taker at their limit
+
+Makers who fill closer to slot 0 are giving the taker a better price (and taking more risk). Makers who wait until later slots get easier fills but at less favorable prices.
+
+## Auction pricing formula
+
+Auction prices interpolate linearly from start to end over the auction duration:
+
+```
+Auction Price(slot) = start_price + (end_price - start_price) x progress
+
+where progress = min(1, (current_slot - auction_start_slot) / auction_duration)
+```
+
+**Example** (long market order, oracle at $100):
+- `auctionStartPrice`: $100.10 (oracle + 0.1%)
+- `auctionEndPrice`: $100.00 (oracle)
+- `auctionDuration`: 10 slots
+- At slot 3: price = $100.10 + ($100.00 - $100.10) x 0.3 = $100.07
+- At slot 7: price = $100.10 + ($100.00 - $100.10) x 0.7 = $100.03
+
+A maker offering $100.05 would be eligible to fill starting at slot 5 (when the auction price reaches $100.05). Makers offering $100.08 could fill as early as slot 2.
+
+## Auction lifecycle
+
+**1. Taker places order**
+```typescript
+await driftClient.placePerpOrder({
+  orderType: OrderType.MARKET,
+  direction: PositionDirection.LONG,
+  baseAssetAmount: size,
+  auctionDuration: 10,                    // 10 slots
+  auctionStartPrice: oraclePrice * 1.001, // oracle + 0.1%
+  auctionEndPrice: oraclePrice,           // oracle
+});
+```
+
+**2. Auction starts** ,  the order enters auction for `auctionDuration` slots. The auction price interpolates from `auctionStartPrice` toward `auctionEndPrice`.
+
+**3. Market makers compete** ,  makers observe the auction and submit fills at prices within the auction range.
+
+```typescript
+// Maker observes auction via AuctionSubscriber
+const auction = auctionSubscriber.getAuction(orderId);
+
+// Maker submits fill
+await driftClient.placeAndMakePerpOrder(
+  makerOrderParams,
+  takerInfo  // includes taker's order and user account
+);
+```
+
+**4. Auction resolves** ,  best maker(s) fill the taker. If partially filled, remaining size continues through the auction. If unfilled after `auctionDuration` slots, it matches against DLOB, then AMM.
+
+## Maker participation
+
+To participate in JIT auctions, bots typically:
+
+**1. Subscribe to auction feed**
+```typescript
+import { AuctionSubscriber } from "@drift-labs/sdk";
+
+const auctionSubscriber = new AuctionSubscriber({
+  driftClient,
+  opts: { commitment: "processed" }
+});
+
+await auctionSubscriber.subscribe();
+```
+
+**2. Filter and price auctions**
+```typescript
+import { getAuctionPrice, isVariant } from "@drift-labs/sdk";
+
+// AuctionSubscriber emits 'onAccountUpdate' with UserAccount data
+auctionSubscriber.eventEmitter.on("onAccountUpdate", (userAccount, pubkey, slot) => {
+  // Find orders in auction (hasAuction flag is set by the memcmp filter)
+  for (const order of userAccount.orders) {
+    if (order.status === 0 || order.baseAssetAmount.eq(order.baseAssetAmountFilled)) continue;
+
+    // Calculate current auction price at this slot
+    const oracleData = driftClient.getOracleDataForPerpMarket(order.marketIndex);
+    const auctionPrice = getAuctionPrice(order, slot, oracleData.price);
+
+    // Check if your desired fill price is within the current auction range
+    const myFillPrice = calculateMyPrice(oracleData, inventory);
+
+    if (isProfitable(myFillPrice, auctionPrice, order.direction)) {
+      fillAuction(order, userAccount, pubkey, myFillPrice);
+    }
+  }
+});
+```
+
+**3. Risk management**
+- **Oracle validity**: Reject if oracle is stale or invalid
+- **Position limits**: Don't fill if it exceeds your max position
+- **Toxic flow detection**: Skip auctions from certain patterns
+- **Inventory skew**: Adjust participation based on current inventory
+
+## Place-and-make pattern
+
+The `placeAndMakePerpOrder` instruction atomically:
+1. Places your maker order onchain
+2. Fills against the taker order
+3. Settles PnL in a single transaction
+
+This ensures you're credited as the maker (earning rebates) while filling the taker atomically.
+
+```typescript
+import { OrderType, PositionDirection, PostOnlyParams } from "@drift-labs/sdk";
+
+const makerOrderParams = {
+  orderType: OrderType.LIMIT,
+  marketIndex: auction.order.marketIndex,
+  direction: PositionDirection.SHORT, // opposite of taker's LONG
+  price: driftClient.convertToPricePrecision(myFillPrice),
+  baseAssetAmount: auction.order.baseAssetAmount, // fill entire order
+  postOnly: PostOnlyParams.MUST_POST_ONLY,
+};
+
+const takerInfo = {
+  taker: takerPubkey,                // PublicKey of taker's user account
+  takerStats: takerStatsPubkey,      // PublicKey of taker's UserStats PDA
+  takerUserAccount: takerUserAccount, // decoded UserAccount
+  order: takerOrder,                  // the specific Order to fill
+};
+
+await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
+```
+
+## Multi-maker fills
+
+Multiple makers can fill the same taker order:
+- Maker A fills 30% at oracle + 0.03%
+- Maker B fills 50% at oracle + 0.01%
+- Remaining 20% hits DLOB or AMM
+
+Makers with better prices get priority. This pro-rata allocation ensures best execution for takers.
+
+## Auction vs DLOB
+
+| | JIT Auction | DLOB |
+|---|---|---|
+| **Duration** | 5-10 slots (~2-5 seconds) | Orders rest indefinitely |
+| **Pricing** | Dynamic ,  interpolates toward oracle | Fixed price set at placement |
+| **Commitment** | None until fill ,  makers choose per-auction | Onchain ,  orders are committed |
+| **Best for** | Active makers, flow-selective strategies | Passive makers, committed liquidity |
+| **Priority** | Runs first | Fallback after auction |
+
+JIT runs first, DLOB provides backup liquidity if auction doesn't fully fill.
+
+## Performance considerations
+
+**For makers**:
+- Subscribe with `commitment: "processed"` for lowest latency
+- Use WebSocket or gRPC subscriptions (not polling)
+- Pre-compute oracle prices and risk checks
+- Keep fills under compute budget (400k CU typical)
+
+**For takers**:
+- Auction adds 5-10 slot delay (2-5 seconds) before execution
+- You get better prices but not instant fills
+- Use market orders for auction participation (limit orders bypass auction if they don't cross spread)
+
+## JIT Proxy library
+
+The [`@drift-labs/jit-proxy`](https://github.com/drift-labs/jit-proxy) package provides higher-level abstractions for auction participation:
+
+- **`JitterSniper`** ,  waits for the optimal auction slot before submitting a single fill transaction. Best for precise pricing with lower compute costs.
+- **`JitterShotgun`** ,  submits fill transactions at multiple auction slots simultaneously. Higher fill rate but uses more compute and SOL for fees.
+
+The [`JitMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) bot in keeper-bots-v2 demonstrates both strategies and includes market volatility checks, position sizing, and DLOB-aware pricing.
+
+```typescript
+import { JitterSniper, JitterShotgun, PriceType } from "@drift-labs/jit-proxy/lib";
+
+// Sniper: one precise fill attempt
+const jitter = new JitterSniper({
+  auctionSubscriber,
+  driftClient,
+  // ...
+});
+
+// Shotgun: multiple fill attempts across auction slots
+const jitter = new JitterShotgun({
+  auctionSubscriber,
+  driftClient,
+  // ...
+});
+```
+
+## Gotchas
+
+- **Auction slots ≠ wall-clock time** ,  auction duration is measured in Solana slots (~400ms each), not seconds. Network congestion can stretch slot times, affecting your timing assumptions.
+- **Partial fills are common** ,  multiple makers compete for the same auction. Your fill may be partial; handle `baseAssetAmountFilled < baseAssetAmount` gracefully.
+- **Compute budget for place-and-make** ,  these transactions are heavier than simple order placement. Budget 400-800k CU (the `JitMaker` defaults to 800k). Under-budgeting causes silent failures.
+- **Stale `takerInfo`** ,  if you hold a taker reference too long, the taker's order may already be filled or cancelled. Check `order.baseAssetAmount - order.baseAssetAmountFilled` for remaining size.
+
+## Related
+
+- [Orderbook & Matching](./orderbook-and-matching) - DLOB and liquidity priority (JIT → DLOB → AMM)
+- [Matching Engine](/protocol/about-v3/matching-engine) - Full liquidity priority flow
+- [JIT-only MM](./jit-only) - Building a JIT market maker bot
+- [SWIFT API](./swift-api) - See taker orders 100-500ms before they hit the auction
+- [@drift-labs/jit-proxy](https://github.com/drift-labs/jit-proxy) - JIT proxy SDK

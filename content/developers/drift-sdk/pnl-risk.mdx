@@ -1,5 +1,15 @@
 # PnL & Risk
 
+## How it works
+
+Drift calculates your account's risk using a **health** metric (0-100) derived from total collateral vs margin requirements. Health 100 = no margin used, health 0 = liquidation eligible.
+
+**PnL** (Profit and Loss) comes in two forms: **unrealized** (mark-to-market value of open positions) and **realized** (settled when positions close). Unrealized PnL is calculated by comparing your position's entry price to the current oracle price. For perps, you also have **funding PnL** from periodic funding rate payments between longs and shorts.
+
+**Free collateral** is the amount of collateral not currently backing positions, it's what you can withdraw or use to open new positions. Margin requirements increase with position size and vary by market. Leverage is calculated as notional position value divided by total collateral. These metrics update in real-time as prices and positions change.
+
+## SDK Usage
+
 These helpers are commonly used for risk checks, dashboards, and liquidation logic.
 
 ### User health
@@ -8,8 +18,8 @@ These helpers are commonly used for risk checks, dashboards, and liquidation log
   <TypeScript name="getHealth" type="method" owner="User">
 ```js
 const user = driftClient.getUser();
-const health = user.getHealth();
-console.log(health.toString());
+const health = user.getHealth(); // returns number 0-100
+console.log(health); // e.g. 85 means 85% healthy
 ```
   </TypeScript>
 </SDKDoc>
@@ -19,8 +29,12 @@ console.log(health.toString());
 <SDKDoc>
   <TypeScript name="getTotalCollateral" type="method" owner="User">
 ```js
+import { QUOTE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+// getTotalCollateral returns BN in QUOTE_PRECISION (1e6)
+// marginCategory defaults to 'Initial'; pass 'Maintenance' for liquidation checks
 const total = driftClient.getUser().getTotalCollateral();
-console.log(total.toString());
+console.log(convertToNumber(total, QUOTE_PRECISION)); // e.g. 1500.50 (USD)
 ```
   </TypeScript>
 </SDKDoc>
@@ -28,8 +42,10 @@ console.log(total.toString());
 <SDKDoc>
   <TypeScript name="getMarginRequirement" type="method" owner="User">
 ```js
-const req = driftClient.getUser().getMarginRequirement();
-console.log(req.toString());
+// getMarginRequirement(marginCategory, strict?)
+// marginCategory: 'Initial' (for new positions) or 'Maintenance' (for liquidation)
+const req = driftClient.getUser().getMarginRequirement('Initial');
+console.log(convertToNumber(req, QUOTE_PRECISION)); // USD
 ```
   </TypeScript>
 </SDKDoc>
@@ -38,7 +54,7 @@ console.log(req.toString());
   <TypeScript name="getFreeCollateral" type="method" owner="User">
 ```js
 const free = driftClient.getUser().getFreeCollateral();
-console.log(free.toString());
+console.log(convertToNumber(free, QUOTE_PRECISION)); // USD available
 ```
   </TypeScript>
 </SDKDoc>
@@ -46,8 +62,11 @@ console.log(free.toString());
 <SDKDoc>
   <TypeScript name="getLeverage" type="method" owner="User">
 ```js
+import { TEN_THOUSAND } from "@drift-labs/sdk";
+
+// getLeverage() returns BN scaled by 10000 (e.g. 2x = BN(20000))
 const lev = driftClient.getUser().getLeverage();
-console.log(lev.toString());
+console.log(lev.toNumber() / TEN_THOUSAND.toNumber()); // e.g. 2.5 (2.5x leverage)
 ```
   </TypeScript>
 </SDKDoc>
@@ -57,8 +76,10 @@ console.log(lev.toString());
 <SDKDoc>
   <TypeScript name="getUnrealizedPNL" type="method" owner="User">
 ```js
-const pnl = driftClient.getUser().getUnrealizedPNL();
-console.log(pnl.toString());
+// Returns BN in QUOTE_PRECISION. Positive = profit, negative = loss.
+// Pass withWeightMarginCategory to apply asset/liability weights.
+const pnl = driftClient.getUser().getUnrealizedPNL(true); // withFunding=true
+console.log(convertToNumber(pnl, QUOTE_PRECISION)); // e.g. -25.50 (USD)
 ```
   </TypeScript>
 </SDKDoc>
@@ -66,8 +87,9 @@ console.log(pnl.toString());
 <SDKDoc>
   <TypeScript name="getUnrealizedFundingPNL" type="method" owner="User">
 ```js
-const pnl = driftClient.getUser().getUnrealizedFundingPNL();
-console.log(pnl.toString());
+// Funding PnL only (accumulated funding payments)
+const fundingPnl = driftClient.getUser().getUnrealizedFundingPNL();
+console.log(convertToNumber(fundingPnl, QUOTE_PRECISION)); // USD
 ```
   </TypeScript>
 </SDKDoc>
@@ -77,12 +99,12 @@ console.log(pnl.toString());
 <SDKDoc>
   <TypeScript name="calculateEntryPrice" type="function">
 ```js
-import { calculateEntryPrice } from "@drift-labs/sdk";
+import { calculateEntryPrice, PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
 
 const position = driftClient.getUser().getPerpPosition(0);
 if (position) {
-  const entryPrice = calculateEntryPrice(position);
-  console.log(entryPrice.toString());
+  const entryPrice = calculateEntryPrice(position); // BN in PRICE_PRECISION
+  console.log(convertToNumber(entryPrice, PRICE_PRECISION)); // e.g. 150.25
 }
 ```
   </TypeScript>

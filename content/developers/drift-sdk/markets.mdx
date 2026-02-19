@@ -1,8 +1,31 @@
 # Markets, Oracles, and Positions
 
-These are the most common read-path helpers you’ll use to power bots, dashboards, and risk logic.
+## How it works
 
-### Market accounts
+Drift has two types of markets: **perp markets** (perpetual futures with funding rates) and **spot markets** (token deposits/borrows that serve as collateral). Each market has an onchain account storing configuration like oracle source, fees, funding rates, AMM parameters, and current open interest.
+
+### Market Indexes
+
+Markets are identified by a **numeric index** starting from 0. For example:
+- Perp market 0 is typically SOL-PERP
+- Spot market 0 is typically USDC
+- Perp market 1 might be BTC-PERP, and so on
+
+**Where to find market indexes:**
+- **State account**: Query `driftClient.getStateAccount()` which contains arrays of all perp and spot market configurations
+- **SDK methods**: Use `driftClient.getPerpMarketAccounts()` or `driftClient.getSpotMarketAccounts()` to get all markets and inspect their indexes
+- **Market account directly**: Each market account has a `marketIndex` field you can read
+- **Symbol lookup**: Most bots maintain their own mapping from symbol (e.g., "SOL-PERP") to market index, or query all markets and build the mapping at startup
+
+Each market integrates with an **oracle** (usually Pyth or Switchboard) that provides real-time price data. The SDK lets you read oracle prices, check if they're valid/stale, and use them for quoting or risk calculations. Prices are stored in fixed-point precision (1e6 for PRICE_PRECISION).
+
+Perp markets track funding rates, open interest, and AMM liquidity pools. Spot markets track total deposits, borrows, and utilization rates. When you trade, you're interacting with these market accounts, opening positions on perp markets or borrowing/depositing in spot markets.
+
+## SDK Usage
+
+These are the most common read-path helpers you'll use to power bots, dashboards, and risk logic.
+
+### Market Accounts
 
 <SDKDoc>
   <TypeScript name="getSpotMarketAccount" type="method" owner="DriftClient">
@@ -42,7 +65,7 @@ console.log(perpMarkets.length);
   </TypeScript>
 </SDKDoc>
 
-### Oracle price
+### Oracle Price
 
 <SDKDoc>
   <TypeScript name="getOracleDataForPerpMarket" type="method" owner="DriftClient">
@@ -74,7 +97,7 @@ console.log(oracle.price.toString());
   </TypeScript>
 </SDKDoc>
 
-### Positions and balances
+### Positions and Balances
 
 <SDKDoc>
   <TypeScript name="getSpotPosition" type="method" owner="DriftClient">
@@ -94,7 +117,7 @@ console.log(perpPosition);
   </TypeScript>
 </SDKDoc>
 
-### Protocol state
+### Protocol State
 
 <SDKDoc>
   <TypeScript name="getStateAccount" type="method" owner="DriftClient">
@@ -105,7 +128,22 @@ console.log(state);
   </TypeScript>
 </SDKDoc>
 
-### Orderbook & DLOB (local)
+### Working With the DLOB
+
+The **Decentralized Limit Order Book (DLOB)** aggregates resting limit orders from all users. If you're building a market maker, orderbook UI, or matching bot, you'll want to build a local DLOB by subscribing to orders.
+
+#### Key Classes
+
+| Class | Purpose | When to Use |
+|---|---|---|
+| **`OrderSubscriber`** | Subscribes to all user orders in real-time via WebSocket or polling | Always needed ,  this is the raw data source for the DLOB |
+| **`DLOBSubscriber`** | Builds and maintains an aggregated orderbook from the order stream | When you need a continuously-updated L2/L3 orderbook view |
+| **`SlotSubscriber`** | Tracks the current Solana slot | Needed for timing-sensitive operations like JIT auctions and order expiry |
+| **`DLOB`** | Core data structure with bid/ask sides and query methods | Used internally by `DLOBSubscriber`; access via `dlobSubscriber.getDLOB()` |
+| **`UserMap`** | Efficiently tracks and caches multiple user accounts | Useful for bulk operations across many users (e.g., liquidation bots) |
+
+<details>
+<summary>View OrderSubscriber import</summary>
 
 <SDKDoc>
   <TypeScript name="OrderSubscriber" type="class">
@@ -115,6 +153,11 @@ import { OrderSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
+</details>
+
+<details>
+<summary>View DLOBSubscriber import</summary>
+
 <SDKDoc>
   <TypeScript name="DLOBSubscriber" type="class">
 ```js
@@ -122,6 +165,11 @@ import { DLOBSubscriber } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
+
+</details>
+
+<details>
+<summary>View SlotSubscriber import</summary>
 
 <SDKDoc>
   <TypeScript name="SlotSubscriber" type="class">
@@ -131,7 +179,41 @@ import { SlotSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
+</details>
+
+<details>
+<summary>View DLOB import</summary>
+
+<SDKDoc>
+  <TypeScript name="DLOB" type="class">
 ```js
+import { DLOB } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+</details>
+
+<details>
+<summary>View UserMap import</summary>
+
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
+```js
+import { UserMap } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+</details>
+
+#### Setting Up a Local DLOB
+
+<SDKDoc>
+  <TypeScript name="DLOB setup" type="example">
+```js
+import { SlotSubscriber, OrderSubscriber, DLOBSubscriber } from "@drift-labs/sdk";
+
 const slotSubscriber = new SlotSubscriber(connection);
 await slotSubscriber.subscribe();
 
@@ -151,19 +233,64 @@ const dlobSubscriber = new DLOBSubscriber({
 });
 await dlobSubscriber.subscribe();
 ```
+  </TypeScript>
+</SDKDoc>
+
+#### Getting L2 Orderbook Data
+
+Once the DLOB is subscribed, you can query the aggregated L2 orderbook (price levels with cumulative size):
 
 <SDKDoc>
-  <TypeScript name="DLOB" type="class">
+  <TypeScript name="L2 orderbook" type="example">
 ```js
-import { DLOB } from "@drift-labs/sdk";
+import { MarketType, PRICE_PRECISION, BASE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const dlob = dlobSubscriber.getDLOB();
+const marketIndex = 0; // SOL-PERP
+// For perp markets, use getMMOracleDataForPerpMarket (returns MMOraclePriceData)
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const slot = slotSubscriber.getSlot();
+
+const l2 = dlob.getL2({
+  marketIndex,
+  marketType: MarketType.PERP,
+  oraclePriceData,
+  slot,
+  depth: 10, // number of price levels per side
+});
+
+// l2.bids and l2.asks are arrays of { price: BN, size: BN }
+console.log("Top bid:", convertToNumber(l2.bids[0].price, PRICE_PRECISION),
+            "size:", convertToNumber(l2.bids[0].size, BASE_PRECISION));
+console.log("Top ask:", convertToNumber(l2.asks[0].price, PRICE_PRECISION),
+            "size:", convertToNumber(l2.asks[0].size, BASE_PRECISION));
 ```
   </TypeScript>
 </SDKDoc>
 
+#### Getting Best Bid/Ask
+
+For quick access to the best bid and ask prices without fetching the full orderbook:
+
 <SDKDoc>
-  <TypeScript name="UserMap" type="class">
+  <TypeScript name="Best bid/ask" type="example">
 ```js
-import { UserMap } from "@drift-labs/sdk";
+import { MarketType, PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const dlob = dlobSubscriber.getDLOB();
+const marketIndex = 0;
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const slot = slotSubscriber.getSlot();
+
+// Returns BN | undefined (undefined if no orders on that side)
+const bestBid = dlob.getBestBid(marketIndex, slot, MarketType.PERP, oraclePriceData);
+const bestAsk = dlob.getBestAsk(marketIndex, slot, MarketType.PERP, oraclePriceData);
+
+if (bestBid && bestAsk) {
+  console.log("Best bid:", convertToNumber(bestBid, PRICE_PRECISION));
+  console.log("Best ask:", convertToNumber(bestAsk, PRICE_PRECISION));
+  console.log("Spread:", convertToNumber(bestAsk.sub(bestBid), PRICE_PRECISION));
+}
 ```
   </TypeScript>
 </SDKDoc>

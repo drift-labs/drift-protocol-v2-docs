@@ -1,51 +1,141 @@
 # Orderbook + DLOB websocket
 
-The DLOB server powers the UI orderbook and trades feed. It exposes a websocket interface and uses a small set of channels.
+The DLOB (Decentralized Limit Order Book) server powers the UI orderbook and trades feed. It provides both a websocket interface for real-time updates and REST endpoints for snapshots.
 
-### Step 1: Connect to the DLOB websocket
+## REST endpoints (recommended starting point)
 
-Base URL:
+Before wiring up websockets, you can fetch orderbook snapshots via simple HTTP requests. This is useful for polling-based UIs or quick prototyping.
 
-- `https://dlob.drift.trade`
+### L2 orderbook (aggregated by price level)
 
-You’ll connect to its websocket endpoint (e.g. `wss://dlob.drift.trade/ws`).
+```
+GET https://dlob.drift.trade/l2?marketName=SOL-PERP&depth=10&includeVamm=true&includeIndicative=true
+```
 
-### Step 2: Subscribe to channels
+Query parameters:
+- `marketName` ,  Market symbol (e.g. `SOL-PERP`, `BTC-PERP`, `SOL`)
+- `depth` ,  Number of price levels per side (default: all)
+- `includeVamm` ,  Include AMM liquidity in the book (`true`/`false`)
+- `includeIndicative` ,  Include indicative (non-firm) quotes (`true`/`false`)
+- `grouping` ,  Price grouping in ticks (e.g. `10` for 0.01 increments)
 
-Supported channels include:
-
-- `orderbook`
-- `orderbook_indicative`
-- `trades`
-- `heartbeat`
-
-Example subscription message (perp orderbook):
-
+Response shape:
 ```json
 {
-  "type": "subscribe",
-  "channel": "orderbook",
-  "marketType": "perp",
-  "market": "SOL-PERP",
-  "grouping": 10
+  "bids": [
+    { "price": "123.45", "size": "100.5" },
+    { "price": "123.40", "size": "250.0" }
+  ],
+  "asks": [
+    { "price": "123.50", "size": "80.2" },
+    { "price": "123.55", "size": "150.0" }
+  ],
+  "slot": 250000000
 }
 ```
 
-Example subscription message (trades):
+### L3 orderbook (individual orders)
 
-```json
-{
-  "type": "subscribe",
-  "channel": "trades",
-  "marketType": "perp",
-  "market": "SOL-PERP"
-}
+```
+GET https://dlob.drift.trade/l3?marketName=SOL-PERP&includeVamm=true
 ```
 
-### Step 3: Handle indicative quotes
+Returns every individual order with maker address and order ID ,  useful for building order-level analytics or matching simulations.
 
-Use `orderbook_indicative` to surface indicative quotes for routing and discovery. It uses the same message shape as `orderbook`.
+## WebSocket connection
 
-### Step 4: Map symbols consistently
+For real-time streaming, connect to the DLOB websocket:
 
-Market symbols match UI markets (e.g. `SOL-PERP`). Keep your market list in sync with the SDK’s market metadata to avoid mismatches.
+- Base URL: `wss://dlob.drift.trade/ws`
+
+### Subscribe to channels
+
+Supported channels: `orderbook`, `trades`
+
+<SDKDoc>
+  <TypeScript name="WebSocket" type="class">
+```js
+const ws = new WebSocket("wss://dlob.drift.trade/ws");
+
+ws.onopen = () => {
+  // Subscribe to orderbook updates with full liquidity
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    channel: "orderbook",
+    marketType: "perp",
+    market: "SOL-PERP",
+    grouping: 10,            // Price grouping (0.01 increments)
+    includeVamm: true,       // Include AMM liquidity
+    includeIndicative: true  // Include indicative quotes
+  }));
+
+  // Subscribe to trades
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    channel: "trades",
+    marketType: "perp",
+    market: "SOL-PERP"
+  }));
+};
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+
+  // The channel in responses includes market info, e.g.:
+  //   "orderbook_perp_0_grouped_10"
+  //   "trades_perp_0"
+  const channel = message.channel;
+
+  // IMPORTANT: The `data` field is often a double-encoded JSON string.
+  // You need a second JSON.parse() to get the actual object.
+  const data = typeof message.data === "string"
+    ? JSON.parse(message.data)
+    : message.data;
+
+  if (channel && channel.startsWith("orderbook_")) {
+    console.log("Bids:", data.bids);
+    console.log("Asks:", data.asks);
+  }
+
+  if (channel && channel.startsWith("trades_")) {
+    console.log("New trade:", data);
+  }
+};
+
+// Handle connection lifecycle
+ws.onerror = (error) => console.error("DLOB WS error:", error);
+ws.onclose = () => {
+  console.log("DLOB WS closed ,  implement reconnection logic here");
+};
+```
+  </TypeScript>
+</SDKDoc>
+
+### Response channel format
+
+The `channel` field in websocket responses is **not** the same as the channel you subscribed to. It includes the market type, market index, and grouping:
+
+| Subscribed channel | Response channel format |
+|---|---|
+| `orderbook` | `orderbook_perp_{marketIndex}_grouped_{grouping}` |
+| `trades` | `trades_perp_{marketIndex}` |
+
+For example, subscribing to `orderbook` for `SOL-PERP` with `grouping: 10` produces responses with channel `orderbook_perp_0_grouped_10`.
+
+### Double-encoded data field
+
+The `data` field in websocket messages is frequently a **JSON string inside a JSON string**. Always check whether `data` is a string before using it:
+
+```js
+// Raw message from WS:
+// { "channel": "orderbook_perp_0_grouped_10", "data": "{\"bids\":[...],\"asks\":[...]}" }
+
+const parsed = JSON.parse(event.data);       // First parse: message envelope
+const book = typeof parsed.data === "string"
+  ? JSON.parse(parsed.data)                  // Second parse: actual orderbook
+  : parsed.data;
+```
+
+## Map symbols consistently
+
+Market symbols (e.g. `SOL-PERP`) match the UI. The market index in response channels corresponds to the SDK's `marketIndex` ,  keep your market list in sync with the SDK's market metadata to avoid mismatches.

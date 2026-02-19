@@ -1,8 +1,18 @@
 # Users
 
-Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you’ll typically use a `User`.
+## How it works
 
-### Initialize a user account
+A **user account** is the onchain account that holds your positions, orders, and collateral on Drift. Each wallet can create multiple user accounts (called **subaccounts**), identified by a numeric ID (0, 1, 2, etc.). All subaccounts under the same wallet share cross-margin, meaning collateral and risk are calculated across all of them together.
+
+User accounts store your perp positions (long/short), spot balances (deposits/borrows), open orders, and leverage settings. When you interact with Drift (place orders, deposit, trade), you're modifying data in your user account. The account is a Solana PDA (Program Derived Address) owned by the Drift program.
+
+Subaccounts are useful for separating strategies, isolating risk between different trading styles, or delegating specific accounts to bots while keeping others manual. You can switch between subaccounts using the SDK, and each one maintains its own positions and orders while sharing the wallet's overall collateral pool.
+
+## SDK Usage
+
+Most write actions in Drift are done through `DriftClient`. For account-level reads (positions, orders, health), you'll typically use a `User`.
+
+### Initialize a User Account
 
 <SDKDoc>
   <TypeScript name="initializeUserAccount" type="method" owner="DriftClient">
@@ -14,75 +24,67 @@ console.log(txSig, userAccountPublicKey.toBase58());
   </TypeScript>
 </SDKDoc>
 
-### Get the next subaccount id
+#### Get the Next Subaccount ID
 
-<SDKDoc>
-  <TypeScript name="getNextSubAccountId" type="method" owner="DriftClient">
 ```js
 const nextId = driftClient.getNextSubAccountId();
 console.log(nextId);
 ```
-  </TypeScript>
-</SDKDoc>
 
-### Get a User and subscribe
+### Get a User and Subscribe
 
-<SDKDoc>
-  <TypeScript name="User" type="class">
+<details>
+<summary>View User import</summary>
+
 ```js
 import { User } from "@drift-labs/sdk";
 
-const user = driftClient.getUser(); // convenience helper
+const user = driftClient.getUser();
 await user.subscribe();
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUser" type="method" owner="DriftClient">
+</details>
+
+#### Get active subaccount user
+
 ```js
-const user = driftClient.getUser(); // active subaccount
+const user = driftClient.getUser();
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUser" type="method" owner="DriftClient">
+#### Get a specific subaccount user
+
 ```js
-// Fetch a specific subaccount.
 const user = driftClient.getUser(1);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUserAccount" type="method" owner="User">
+#### Read account via `User`
+
 ```js
 const account = driftClient.getUser().getUserAccount();
 console.log(account);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getUserAccount" type="method" owner="DriftClient">
+#### Read account via `DriftClient`
+
 ```js
-const account = driftClient.getUserAccount(); // active subaccount
+const account = driftClient.getUserAccount();
 console.log(account);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="fetchAccounts" type="method" owner="User">
+#### Refresh user accounts
+
 ```js
 const user = driftClient.getUser(0);
 await user.fetchAccounts();
 ```
-  </TypeScript>
-</SDKDoc>
 
-### Derived addresses (user account)
+### Derived Addresses (User Account)
+
+User accounts are **Program Derived Addresses (PDAs)** - deterministic addresses generated from seeds (the program ID, wallet authority, and subaccount ID). PDAs are a Solana concept that lets you calculate an account's address without making an RPC call.
+
+This is useful when you need to reference a user account address before fetching it, such as when constructing transactions or querying multiple accounts in parallel.
+
+For a deeper understanding of PDAs and program structure, see [Program Structure](/developers/concepts/program-structure).
 
 <SDKDoc>
   <TypeScript name="getUserAccountPublicKey" type="method" owner="DriftClient">
@@ -93,10 +95,10 @@ console.log(userAccountPublicKey.toBase58());
   </TypeScript>
 </SDKDoc>
 
-### Query user state (orders / positions)
+### Query User State (Orders / Positions)
 
-<SDKDoc>
-  <TypeScript name="getTokenAmount" type="method" owner="User">
+#### Get token amount (deposit vs borrow)
+
 ```js
 import { BN } from "@drift-labs/sdk";
 
@@ -107,57 +109,64 @@ const isDeposit = tokenAmount.gte(new BN(0));
 const isBorrow = tokenAmount.lt(new BN(0));
 console.log({ tokenAmount: tokenAmount.toString(), isDeposit, isBorrow });
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getPerpPosition" type="method" owner="User">
+#### Get a perp position
+
 ```js
 const position = driftClient.getUser().getPerpPosition(0);
 console.log(position?.baseAssetAmount.toString());
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOrder" type="method" owner="User">
+#### Get an order by order id
+
 ```js
 const order = driftClient.getUser().getOrder(1);
 console.log(order);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOrderByUserOrderId" type="method" owner="User">
+#### Get an order by user order id
+
 ```js
 const order = driftClient.getUser().getOrderByUserOrderId(1);
 console.log(order);
 ```
-  </TypeScript>
-</SDKDoc>
 
-<SDKDoc>
-  <TypeScript name="getOpenOrders" type="method" owner="User">
+#### Get all open orders
+
 ```js
 const orders = driftClient.getUser().getOpenOrders();
 console.log(orders.length);
 ```
-  </TypeScript>
-</SDKDoc>
 
-### Switch active subaccount
+### Active Subaccount
+
+The **active subaccount** is the default subaccount that DriftClient methods operate on when you don't explicitly specify a subaccount ID. By default, the active subaccount is 0.
+
+Many SDK methods use the active subaccount implicitly:
+- `driftClient.getUser()` - returns the User for the active subaccount
+- `driftClient.getUserAccount()` - returns the account data for the active subaccount
+- `driftClient.placePerpOrder(orderParams)` - places an order on the active subaccount
+- `driftClient.getSpotPosition(marketIndex)` - gets position from the active subaccount
+- `driftClient.getPerpPosition(marketIndex)` - gets position from the active subaccount
+
+You can change which subaccount is active using `switchActiveUser()`, or you can explicitly pass a subaccount ID to methods that support it (like `getUser(subAccountId)`).
+
+### Switch Active Subaccount
 
 <SDKDoc>
   <TypeScript name="switchActiveUser" type="method" owner="DriftClient">
 ```js
 // Switch to subaccount 1.
-driftClient.switchActiveUser(1);
+await driftClient.switchActiveUser(1);
 ```
   </TypeScript>
 </SDKDoc>
 
-### Update user settings (delegate / margin)
+### Update Delegate
+
+A **delegate** is another wallet that can trade on behalf of your user account without being able to withdraw funds. This is useful for allowing trading bots to manage positions while keeping withdrawal authority secure.
+
+Learn more: [Delegated Accounts](/protocol/getting-started/delegated-accounts)
 
 <SDKDoc>
   <TypeScript name="updateUserDelegate" type="method" owner="DriftClient">
@@ -169,10 +178,18 @@ await driftClient.updateUserDelegate(new PublicKey("<DELEGATE_PUBKEY>"), 0);
   </TypeScript>
 </SDKDoc>
 
+### Update Margin Settings
+
+**Margin trading** settings control how your account can use leverage and borrow against collateral. You can enable/disable margin trading or set custom margin ratios to control risk.
+
+Learn more: [Margin](/protocol/trading/margin)
+
 <SDKDoc>
   <TypeScript name="updateUserMarginTradingEnabled" type="method" owner="DriftClient">
 ```js
-await driftClient.updateUserMarginTradingEnabled(true, 0);
+await driftClient.updateUserMarginTradingEnabled([
+  { marginTradingEnabled: true, subAccountId: 0 },
+]);
 ```
   </TypeScript>
 </SDKDoc>
@@ -180,16 +197,16 @@ await driftClient.updateUserMarginTradingEnabled(true, 0);
 <SDKDoc>
   <TypeScript name="updateUserCustomMarginRatio" type="method" owner="DriftClient">
 ```js
-import { MARGIN_PRECISION } from "@drift-labs/sdk";
-
+// marginRatio is a number scaled by 10000 (MARGIN_PRECISION)
+// e.g. 10000 = 1x max leverage, 5000 = 2x, 2000 = 5x
 await driftClient.updateUserCustomMarginRatio([
-  { marginRatio: MARGIN_PRECISION, subAccountId: 0 },
+  { marginRatio: 5000, subAccountId: 0 }, // 2x max leverage
 ]);
 ```
   </TypeScript>
 </SDKDoc>
 
-### Delete a user account
+### Delete a User Account
 
 If a subaccount has no assets/liabilities, it can be deleted to reclaim rent.
 
