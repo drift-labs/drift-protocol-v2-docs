@@ -34,26 +34,45 @@ export function SDKDocTabs({ tabs }: SDKDocTabsProps) {
       {tabs.map((tab) => (
         <Tabs.Tab key={tab.label} title={tab.label}>
           {tab.example ? <div>{tab.example.content}</div> : null}
-          <details className="x:not-first:mt-4 x:rounded x:border x:border-gray-200 x:bg-white x:p-2 x:shadow-sm x:dark:border-neutral-800 x:dark:bg-neutral-900 x:overflow-hidden">
-            <summary className="x:focus-visible:nextra-focus x:cursor-pointer x:transition-colors x:hover:bg-gray-100 x:dark:hover:bg-neutral-800 x:select-none x:rounded x:[&::-webkit-details-marker]:hidden x:flex x:items-center">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" height="1em" className="x:motion-reduce:transition-none x:ms-2 x:me-1 x:shrink-0 x:rtl:rotate-180 x:[[data-expanded]&gt;summary:first-child&gt;&amp;]:rotate-90 x:transition"><path d="M9 5l7 7-7 7" strokeLinecap="round" stroke-linejoin="round"></path></svg>
+          {tab.heading || tab.description || tab.content ? (
+            <details className="x:not-first:mt-4 x:rounded x:border x:border-gray-200 x:bg-white x:p-2 x:shadow-sm x:dark:border-neutral-800 x:dark:bg-neutral-900 x:overflow-hidden">
               {tab.heading ? (
-              <div className="x:flex x:flex-wrap x:items-center x:gap-3">
-                <code className="nextra-code x:max-md:break-all">
-                  {tab.heading}
-                </code>
-                {tab.link ? (
-                  <a href={tab.link} target="_blank" rel="noopener noreferrer">
-                    Reference ↗
-                  </a>
-                ) : null}
-              </div>
-            ) : null}
-            </summary>
-            {tab.description ? <i>{tab.description}</i> : null}
-            {tab.content ??
-              (tab.placeholder ? <Placeholder label={tab.label} /> : null)}
-          </details>
+                <summary className="x:focus-visible:nextra-focus x:cursor-pointer x:transition-colors x:hover:bg-gray-100 x:dark:hover:bg-neutral-800 x:select-none x:rounded x:[&::-webkit-details-marker]:hidden x:flex x:items-center">
+                  <svg
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-width="3"
+                    height="1em"
+                    className="x:motion-reduce:transition-none x:ms-2 x:me-1 x:shrink-0 x:rtl:rotate-180 x:[[data-expanded]&gt;summary:first-child&gt;&amp;]:rotate-90 x:transition"
+                  >
+                    <path
+                      d="M9 5l7 7-7 7"
+                      strokeLinecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
+                  <div className="x:flex x:flex-wrap x:items-center x:gap-3">
+                    <code className="nextra-code x:max-md:break-all">
+                      {tab.heading}
+                    </code>
+                    {tab.link ? (
+                      <a
+                        href={tab.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Reference ↗
+                      </a>
+                    ) : null}
+                  </div>
+                </summary>
+              ) : null}
+              {tab.description ? <i>{tab.description}</i> : null}
+              {tab.content ??
+                (tab.placeholder ? <Placeholder label={tab.label} /> : null)}
+            </details>
+          ) : null}
         </Tabs.Tab>
       ))}
     </Tabs>

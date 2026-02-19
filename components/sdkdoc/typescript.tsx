@@ -7,7 +7,7 @@ import type { SDKBlockProps } from "./types";
 const SDK_BASE_URL = "https://drift-labs.github.io/protocol-v2/sdk";
 const JSDOC_LINK_RE = /{@link ([^}]*)}/g;
 
-type TsDocDefinition = ReturnType<typeof generateDefinition>
+type TsDocDefinition = ReturnType<typeof generateDefinition>;
 
 function sanitizeDocText(text?: string) {
   if (!text) return text;
@@ -29,9 +29,7 @@ function sanitizeTags(tags?: Record<string, string>) {
   return next;
 }
 
-function sanitizeDefinition<T extends TsDocDefinition>(
-  definition: T,
-) {
+function sanitizeDefinition<T extends TsDocDefinition>(definition: T) {
   if (!definition) return definition;
   const next = {
     ...definition,
@@ -277,17 +275,17 @@ export function buildTypeScriptTab(props: SDKBlockProps): SDKTab {
 
   return {
     label: "TypeScript",
-    heading: `${displayType} ${displayName}`,
+    heading: props.name ? `${displayType} ${displayName}` : undefined,
     description,
     content:
       definition && content ? (
         content
-      ) : (
+      ) : props.name ? (
         <Callout type="warning">
           TypeScript docs unavailable for{" "}
           <code className="nextra-code x:max-md:break-all">{props.name}</code>.
         </Callout>
-      ),
+      ) : undefined,
     link: getTsDocLink({
       name: props.name,
       type: tsType,
