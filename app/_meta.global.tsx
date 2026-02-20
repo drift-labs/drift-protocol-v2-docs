@@ -238,7 +238,7 @@ const META = {
         "items": {
           "index": "",
           "quickstart": "",
-          "normal-mm": "",
+          "dlob-mm": "DLOB MM",
           "jit-only": "",
           "bot-architecture": "",
           "orderbook-and-matching": "",

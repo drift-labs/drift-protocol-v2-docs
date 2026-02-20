@@ -23,10 +23,10 @@ Maker order is submitted onchain with ed25519 verification and atomically fills 
 
 In the standard JIT flow, the taker submits a transaction to Solana → it lands onchain → your RPC/gRPC subscription fires → you compute and submit your fill. This takes 1-2 seconds minimum.
 
-With SWIFT, the taker broadcasts the signed order offchain to the SWIFT WebSocket *simultaneously* with submitting it onchain. You receive it over WebSocket in 100-500ms ,  before it even lands onchain. This head start lets you:
-- **Price more accurately** ,  you see the order while the oracle is fresher
-- **Win more auctions** ,  your fill tx can land at the same slot or even before other makers who rely on onchain feeds
-- **React to flow faster** ,  critical for inventory management and toxic flow avoidance
+With SWIFT, the taker broadcasts the signed order offchain to the SWIFT WebSocket *simultaneously* with submitting it onchain. You receive it over WebSocket in 100-500ms, before it even lands onchain. This head start lets you:
+- **Price more accurately:** you see the order while the oracle is fresher
+- **Win more auctions:** your fill tx can land at the same slot or even before other makers who rely on onchain feeds
+- **React to flow faster:** critical for inventory management and toxic flow avoidance
 
 The tradeoff: you need fast infrastructure (dedicated RPC node, low-latency WebSocket connection) to capitalize on this advantage. If your fill tx doesn't land quickly, the latency edge is wasted.
 
@@ -70,7 +70,7 @@ await swiftSubscriber.subscribe(
 
 ### With UserAccount getter
 
-Optionally provide a `userAccountGetter` to resolve taker UserAccount details. This lets you inspect the taker's positions, collateral, and health before deciding to fill ,  useful for toxic flow filtering.
+Optionally provide a `userAccountGetter` to resolve taker UserAccount details. This lets you inspect the taker's positions, collateral, and health before deciding to fill, which is useful for toxic flow filtering.
 
 <SDKDoc>
   <TypeScript name="UserMap" type="class">
@@ -98,7 +98,7 @@ const swiftSubscriber = new SwiftOrderSubscriber({
 
 ## Place-and-make with SWIFT
 
-SWIFT fills use a special instruction (`placeAndMakeSignedMsgPerpOrder`) that includes an ed25519 signature verification ,  proving the taker actually signed this order offchain. The SDK handles building this instruction for you.
+SWIFT fills use a special instruction (`placeAndMakeSignedMsgPerpOrder`) that includes an ed25519 signature verification, proving the taker actually signed this order offchain. The SDK handles building this instruction for you.
 
 For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-make](./jit-auctions#place-and-make-pattern). The SWIFT variant adds the signature verification step.
 
@@ -292,7 +292,7 @@ auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey,
     if (order.baseAssetAmount.isZero()) continue;
 
     if (isSignedMsgOrder(order)) {
-      // This came from SWIFT ,  you already saw it via WebSocket
+      // This came from SWIFT, you already saw it via WebSocket
       // Skip to avoid submitting a duplicate fill
       continue;
     }
@@ -326,12 +326,12 @@ auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey,
 
 ## Gotchas
 
-- **SWIFT is not guaranteed flow** ,  not all taker orders go through SWIFT. Takers using the standard SDK flow submit directly onchain. You should subscribe to both SWIFT and `AuctionSubscriber` for complete coverage, using `isSignedMsgOrder()` to deduplicate.
-- **ed25519 instruction ordering** ,  the ed25519 verification instruction must be the first instruction in the transaction. The SDK handles this, but if building transactions manually, incorrect ordering causes silent verification failures.
-- **Latency advantage is perishable** ,  the 100-500ms head start from SWIFT only helps if your fill transaction lands quickly. With a slow RPC node, the advantage is wasted. Use a dedicated RPC node with staked connections for fastest landing.
-- **UserAccount resolution** ,  the `userAccountGetter` callback should return quickly. If it requires an RPC call per order, you'll negate the latency advantage. Pre-load user accounts via `UserMap` subscription.
-- **Order expiry** ,  SWIFT signed orders have a `maxTs` field. If your fill transaction lands after this timestamp, it will fail. Check remaining time before submitting.
-- **Fallback strategy** ,  if the SWIFT WebSocket disconnects, your bot should seamlessly fall back to standard `AuctionSubscriber` flow. Don't let a SWIFT outage stop you from filling auctions.
+- **SWIFT is not guaranteed flow:** not all taker orders go through SWIFT. Takers using the standard SDK flow submit directly onchain. You should subscribe to both SWIFT and `AuctionSubscriber` for complete coverage, using `isSignedMsgOrder()` to deduplicate.
+- **ed25519 instruction ordering:** the ed25519 verification instruction must be the first instruction in the transaction. The SDK handles this, but if building transactions manually, incorrect ordering causes silent verification failures.
+- **Latency advantage is perishable:** the 100-500ms head start from SWIFT only helps if your fill transaction lands quickly. With a slow RPC node, the advantage is wasted. Use a dedicated RPC node with staked connections for fastest landing.
+- **UserAccount resolution:** the `userAccountGetter` callback should return quickly. If it requires an RPC call per order, you'll negate the latency advantage. Pre-load user accounts via `UserMap` subscription.
+- **Order expiry:** SWIFT signed orders have a `maxTs` field. If your fill transaction lands after this timestamp, it will fail. Check remaining time before submitting.
+- **Fallback strategy:** if the SWIFT WebSocket disconnects, your bot should seamlessly fall back to standard `AuctionSubscriber` flow. Don't let a SWIFT outage stop you from filling auctions.
 
 ## Related
 

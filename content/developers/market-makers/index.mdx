@@ -6,9 +6,7 @@ Market making on Drift involves providing liquidity through resting orders, JIT 
 
 ### Quickstart Guide
 
-**Get a market maker running in 10 minutes**
-
-Learn how to place two-sided quotes that automatically update with oracle prices. Perfect for understanding the basics before diving into advanced strategies.
+Learn how to place two-sided quotes that automatically update with oracle prices. Perfect for understanding the basics.
 
 <Cards.Card
   title="Understand quickstart guide ↗"
@@ -19,22 +17,18 @@ Learn how to place two-sided quotes that automatically update with oracle prices
 
 Drift supports three distinct market making approaches. The right choice depends on your latency infrastructure, capital efficiency goals, and operational complexity tolerance.
 
-| | Normal MM | JIT-only | SWIFT |
+| | DLOB MM | JIT-only | SWIFT |
 |---|---|---|---|
 | **How it works** | Resting limit orders on the DLOB | React to taker auctions in real-time | Receive signed taker orders offchain before auction |
-| **Latency requirement** | Low (seconds) | Medium (sub-second) | High (100-500ms edge) |
-| **Infrastructure** | Simple ,  place orders, update periodically | Moderate ,  auction subscriber + fill logic | Advanced ,  WebSocket feed + fast tx submission |
-| **Capital efficiency** | Orders locked on-chain | Capital deployed only when filling | Capital deployed only when filling |
-| **Adverse selection** | Higher ,  resting orders can be picked off | Lower ,  choose which auctions to fill | Lowest ,  earliest look at order flow |
+| **Capital efficiency** | Orders locked onchain | Capital deployed only when filling | Capital deployed only when filling |
 | **Maker rebates** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Txs/day (oracle offset)** | ~30 | Varies with flow | Varies with flow |
-| **Best for** | Passive MM, low-touch strategies | Active MM, inventory-aware fills | Competitive latency-sensitive MM |
 
-**Recommendation:** Start with **Normal MM** using oracle offset orders (orders float with the oracle automatically, requiring very few transactions). Add **JIT** participation when you want to capture auction flow. Add **SWIFT** when you need the latency edge over other JIT makers.
+
+**Recommendation:** Start with **DLOB MM** using oracle offset orders (orders float with the oracle automatically, requiring very few transactions).
 
 ## Market Making Strategies
 
-### Normal Market Making
+### DLOB MM
 
 **Resting orders on the DLOB**
 
@@ -47,8 +41,8 @@ Place limit orders that rest on the orderbook until filled. Use oracle offset or
 - Traditional orderbook strategies
 
 <Cards.Card
-  title="Understand normal market making ↗"
-  href="/developers/market-makers/normal-mm"
+  title="Understand DLOB MM ↗"
+  href="/developers/market-makers/dlob-mm"
 />
 
 ### JIT-Only Market Making
@@ -109,9 +103,7 @@ Deep dive into how JIT auctions work, auction pricing, maker participation, and 
 
 ### SWIFT API
 
-**Ultra-low-latency order feed**
-
-Receive signed taker orders offchain via WebSocket before they hit the auction. Enable sub-second reaction times with SWIFT place-and-make.
+Receive signed taker orders offchain via WebSocket before they hit the auction.
 
 **Latency advantage:** 100-500ms faster than onchain feeds
 
