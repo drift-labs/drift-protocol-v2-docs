@@ -310,22 +310,45 @@ If DLOB doesn't fully fill, remaining size goes to AMM.
 
 ### Example 1: Market order (long)
 
-1. Order enters JIT auction at oracle + 0.1%
-2. Two JIT makers fill 60% at oracle + 0.02%
-3. Remaining 40% fills against DLOB at oracle + 0.05%
-4. AMM not needed (fully filled)
+<Steps>
+### Order enters JIT auction at oracle + 0.1%
+The taker order starts in auction mode.
+
+### Two JIT makers fill 60% at oracle + 0.02%
+Competitive makers provide the first fills.
+
+### Remaining 40% fills against DLOB at oracle + 0.05%
+Residual size is matched against resting book liquidity.
+
+### AMM not needed (fully filled)
+Order is fully filled before fallback liquidity is required.
+</Steps>
 
 ### Example 2: Large market order
 
-1. JIT auction fills 40% at oracle + 0.03%
-2. DLOB fills 30% at oracle + 0.08%
-3. AMM fills remaining 30% at oracle + 0.15% (price impact)
+<Steps>
+### JIT auction fills 40% at oracle + 0.03%
+Best early pricing comes from active makers.
+
+### DLOB fills 30% at oracle + 0.08%
+Next portion matches against resting orders.
+
+### AMM fills remaining 30% at oracle + 0.15% (price impact)
+Final size is absorbed by AMM with more slippage.
+</Steps>
 
 ### Example 3: Limit order at DLOB price
 
-1. Order bypasses JIT (not crossing spread)
-2. Rests on DLOB as maker order
-3. Earns maker rebate when filled
+<Steps>
+### Order bypasses JIT (not crossing spread)
+Since it does not cross, it does not trigger auction flow.
+
+### Rests on DLOB as maker order
+Order is posted to the book and waits for taker flow.
+
+### Earns maker rebate when filled
+Fill is credited as maker liquidity.
+</Steps>
 
 ## Performance characteristics
 

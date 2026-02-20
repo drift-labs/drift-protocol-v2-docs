@@ -205,12 +205,25 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 ### SWIFT flow
 
 **Timeline:**
-1. Taker signs order offchain
-2. Broadcast to SWIFT WebSocket (~50ms)
-3. Maker receives order (~100-500ms total)
-4. Maker submits place-and-make tx
-5. Taker's order lands onchain (~1-2s total)
-6. Maker's fill tx lands (ideally same slot)
+<Steps>
+### Taker signs order offchain
+Taker signs and prepares the order message.
+
+### Broadcast to SWIFT WebSocket
+The signed message is broadcast to SWIFT (~50ms).
+
+### Maker receives order
+Maker gets the order before it lands onchain (~100-500ms total).
+
+### Maker submits place-and-make
+Maker submits a place-and-make transaction.
+
+### Taker order lands onchain
+Taker transaction lands onchain (~1-2s total).
+
+### Maker fill lands
+Maker fill transaction lands (ideally same slot).
+</Steps>
 
 **Latency advantage:**
 - Makers see orders 100-500ms before onchain
@@ -226,12 +239,25 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 ### Standard onchain auction
 
 **Timeline:**
-1. Taker submits tx to Solana
-2. Tx lands onchain (~1-2s)
-3. RPC/gRPC subscription fires
-4. Maker sees auction, computes fill
-5. Maker submits place-and-make tx
-6. Fill lands (~1-2s later)
+<Steps>
+### Taker submits tx to Solana
+Order transaction is sent directly onchain.
+
+### Transaction lands onchain
+The taker tx lands (~1-2s).
+
+### RPC/gRPC subscription fires
+Makers receive the auction event from onchain subscriptions.
+
+### Maker computes fill
+Maker processes pricing and risk checks.
+
+### Maker submits place-and-make
+Maker sends the fill transaction.
+
+### Fill lands
+Fill lands onchain (~1-2s later).
+</Steps>
 
 **Total latency:** 2-4 seconds from taker intent to maker fill
 
@@ -244,8 +270,14 @@ Use the same filters as other JIT flows: oracle validation, position limits, and
 ## Detecting SWIFT orders in onchain feeds
 
 When subscribed to both SWIFT and onchain feeds, you may see the same order twice:
-1. First via SWIFT WebSocket (offchain)
-2. Again when it lands onchain
+
+<Steps>
+### First via SWIFT WebSocket (offchain)
+You receive the signed order from SWIFT before onchain landing.
+
+### Again when it lands onchain
+The same order appears in your onchain subscription stream later.
+</Steps>
 
 Use `isSignedMsgOrder()` to identify SWIFT-origin orders and avoid double-handling:
 

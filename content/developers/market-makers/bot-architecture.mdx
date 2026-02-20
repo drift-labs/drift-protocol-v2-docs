@@ -276,19 +276,25 @@ When subscribed to both SWIFT and onchain feeds, use `isSignedMsgOrder(order)` t
 
 A production bot typically follows this structure:
 
-```
-1. Initialize DriftClient + subscribe
-2. Start OrderSubscriber (websocket + resync)
-3. Start PriorityFeeSubscriber
-4. Register SIGINT/SIGTERM handlers
-5. Main loop:
-   a. Check health → emergency cancel if needed
-   b. Refresh oracle prices
-   c. Update quotes (cancel-and-place or oracle offset)
-   d. Process JIT auctions (if participating)
-   e. Log metrics (position, PnL, fill rate)
-6. Sleep until next cycle
-```
+<Steps>
+### Initialize DriftClient + subscribe
+Start your client and subscribe to required accounts/feeds.
+
+### Start OrderSubscriber (websocket + resync)
+Bring up real-time order subscriptions with automatic resync.
+
+### Start PriorityFeeSubscriber
+Track current priority fee levels for transaction construction.
+
+### Register SIGINT/SIGTERM handlers
+Ensure graceful shutdown and emergency cleanup paths are active.
+
+### Main loop
+Check health (and emergency cancel if needed), refresh oracle prices, update quotes, process JIT auctions (if participating), and log metrics (position, PnL, fill rate).
+
+### Sleep until next cycle
+Pause until the next scheduled run tick.
+</Steps>
 
 ## Subaccount isolation
 

@@ -14,10 +14,19 @@ JIT-only market making means you **do not keep a standing book**. Instead of res
 
 A JIT-only bot follows this loop:
 
-1. **Subscribe** to auction and order feeds (onchain via `AuctionSubscriber`, or offchain via [SWIFT](./swift-api))
-2. **Filter** incoming auctions ,  check oracle, position limits, toxic flow, profitability
-3. **Price** your fill ,  compute the best price you're willing to offer given current conditions
-4. **Fill** atomically via `placeAndMakePerpOrder` ,  your maker order is placed and matched against the taker in one transaction
+<Steps>
+### Subscribe
+Subscribe to auction and order feeds (onchain via `AuctionSubscriber`, or offchain via [SWIFT](./swift-api)).
+
+### Filter
+Filter incoming auctions by oracle checks, position limits, toxic flow, and profitability.
+
+### Price
+Compute the best price you're willing to offer based on current market and inventory conditions.
+
+### Fill
+Fill atomically via `placeAndMakePerpOrder` so your maker order is placed and matched in one transaction.
+</Steps>
 
 ## Subscribe to auctions / orders
 
