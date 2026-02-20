@@ -6,6 +6,8 @@ Builder Codes (DBC) let integrators earn fees by routing flow through their appl
 
 First, initialize the DriftClient for both the builder and user:
 
+Create and subscribe separate `DriftClient` instances for builder and user authorities.
+
 <SDKDoc>
   <TypeScript name="Builder codes setup" type="example">
 ```js
@@ -46,6 +48,8 @@ await userClient.subscribe();
 
 ### Builder: Initialize Revenue Share
 
+Create the builder's onchain revenue-share configuration account.
+
 <SDKDoc>
   <TypeScript name="initializeRevenueShare" type="method" owner="DriftClient">
 ```js
@@ -56,6 +60,8 @@ await builderClient.initializeRevenueShare(builderAuthority);
 
 ### User: Initialize Escrow
 
+Create the user's revenue-share escrow account used for builder fee routing.
+
 <SDKDoc>
   <TypeScript name="initializeRevenueShareEscrow" type="method" owner="DriftClient">
 ```js
@@ -65,6 +71,8 @@ await userClient.initializeRevenueShareEscrow(takerAuthority, 16);
 </SDKDoc>
 
 ### User: Approve a Builder (Max Fee)
+
+Approve a builder for this user and set the maximum fee they can charge.
 
 <SDKDoc>
   <TypeScript name="changeApprovedBuilder" type="method" owner="DriftClient">

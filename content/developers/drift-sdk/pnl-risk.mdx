@@ -14,6 +14,8 @@ These helpers are commonly used for risk checks, dashboards, and liquidation log
 
 ### User health
 
+Return an overall account health score from 0-100, where lower values mean higher liquidation risk.
+
 <SDKDoc>
   <TypeScript name="getHealth" type="method" owner="User">
 ```js
@@ -25,6 +27,8 @@ console.log(health); // e.g. 85 means 85% healthy
 </SDKDoc>
 
 ### Collateral, margin requirement, leverage
+
+Get total account collateral value in quote units (typically USD precision).
 
 <SDKDoc>
   <TypeScript name="getTotalCollateral" type="method" owner="User">
@@ -39,6 +43,8 @@ console.log(convertToNumber(total, QUOTE_PRECISION)); // e.g. 1500.50 (USD)
   </TypeScript>
 </SDKDoc>
 
+Get the required margin for the account under initial or maintenance rules.
+
 <SDKDoc>
   <TypeScript name="getMarginRequirement" type="method" owner="User">
 ```js
@@ -50,6 +56,8 @@ console.log(convertToNumber(req, QUOTE_PRECISION)); // USD
   </TypeScript>
 </SDKDoc>
 
+Get currently available collateral that can be used for new positions or withdrawals.
+
 <SDKDoc>
   <TypeScript name="getFreeCollateral" type="method" owner="User">
 ```js
@@ -58,6 +66,8 @@ console.log(convertToNumber(free, QUOTE_PRECISION)); // USD available
 ```
   </TypeScript>
 </SDKDoc>
+
+Get current account leverage as a scaled value (convert to human-readable x leverage).
 
 <SDKDoc>
   <TypeScript name="getLeverage" type="method" owner="User">
@@ -73,6 +83,8 @@ console.log(lev.toNumber() / TEN_THOUSAND.toNumber()); // e.g. 2.5 (2.5x leverag
 
 ### Unrealized PnL
 
+Get unrealized PnL across open positions (optionally including funding effects).
+
 <SDKDoc>
   <TypeScript name="getUnrealizedPNL" type="method" owner="User">
 ```js
@@ -83,6 +95,8 @@ console.log(convertToNumber(pnl, QUOTE_PRECISION)); // e.g. -25.50 (USD)
 ```
   </TypeScript>
 </SDKDoc>
+
+Get unrealized funding PnL only, separated from price-movement PnL.
 
 <SDKDoc>
   <TypeScript name="getUnrealizedFundingPNL" type="method" owner="User">
@@ -95,6 +109,8 @@ console.log(convertToNumber(fundingPnl, QUOTE_PRECISION)); // USD
 </SDKDoc>
 
 ### Entry price helper
+
+Compute the effective entry price for a perp position from its cumulative trade data.
 
 <SDKDoc>
   <TypeScript name="calculateEntryPrice" type="function">
@@ -112,6 +128,8 @@ if (position) {
 
 ### Settle perp PnL
 
+Realize and settle a user's perp PnL for a specific market into spot balances.
+
 <SDKDoc>
   <TypeScript name="settlePNL" type="method" owner="DriftClient">
 ```js
@@ -120,4 +138,3 @@ await driftClient.settlePNL(user.userAccountPublicKey, user.getUserAccount(), 0)
 ```
   </TypeScript>
 </SDKDoc>
-

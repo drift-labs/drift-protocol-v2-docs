@@ -27,6 +27,8 @@ These are the most common read-path helpers you'll use to power bots, dashboards
 
 ### Market Accounts
 
+Read a single spot market account by index (e.g., market config, oracle source, and utilization state).
+
 <SDKDoc>
   <TypeScript name="getSpotMarketAccount" type="method" owner="DriftClient">
 ```js
@@ -36,6 +38,8 @@ console.log(spotMarket?.marketIndex);
 ```
   </TypeScript>
 </SDKDoc>
+
+Read a single perp market account by index (e.g., AMM params, funding state, and open interest).
 
 <SDKDoc>
   <TypeScript name="getPerpMarketAccount" type="method" owner="DriftClient">
@@ -47,6 +51,8 @@ console.log(perpMarket?.marketIndex);
   </TypeScript>
 </SDKDoc>
 
+Get all spot market accounts at once, useful for startup symbol/index mapping and dashboards.
+
 <SDKDoc>
   <TypeScript name="getSpotMarketAccounts" type="method" owner="DriftClient">
 ```js
@@ -55,6 +61,8 @@ console.log(spotMarkets.length);
 ```
   </TypeScript>
 </SDKDoc>
+
+Get all perp market accounts at once, useful for scanning market metadata and risk parameters.
 
 <SDKDoc>
   <TypeScript name="getPerpMarketAccounts" type="method" owner="DriftClient">
@@ -67,6 +75,8 @@ console.log(perpMarkets.length);
 
 ### Oracle Price
 
+Read the current oracle data for a perp market (price, confidence, and validity flags).
+
 <SDKDoc>
   <TypeScript name="getOracleDataForPerpMarket" type="method" owner="DriftClient">
 ```js
@@ -77,6 +87,8 @@ console.log(oracle.price.toString());
   </TypeScript>
 </SDKDoc>
 
+Read the current oracle data for a spot market using its market index.
+
 <SDKDoc>
   <TypeScript name="getOracleDataForSpotMarket" type="method" owner="DriftClient">
 ```js
@@ -86,6 +98,8 @@ console.log(oracle.price.toString());
 ```
   </TypeScript>
 </SDKDoc>
+
+Read market-maker-oriented oracle data for perp markets, typically used for DLOB/JIT pricing flows.
 
 <SDKDoc>
   <TypeScript name="getMMOracleDataForPerpMarket" type="method" owner="DriftClient">
@@ -99,6 +113,8 @@ console.log(oracle.price.toString());
 
 ### Positions and Balances
 
+Get your active subaccount's spot position for a given market index (deposit or borrow state).
+
 <SDKDoc>
   <TypeScript name="getSpotPosition" type="method" owner="DriftClient">
 ```js
@@ -107,6 +123,8 @@ console.log(spotPosition);
 ```
   </TypeScript>
 </SDKDoc>
+
+Get your active subaccount's perp position for a given perp market index.
 
 <SDKDoc>
   <TypeScript name="getPerpPosition" type="method" owner="DriftClient">
@@ -132,18 +150,9 @@ console.log(state);
 
 The **Decentralized Limit Order Book (DLOB)** aggregates resting limit orders from all users. If you're building a market maker, orderbook UI, or matching bot, you'll want to build a local DLOB by subscribing to orders.
 
-#### Key Classes
+#### OrderSubscriber
 
-| Class | Purpose | When to Use |
-|---|---|---|
-| **`OrderSubscriber`** | Subscribes to all user orders in real-time via WebSocket or polling | Always needed ,  this is the raw data source for the DLOB |
-| **`DLOBSubscriber`** | Builds and maintains an aggregated orderbook from the order stream | When you need a continuously-updated L2/L3 orderbook view |
-| **`SlotSubscriber`** | Tracks the current Solana slot | Needed for timing-sensitive operations like JIT auctions and order expiry |
-| **`DLOB`** | Core data structure with bid/ask sides and query methods | Used internally by `DLOBSubscriber`; access via `dlobSubscriber.getDLOB()` |
-| **`UserMap`** | Efficiently tracks and caches multiple user accounts | Useful for bulk operations across many users (e.g., liquidation bots) |
-
-<details>
-<summary>View OrderSubscriber import</summary>
+Subscribes to all user orders in real-time via WebSocket or polling. Always needed — this is the raw data source for the DLOB.
 
 <SDKDoc>
   <TypeScript name="OrderSubscriber" type="class">
@@ -153,10 +162,9 @@ import { OrderSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-</details>
+#### DLOBSubscriber
 
-<details>
-<summary>View DLOBSubscriber import</summary>
+Builds and maintains an aggregated orderbook from the order stream. Use when you need a continuously-updated L2/L3 orderbook view.
 
 <SDKDoc>
   <TypeScript name="DLOBSubscriber" type="class">
@@ -166,10 +174,9 @@ import { DLOBSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-</details>
+#### SlotSubscriber
 
-<details>
-<summary>View SlotSubscriber import</summary>
+Tracks the current Solana slot. Needed for timing-sensitive operations like JIT auctions and order expiry.
 
 <SDKDoc>
   <TypeScript name="SlotSubscriber" type="class">
@@ -179,10 +186,9 @@ import { SlotSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-</details>
+#### DLOB
 
-<details>
-<summary>View DLOB import</summary>
+Core data structure with bid/ask sides and query methods. Used internally by `DLOBSubscriber`; access via `dlobSubscriber.getDLOB()`.
 
 <SDKDoc>
   <TypeScript name="DLOB" type="class">
@@ -192,10 +198,9 @@ import { DLOB } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-</details>
+#### UserMap
 
-<details>
-<summary>View UserMap import</summary>
+Efficiently tracks and caches multiple user accounts. Useful for bulk operations across many users (e.g., liquidation bots).
 
 <SDKDoc>
   <TypeScript name="UserMap" type="class">
@@ -204,8 +209,6 @@ import { UserMap } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
-
-</details>
 
 #### Setting Up a Local DLOB
 
@@ -293,4 +296,5 @@ if (bestBid && bestAsk) {
 }
 ```
   </TypeScript>
+  
 </SDKDoc>

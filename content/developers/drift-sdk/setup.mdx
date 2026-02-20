@@ -102,9 +102,13 @@ await driftClient.subscribe();
   </Rust>
 </SDKDoc>
 
+<SDKDoc>
+  <TypeScript name="unsubscribe" type="method" owner="DriftClient">
 ```js
 await driftClient.unsubscribe();
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### Account Subscriptions (WebSocket vs Polling)
 
@@ -168,6 +172,9 @@ await driftClient.addUser(1);
 </SDKDoc>
 
 ### Program ID
+
+<SDKDoc>
+  <TypeScript name="DRIFT_PROGRAM_ID" type="variable">
 ```js
 import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
 
@@ -175,12 +182,19 @@ import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
 // Use this when deriving PDAs or referencing the program directly.
 console.log(DRIFT_PROGRAM_ID.toBase58());
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### High Leverage Mode
+
+<SDKDoc>
+  <TypeScript name="getHighLeverageModeConfigPublicKey" type="function">
 ```js
 import { getHighLeverageModeConfigPublicKey } from "@drift-labs/sdk";
 
 const pda = getHighLeverageModeConfigPublicKey(driftClient.program.programId);
 const config = await driftClient.program.account.highLeverageModeConfig.fetch(pda);
 ```
+  </TypeScript>
+</SDKDoc>
 

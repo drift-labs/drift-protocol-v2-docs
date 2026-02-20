@@ -4,29 +4,34 @@ Understanding how Drift's orderbook and matching engine work is essential for ma
 
 ## What is the DLOB?
 
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
-
 The **DLOB** (Decentralized Limit Order Book) is Drift's offchain orderbook that aggregates all resting limit orders across user accounts. It provides a unified orderbook view for matching and price discovery while keeping order storage onchain.
 
 **Why offchain?**
 
 Storing a sorted orderbook onchain would be prohibitively expensive. Instead, Drift stores orders in user accounts (up to 32 per user), and the DLOB server:
-1. Scans all user accounts
-2. Extracts resting limit orders
-3. Sorts them by price into a bid/ask orderbook
-4. Serves this orderbook via WebSocket and HTTP
+
+<Steps>
+### Scan all user accounts
+Read all relevant `UserAccount` state from chain.
+
+### Extract resting limit orders
+Pull active, fillable limit orders from each account.
+
+### Sort into a bid/ask orderbook
+Group and order quotes by price levels.
+
+### Serve via WebSocket and HTTP
+Publish snapshots and updates for UIs and bots.
+</Steps>
 
 This gives you Binance-style orderbook depth without onchain sorting costs.
 
-</div>
-
 ## How matching works
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 When a taker order arrives, it's matched in this **liquidity priority order**:
 
-### 1. JIT Auction (first ~10 slots / ~5 seconds)
+<Steps>
+### JIT Auction (first ~10 slots / ~5 seconds)
 
 The taker order enters an auction where market makers compete to fill at the best price. This is the highest-priority liquidity source because it produces the best price discovery ,  makers actively compete in real-time. The auction price interpolates from the start price toward the end price over the auction duration, creating a Dutch auction dynamic.
 
@@ -34,17 +39,18 @@ The taker order enters an auction where market makers compete to fill at the bes
 
 See [JIT Auctions](./jit-auctions) for the full auction lifecycle and pricing math.
 
-### 2. DLOB (Decentralized Limit Order Book)
+### DLOB (Decentralized Limit Order Book)
 
 After the JIT auction, any unfilled portion matches against resting limit orders. These are sorted by **price-time priority** ,  best price wins, and among tied prices, the earliest order fills first. DLOB liquidity is "committed" ,  the orders are onchain and can't be pulled during matching.
 
-### 3. AMM (Automated Market Maker)
+### AMM (Automated Market Maker)
 
 If DLOB doesn't fully fill the order, the remainder executes against Drift's AMM. The AMM uses a constant product curve adjusted by the oracle price, so it always provides liquidity but at worse prices (higher fees + price impact). Think of the AMM as the liquidity of last resort ,  it guarantees fills but at a cost.
 
-### 4. External fulfillment (spot markets only)
+### External fulfillment (spot markets only)
 
 For spot markets, the matching engine can also route through external DEXs (Phoenix, OpenBook) and Jupiter aggregator when they offer better prices than onchain sources.
+</Steps>
 
 **The waterfall in practice:**
 
@@ -55,11 +61,7 @@ A 10 SOL market buy might fill like this:
 
 The taker gets a blended price better than any single source would provide.
 
-</div>
-
 ## What is "indicative" liquidity?
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 When you query the DLOB orderbook, you'll see two types of liquidity:
 
@@ -70,13 +72,7 @@ When you query the DLOB orderbook, you'll see two types of liquidity:
 
 In the L2 API response, the `sources` field on each price level tells you where the liquidity comes from ,  see [REST API](#rest-api-l2l3) below.
 
-</div>
-
 ## DLOB architecture
-
-<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem'}}>
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
 
 ### DLOB responsibilities
 
@@ -97,44 +93,31 @@ In the L2 API response, the `sources` field on each price level tells you where 
 - Updates orderbook when orders placed/canceled/filled
 - Publishes updates via WebSocket
 
-</div>
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
-
 ### Order lifecycle
 
-1. **User places limit order**
-   - UserAccount updated onchain
+<Steps>
+### User places limit order
+`UserAccount` is updated onchain.
 
-2. **DLOB detects new order**
-   - Scans UserAccount via RPC subscription
+### DLOB detects new order
+The order is picked up via RPC subscriptions.
 
-3. **Order added to DLOB**
-   - Inserted at correct price level
+### Order added to DLOB
+The order is inserted at the correct price level.
 
-4. **Orderbook update broadcast**
-   - WebSocket clients receive new depth
+### Orderbook update broadcast
+WebSocket clients receive refreshed depth.
 
-5. **Order fills**
-   - UserAccount marked filled
-   - DLOB removes order
+### Order fills
+`UserAccount` is marked filled and DLOB removes the order.
 
-6. **Update broadcast**
-   - Clients see reduced depth
+### Update broadcast
+Clients receive the reduced depth after fill.
+</Steps>
 
 *The DLOB never modifies onchain state, it's read-only.*
 
-</div>
-
-</div>
-
 ## DLOB vs onchain state
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
-
-<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem'}}>
-
-<div>
 
 **Onchain (source of truth)**
 
@@ -143,10 +126,6 @@ In the L2 API response, the `sources` field on each price level tells you where 
 - Settlement and PnL calculation
 - Collateral and margin checks
 
-</div>
-
-<div>
-
 **DLOB (aggregated view)**
 
 - Sorted orderbook for matching
@@ -154,17 +133,9 @@ In the L2 API response, the `sources` field on each price level tells you where 
 - Real-time orderbook updates
 - Convenient API for UIs and bots
 
-</div>
-
-</div>
-
 If DLOB goes down, orders are still onchain and valid, they just won't be visible in the aggregated orderbook until DLOB recovers.
 
-</div>
-
 ## Accessing the DLOB
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 ### REST API (L2/L3)
 
@@ -310,22 +281,20 @@ Subscribe via `AuctionSubscriber` to get active auctions; see [JIT Auctions](./j
 
 Use `isSignedMsgOrder(order)` to identify SWIFT-origin orders when subscribed to both SWIFT and onchain feeds. See [SWIFT API](./swift-api#detecting-swift-orders-in-onchain-feeds) for details.
 
-</div>
-
 ## DLOB matching mechanics
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 After the JIT auction, remaining order size matches against DLOB using **price-time priority**:
 
-1. **Best price wins**
-   - Lowest ask for buys, highest bid for sells
+<Steps>
+### Best price wins
+Lowest ask fills buys first; highest bid fills sells first.
 
-2. **Time priority for tied prices**
-   - Earlier orders fill first (FIFO at each price level)
+### Time priority for tied prices
+Earlier orders fill first (FIFO at each price level).
 
-3. **Walk the book**
-   - Continue filling at successive price levels until taker is fully filled or book is exhausted
+### Walk the book
+Continue across price levels until fully filled or liquidity is exhausted.
+</Steps>
 
 **Example** (taker buying 10 SOL):
 - DLOB has: 3 SOL @ $100, 5 SOL @ $100.10, 4 SOL @ $100.20
@@ -333,11 +302,7 @@ After the JIT auction, remaining order size matches against DLOB using **price-t
 
 If DLOB doesn't fully fill, remaining size goes to AMM.
 
-</div>
-
 ## Matching examples
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 ### Example 1: Market order (long)
 
@@ -358,11 +323,7 @@ If DLOB doesn't fully fill, remaining size goes to AMM.
 2. Rests on DLOB as maker order
 3. Earns maker rebate when filled
 
-</div>
-
 ## Performance characteristics
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 **DLOB performance:**
 - **Latency**: 1-2 seconds from onchain placement to DLOB update
@@ -373,8 +334,6 @@ If DLOB doesn't fully fill, remaining size goes to AMM.
 **For low-latency bots:**
 
 Subscribing directly to onchain UserAccounts (via RPC or gRPC) can be faster than waiting for DLOB updates. The SDK's `OrderSubscriber` with `type: "websocket"` gives you the rawest feed.
-
-</div>
 
 ## Gotchas
 
