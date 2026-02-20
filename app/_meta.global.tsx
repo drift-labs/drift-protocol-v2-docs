@@ -1,6 +1,7 @@
 import { MetaRecord } from "nextra";
 
 const displayWip = process.env.NODE_ENV === 'development' ? 'normal' : "hidden"
+
 /*
 Conditionally hide items in production
 USAGE:
@@ -191,6 +192,15 @@ const META = {
     "title": "Developers",
     "type": "page",
     "items": {
+      "concepts": {
+        "title": "Concepts",
+        "items": {
+          "index": "",
+          "architecture": "",
+          "program-structure": "",
+          "account-model": ""
+        }
+      },
       "drift-sdk": {
         "title": "Drift SDK",
         "items": {
@@ -206,6 +216,7 @@ const META = {
           "swaps": "",
           "swift": "",
           "builder-codes": "",
+          "sdk-internals": "",
           "rust": {
             "display": displayWip,
           },
@@ -225,13 +236,15 @@ const META = {
       "market-makers": {
         "title": "Market Makers",
         "items": {
+          "index": "",
+          "quickstart": "",
           "normal-mm": "",
-          "orderbook": "",
           "jit-only": "",
-          "swift-order-feed": "",
-          "swift-place-and-make": "",
-          "indicative-quotes": "",
-          "bot-architecture": ""
+          "bot-architecture": "",
+          "orderbook-and-matching": "",
+          "jit-auctions": "",
+          "swift-api": "",
+          "indicative-quotes": ""
         }
       },
       "vault-managers": {

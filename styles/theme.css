@@ -42,6 +42,11 @@ footer {
   background-color: rgb(var(--nextra-bg));
 }
 
+
+details[open]>summary:first-child>svg {
+    rotate: 90deg;
+}
+
 /* Top level tabs */
 header>nav {
   display: flex;

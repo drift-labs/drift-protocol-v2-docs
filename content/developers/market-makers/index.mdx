@@ -1,0 +1,152 @@
+# Market Makers
+
+Market making on Drift involves providing liquidity through resting orders, JIT auctions, or both. This section covers strategies, architecture, and trading mechanisms.
+
+## Getting Started
+
+### Quickstart Guide
+
+**Get a market maker running in 10 minutes**
+
+Learn how to place two-sided quotes that automatically update with oracle prices. Perfect for understanding the basics before diving into advanced strategies.
+
+<Cards.Card
+  title="Understand quickstart guide ↗"
+  href="/developers/market-makers/quickstart"
+/>
+
+## Choosing a Strategy
+
+Drift supports three distinct market making approaches. The right choice depends on your latency infrastructure, capital efficiency goals, and operational complexity tolerance.
+
+| | Normal MM | JIT-only | SWIFT |
+|---|---|---|---|
+| **How it works** | Resting limit orders on the DLOB | React to taker auctions in real-time | Receive signed taker orders offchain before auction |
+| **Latency requirement** | Low (seconds) | Medium (sub-second) | High (100-500ms edge) |
+| **Infrastructure** | Simple ,  place orders, update periodically | Moderate ,  auction subscriber + fill logic | Advanced ,  WebSocket feed + fast tx submission |
+| **Capital efficiency** | Orders locked on-chain | Capital deployed only when filling | Capital deployed only when filling |
+| **Adverse selection** | Higher ,  resting orders can be picked off | Lower ,  choose which auctions to fill | Lowest ,  earliest look at order flow |
+| **Maker rebates** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Txs/day (oracle offset)** | ~30 | Varies with flow | Varies with flow |
+| **Best for** | Passive MM, low-touch strategies | Active MM, inventory-aware fills | Competitive latency-sensitive MM |
+
+**Recommendation:** Start with **Normal MM** using oracle offset orders (orders float with the oracle automatically, requiring very few transactions). Add **JIT** participation when you want to capture auction flow. Add **SWIFT** when you need the latency edge over other JIT makers.
+
+## Market Making Strategies
+
+### Normal Market Making
+
+**Resting orders on the DLOB**
+
+Place limit orders that rest on the orderbook until filled. Use oracle offset orders to automatically track the oracle price with minimal transactions. Earn maker rebates while providing committed liquidity.
+
+**Best for:**
+- Passive market making
+- Earning maker rebates
+- Lower infrastructure requirements
+- Traditional orderbook strategies
+
+<Cards.Card
+  title="Understand normal market making ↗"
+  href="/developers/market-makers/normal-mm"
+/>
+
+### JIT-Only Market Making
+
+**Active market making through auctions**
+
+React to incoming taker orders during JIT auctions without maintaining resting orders. Compete for fills at better prices. Capital is only deployed when you choose to fill.
+
+**Best for:**
+- Active market making
+- Dynamic pricing strategies
+- Avoiding adverse selection
+- Selective flow participation
+
+<Cards.Card
+  title="Understand JIT-only market making ↗"
+  href="/developers/market-makers/jit-only"
+/>
+
+### Bot Architecture
+
+Production patterns and best practices for building reliable market making bots. Covers priority fees, health monitoring, graceful shutdown, error handling, and operational considerations.
+
+<Cards.Card
+  title="Understand bot architecture ↗"
+  href="/developers/market-makers/bot-architecture"
+/>
+
+## Understanding Drift's Trading Mechanisms
+
+### Orderbook & Matching
+
+**How orders are matched and filled**
+
+Learn about the DLOB architecture, liquidity priority (JIT → DLOB → AMM), and how to access orderbook data via HTTP, WebSocket, or SDK.
+
+*Essential reading for understanding execution flow*
+
+<Cards.Card
+  title="Understand orderbook & matching ↗"
+  href="/developers/market-makers/orderbook-and-matching"
+/>
+
+### JIT Auctions
+
+**Just-In-Time auction mechanics**
+
+Deep dive into how JIT auctions work, auction pricing, maker participation, and place-and-make patterns.
+
+*Critical for competitive market making*
+
+<Cards.Card
+  title="Understand JIT auctions ↗"
+  href="/developers/market-makers/jit-auctions"
+/>
+
+## Advanced Features
+
+### SWIFT API
+
+**Ultra-low-latency order feed**
+
+Receive signed taker orders offchain via WebSocket before they hit the auction. Enable sub-second reaction times with SWIFT place-and-make.
+
+**Latency advantage:** 100-500ms faster than onchain feeds
+
+<Cards.Card
+  title="Understand SWIFT API ↗"
+  href="/developers/market-makers/swift-api"
+/>
+
+### Indicative Quotes
+
+**Offchain liquidity signaling**
+
+Signal intent to provide liquidity at certain prices without committing onchain orders. Helps with price discovery for takers and aggregator routing.
+
+**Use case:** Show liquidity for UI/aggregators
+
+<Cards.Card
+  title="Understand indicative quotes ↗"
+  href="/developers/market-makers/indicative-quotes"
+/>
+
+## Reference Implementations
+
+Drift maintains open-source reference bots in [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2):
+
+| Bot | Source | Strategy |
+|---|---|---|
+| **FloatingPerpMaker** | [`src/bots/floatingMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) | Oracle offset resting orders on DLOB |
+| **JitMaker** | [`src/bots/jitMaker.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/jitMaker.ts) | JIT auction fills using `JitterSniper`/`JitterShotgun` |
+
+> **Tip:** The `FloatingPerpMaker` is the best starting point for understanding oracle offset orders in production. The `JitMaker` shows how to use the [`@drift-labs/jit-proxy`](https://github.com/drift-labs/jit-proxy) library for auction participation.
+
+## Related Resources
+
+- [Drift SDK](/developers/drift-sdk) - SDK reference for orders and positions
+- [Protocol Concepts](/developers/concepts) - Understanding accounts and onchain data
+- [Keeper Bots](https://github.com/drift-labs/keeper-bots-v2) - Open source keeper bot infrastructure
+- [@drift-labs/jit-proxy](https://github.com/drift-labs/jit-proxy) - JIT proxy SDK with `JitterSniper` and `JitterShotgun`

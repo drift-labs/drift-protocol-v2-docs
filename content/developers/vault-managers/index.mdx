@@ -1,26 +1,48 @@
 # Vault Managers
 
-Vaults are delegated trading pools: **depositors** provide capital, and a **manager/delegate** trades with that capital under strict withdrawal rules (redeem period, share accounting). Vault execution still happens through Drift accounts, so vault behavior mirrors standard Drift margin + order flows.
+Vaults are delegated trading pools where **depositors** provide capital and a **manager** (delegate) trades with it under strict withdrawal rules. This guide covers the lifecycle and operations you need as a vault manager. You can manage vaults via the CLI (recommended) or programmatically with the SDK's `VaultClient`. For full CLI flags and setup, see the [drift-vaults](https://github.com/drift-labs/drift-vaults) repo.
 
-This guide focuses on the lifecycle and decisions a manager needs to make. For full CLI flags and details, see the vaults CLI reference in the `drift-vaults` repo.
+## How it works
+
+Each vault has its own Drift user account that the manager trades with. The manager has **delegate authority** over this account: they can place and cancel orders and manage positions. Depositors' funds are pooled in this single account; PnL affects all share holders proportionally. Vaults use **share-based accounting**: depositors receive shares when they deposit and redeem them after a cooldown (**redeem period**).
+
+**Parameters you set at initialization** (and how they can change later):
+
+| Parameter | Notes |
+| --------- | ----- |
+| **`name`** | Unique identity for the vault. |
+| **`management fee`** | Annualized; after initialization can only be **lowered**. |
+| **`performance fee`** (profit share) | On realized gains; after initialization can only be **lowered**. |
+| **`redemption period`** | Withdrawal cooldown in seconds; after initialization can only be **shortened**. |
+| **`permissioned`** | If set, only the manager can initialize new vault depositor accounts. |
+| **`max_deposits`** / **`max-tokens`** | Capacity limit; can be raised or lowered after init (applies to new deposits only). |
+| **`min_lp_deposit`** / **`min-deposit-amount`** | Minimum deposit size; can be changed after init (applies to new deposits only). |
+
+**Fees:** Fee parameters use percentage precision (e.g. 1e6 scale) and are annualized. Management fees apply only when there are non-manager deposits and are charged across the vault; they compound on actions, so more frequent depositor activity slightly reduces the effective annualized fee. Performance fees are calculated per depositor with **watermarks** so drawdowns don't cause double-charging; once charged, this fee is not reclaimed.
+
+## Managing vaults
 
 ### Step 1: Understand roles and lifecycle
 
-- **Manager/delegate**: trades for the vault, can update some params.
-- **Depositor**: deposits, requests withdrawals, and completes withdrawals after redeem period.
+- **Manager/delegate**: trades for the vault, updates allowed parameters, collects fees.
+- **Depositor**: deposits, requests withdrawals, and completes withdrawals after the redeem period.
 
-Lifecycle: **create → deposit → trade → request withdraw → wait → withdraw**.
+Lifecycle: **create → deposit → trade → request withdraw → wait (redeem period) → withdraw**.
 
 ### Step 2: Decide vault parameters
 
-- **`market-index` / `spotMarketIndex`**: deposit token (commonly 0 = USDC)
-- **`redeem-period`**: withdrawal cooldown (often 3–7 days)
-- **`max-tokens`**: capacity / risk control
-- **`management-fee`**: annualized fee
-- **`profit-share`**: charged on realized gains
-- **`permissioned`** + **`min-deposit-amount`**: onboarding controls
+| Parameter | Description |
+| --------- | ----------- |
+| **`market-index`** / **`spotMarketIndex`** | Deposit token (e.g. 0 = USDC). |
+| **`redeem-period`** | Withdrawal cooldown in seconds (often 3–7 days). |
+| **`max-tokens`** | Capacity / risk control. |
+| **`management-fee`** | Annualized management fee. |
+| **`profit-share`** | Performance fee on realized gains. |
+| **`permissioned`** + **`min-deposit-amount`** | Optional onboarding controls. |
 
-### Step 3: Initialize the vault (manager)
+### Step 3: Initialize the vault
+
+Vault initialization is permissionless. From the drift-vaults CLI:
 
 ```bash
 yarn cli init-vault \
@@ -32,12 +54,22 @@ yarn cli init-vault \
   --profit-share 2000
 ```
 
-### Step 4: Enable trading + set policies
+Add `--permissioned` and `--min-deposit-amount <amount>` if you want whitelisted depositors and a minimum deposit size. Vault name must be unique.
 
-Optional actions you may take after creation:
+### Step 4: Update parameters and enable trading
 
-- enable margin trading on the vault
-- update parameters (redeem period, caps, fees)
+After creation you can lower fees, shorten redeem period, or adjust caps (within the one-way constraints above):
+
+```bash
+yarn cli manager-update-vault \
+  --vault-address <VAULT_ADDRESS> \
+  --redeem-period 1000 \
+  --max-tokens 200000 \
+  --management-fee 0 \
+  --profit-share 0
+```
+
+To enable margin trading on the vault:
 
 ```bash
 yarn cli manager-update-margin-trading-enabled \
@@ -45,9 +77,15 @@ yarn cli manager-update-margin-trading-enabled \
   --enabled true
 ```
 
-### Step 5: Deposits and withdrawals (depositors)
+View vault state anytime:
 
-For permissioned vaults, managers must initialize depositors:
+```bash
+yarn cli view-vault --vault-address <VAULT_ADDRESS>
+```
+
+### Step 5: Permissioned vaults (allowing depositors)
+
+For permissioned vaults, the manager must initialize each depositor:
 
 ```bash
 yarn cli init-vault-depositor \
@@ -55,24 +93,99 @@ yarn cli init-vault-depositor \
   --deposit-authority <AUTHORITY_TO_ALLOW_DEPOSIT>
 ```
 
-Deposits are permissioned or permissionless based on vault settings. Withdrawals are two-step:
-
-- request withdrawal
-- wait redeem period
-- complete withdrawal
+Deposits and withdrawals are otherwise as in the standard flow: request withdrawal → wait redeem period → complete withdrawal.
 
 ### Step 6: Manager operations
 
 Common manager actions:
 
-- manager deposit/withdraw
-- apply profit share across depositors
-- view vault state
+- Manager deposit/withdraw
+- Apply profit share across depositors
+- View vault state and depositors
 
-See the `drift-vaults` CLI docs for the full command list and flags.
+See the drift-vaults CLI for the full command list and flags.
 
-### Step 7: Security
+### Step 7: Security and guardrails
 
-- Managers **cannot** withdraw user funds directly.
-- Withdrawals are governed by **redeem period** and **share accounting**.
-- Managers can usually **decrease** (but not increase) the redeem period.
+- Managers **cannot** withdraw user funds directly; withdrawals are governed by **redeem period** and **share accounting**.
+- Managers can **decrease** (but not increase) the redeem period and can only **lower** fees after initialization.
+
+## Trusted vaults
+
+Trusted vaults extend the base vault with **manager borrowing** and (when enabled) margin trading. They are created like a normal vault; an admin must then update the vault class to Trusted. Once upgraded, the manager can borrow assets from the vault and repay or mark-to-market the borrow.
+
+<Callout type="warning" title="Trust and risk">
+Vault depositors in Trusted vaults place significant trust in the manager. Borrowing and margin increase the manager's ability to move or risk vault capital. Depositors should only use Trusted vaults when they accept this additional trust assumption.
+</Callout>
+
+**Borrow:** Move vault assets out (e.g. USDC) up to the vault's capacity. Vault equity for share accounting includes the manager's borrowed value so depositor share price reflects the full claim on the vault.
+
+```bash
+yarn cli manager-borrow \
+  --vault-address <VAULT_ADDRESS> \
+  --borrow-spot-market-index 0 \
+  --borrow-amount <AMOUNT>
+```
+
+**Repay:** Send tokens back into the vault and reduce the outstanding borrow. You can repay in the same asset or another spot market and specify the value to deduct from `manager_borrowed_value`; omit amount to repay the full borrow.
+
+```bash
+yarn cli manager-repay \
+  --vault-address <VAULT_ADDRESS> \
+  --repay-spot-market-index <INDEX> \
+  --repay-amount <AMOUNT> \
+  --repay-value <VALUE_IN_DEPOSIT_ASSET>
+```
+
+**Update borrow value:** If borrowed funds have been used elsewhere and their mark-to-deposit-asset value has changed, you can set the tracked borrow value to the current mark:
+
+```bash
+yarn cli manager-update-borrow \
+  --vault-address <VAULT_ADDRESS> \
+  --new-borrow-value <VALUE>
+```
+
+Trusted vaults typically use margin trading; enable it with `manager-update-margin-trading-enabled` as in Step 4.
+
+## Multisig manager
+
+The vault **manager** is the ultimate owner: they update parameters, fees, and the trading delegate, and collect fees. The manager is set to the signer of the vault creation transaction and can be changed with `update_vault_manager` (signed by the current manager).
+
+**New vault with multisig as manager:** Set the manager to your Squads (or other multisig) address and use `--dump-transaction-message` to output a base58 transaction blob. Create a transaction in Squads (Developers → TX Builder → Create Transaction → Add Instruction → Import from base58), then have signers approve and execute.
+
+```bash
+yarn cli init-vault \
+  --name <VAULT_NAME> \
+  --market-index <SPOT_MARKET_INDEX> \
+  --redeem-period <SECONDS> \
+  --profit-share <BPS_OR_PCT> \
+  --min-deposit-amount <AMOUNT> \
+  --manager <MULTISIG_ADDRESS> \
+  --dump-transaction-message
+```
+
+**Existing vault:** Transfer management to a multisig by having the current manager run:
+
+```bash
+yarn cli manager-update-vault-manager \
+  --vault-address <VAULT_ADDRESS> \
+  --new-manager <MULTISIG_ADDRESS>
+```
+
+**Any manager command via multisig:** Use `--dump-transaction-message` on manager commands (`yarn cli manager-*`) to get a base58 blob, then import it in Squads as above. The CLI uses the manager as fee payer, so ensure the multisig wallet has enough SOL for transaction fees.
+
+## Accounting
+
+**Share price** is implied as `vault_equity / total_shares` in the vault's deposit asset. Vault equity is the value of vault assets (and for Trusted vaults includes the manager's borrowed value). Depositor and manager shares are tracked on the vault and depositor accounts.
+
+## What to monitor and risks
+
+**Liquidations:** If a depositor has waited the redeem period and their withdrawal would breach the vault's initial margin requirement (e.g. the delegate is over-leveraged), a permissioned liquidator can temporarily assume delegate control and close positions in reduce-only mode (until withdrawal is processed or for up to 1 hour), then restore the original delegate. Monitor **total outstanding withdrawal requests** (stored on the vault account) and keep margin usage in check so depositor withdrawals don't trigger takeovers; the redeem period gives you time to unwind positions.
+
+**Trust and incentives:** The design is not trustless between depositors and managers. Without reputation or stake, incentives can be misaligned (e.g. moving value via losing trades). Depositors have no on-chain recourse, so they must trust the manager. Operate with clear terms and consider reputation or skin-in-the-game where appropriate.
+
+## Related Resources
+
+- [drift-vaults](https://github.com/drift-labs/drift-vaults), CLI and TypeScript SDK for vault operations
+- [Protocol Concepts](/developers/concepts), accounts and onchain data model
+- [Drift SDK](/developers/drift-sdk), core trading and positions SDK

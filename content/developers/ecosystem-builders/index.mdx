@@ -1,37 +1,161 @@
 # Ecosystem Builders
 
-This workflow is for teams building apps, analytics, or integrations that mirror Drift UI functionality. The goal: use the same data sources the UI uses, and send actions via the SDK.
+This section is for teams building apps, analytics, or integrations on top of Drift. The goal: use the same building blocks the official Drift UI uses, so you get UI parity without reinventing the wheel.
 
-### Step 1: Decide your data sources
+## What you can build
 
-For UI-parity data, Drift uses a mix of:
+- **Portfolio tracker**, display user positions, PnL, funding payments, and account health
+- **Trading terminal**, custom order entry UI with real-time orderbook, candle charts, and SDK execution
+- **Analytics dashboard**, market stats (volume, OI, funding rates, oracle prices) from the Data API
+- **Liquidation bot UI**, monitor at-risk accounts and trigger liquidations with profit tracking
+- **Notification service**, watch for fills, liquidations, or funding events and push alerts
 
-- **Data API** (historical data, candles, trades)
-- **DLOB server** (orderbook + trades websocket)
-- **Swift** (signed message orders)
+## drift-common: the fastest path to UI parity
 
-Start here:
+[`drift-common`](https://github.com/drift-labs/drift-common) is the monorepo of shared packages used by the official Drift UI. If you're building a frontend, **start here**, not with the raw SDK.
+
+### Packages
+
+| Package | npm | Purpose |
+|---|---|---|
+| `@drift-labs/react` | `npm i @drift-labs/react` | React providers, hooks, and stores for Drift integration |
+| `@drift-labs/common-ts` | `npm i @drift-labs/common-ts` | TypeScript utilities, market types, number formatting, UI helpers |
+| `@drift-labs/icons` | `npm i @drift-labs/icons` | Market and token icons used across the Drift UI |
+
+### `@drift-labs/react`
+
+This package gives you a complete React integration layer:
+
+**`DriftProvider`**, wrap your app to handle wallet connection, DriftClient initialization, RPC management, geoblocking, and idle polling. This is the entry point for any React app using Drift.
+
+```tsx
+import { DriftProvider, DEFAULT_BREAKPOINTS } from "@drift-labs/react";
+
+function App() {
+  return (
+    <DriftProvider breakpoints={DEFAULT_BREAKPOINTS}>
+      <YourApp />
+    </DriftProvider>
+  );
+}
+```
+
+**`useCommonDriftStore`**, Zustand store that holds the central DriftClient instance, user accounts, connection state, and SDK config. This is how you access Drift state throughout your app.
+
+```tsx
+import { useCommonDriftStore } from "@drift-labs/react";
+
+function TradingPanel() {
+  const driftClient = useCommonDriftStore((s) => s.driftClient.client);
+  const isReady = useCommonDriftStore((s) => s.checkIsDriftClientReady());
+  const userAccounts = useCommonDriftStore((s) => s.userAccounts);
+
+  if (!isReady) return <div>Connecting...</div>;
+
+  // driftClient is a fully subscribed DriftClient instance
+  // Use it for orders, positions, market data, etc.
+}
+```
+
+**`useDriftClientIsReady`**, simple hook to check if the DriftClient is subscribed and ready:
+
+```tsx
+import { useDriftClientIsReady } from "@drift-labs/react";
+
+function OrderButton() {
+  const isReady = useDriftClientIsReady();
+  return <button disabled={!isReady}>Place Order</button>;
+}
+```
+
+**`useOraclePriceStore`**, Zustand store for real-time oracle prices across all markets. Synced automatically via `useSyncOraclePriceStore`:
+
+```tsx
+import { useOraclePriceStore } from "@drift-labs/react";
+import { MarketId } from "@drift-labs/common-ts";
+
+function PriceDisplay({ marketId }: { marketId: MarketId }) {
+  const priceData = useOraclePriceStore((s) => s.getMarketPriceData(marketId));
+  return <span>${priceData?.priceData.price.toFixed(2)}</span>;
+}
+```
+
+### `@drift-labs/common-ts`
+
+Shared TypeScript utilities that handle the repetitive parts of working with Drift data:
+
+**`UIMarket`**, wraps SDK market configs with display-friendly properties (symbol, display name, base asset, pool ID). Use this instead of raw market configs:
+
+```ts
+import { UIMarket, MarketId } from "@drift-labs/common-ts";
+
+// Create from market index and type
+const solPerp = UIMarket.createPerpMarket({ marketIndex: 0 });
+console.log(solPerp.marketName);  // "SOL-PERP"
+
+// MarketId is a lightweight identifier for maps and lookups
+const id = MarketId.createPerpMarket(0);
+```
+
+**`NumLib`**, number formatting utilities for converting BN values to display strings with locale support:
+
+```ts
+import { NumLib } from "@drift-labs/common-ts";
+
+// Format a BN price for display
+const displayPrice = NumLib.formatNum.toDisplayPrice(rawPriceBN);
+```
+
+**`ENUM_UTILS`**, helpers for working with Anchor/Drift enum types (the `isVariant` pattern used throughout the SDK):
+
+```ts
+import { ENUM_UTILS } from "@drift-labs/common-ts";
+
+// Check enum variants without the boilerplate
+ENUM_UTILS.match(order.orderType, "limit");
+```
+
+**Constants**, commonly used market indexes and pool IDs:
+
+```ts
+import {
+  USDC_SPOT_MARKET_INDEX,
+  SOL_SPOT_MARKET_INDEX,
+  MAIN_POOL_ID,
+} from "@drift-labs/common-ts";
+```
+
+**UI utility modules**, pre-built helpers for common UI operations:
+
+| Module | What it does |
+|---|---|
+| `MARKET_UTILS` | Market name resolution, config lookups, display formatting |
+| `ORDER_COMMON_UTILS` | Order parameter building, auction param derivation |
+| `TRADING_UTILS` | Trade execution helpers, slippage calculations |
+| `USER_UTILS` | User account formatting, position display helpers |
+
+## Data sources
+
+For real-time and historical data, Drift exposes several APIs:
+
+- **Data API**, historical data, candles, trades, market stats (`https://data.api.drift.trade`)
+- **DLOB server**, real-time orderbook and trades websocket (`https://dlob.drift.trade`)
+- **Swift**, signed message orders for fast execution (`https://swift.drift.trade`)
+
+Detailed guides:
 
 - [Reading data (API + websockets)](/developers/ecosystem-builders/reading-data)
 - [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws)
-- [drift-common (GitHub)](https://github.com/drift-labs/drift-common)
 
-### Step 2: Use drift-common UI building blocks
+## Sending actions
 
-If you want UI parity, the fastest path is `drift-common` - it contains shared UI utilities, hooks, and components used to render markets, accounts, health, and funding views. 
-
-### Step 3: Build UI models
-
-Translate protocol data into UI shapes (markets, accounts, positions, funding, health). 
-
-### Step 4: Send actions with the SDK
-
-Once the UI state is ready, use the SDK to place orders, cancel, and manage accounts:
+Once your UI state is ready, use the SDK to place orders, cancel, and manage accounts:
 
 - [Sending actions](/developers/ecosystem-builders/sending-actions)
+- [SDK Setup](/developers/drift-sdk/setup), if you need to initialize DriftClient manually (non-React apps)
 
-### Step 5: Keep parity over time
+## Staying up to date
 
-Track API changes and SDK updates, and review the official Data API docs:
-
+- [GitHub: protocol-v2](https://github.com/drift-labs/protocol-v2), watch releases for SDK breaking changes
+- [GitHub: drift-common](https://github.com/drift-labs/drift-common), shared UI packages
 - [Data API playground](/developers/data-api)
