@@ -182,27 +182,27 @@ setInterval(async () => {
   </TypeScript>
 </SDKDoc>
 
-> **Tip:** This cancel-and-replace approach sends ~2 transactions every 10 seconds. For production, consider [oracle offset orders](/developers/market-makers/normal-mm#oracle-offset-orders) which float with the oracle automatically and require only ~30 txs/day.
+> **Tip:** This cancel-and-replace approach sends ~2 transactions every 10 seconds. For production, consider [oracle offset orders](/developers/market-makers/dlob-mm#oracle-offset-orders) which float with the oracle automatically and require only ~30 txs/day.
 
 ## Next steps
 
 This basic example gets you started, but production market makers need:
 
-- **Oracle offset orders** ,  orders that automatically track oracle price, drastically reducing transactions ([Normal MM](/developers/market-makers/normal-mm#oracle-offset-orders))
-- **Inventory management** ,  adjust spread based on position size ([Normal MM](/developers/market-makers/normal-mm))
-- **Risk controls** ,  position limits, health checks, emergency cancel ([Bot Architecture](/developers/market-makers/bot-architecture))
-- **JIT participation** ,  compete in auctions for better fills ([JIT-only MM](/developers/market-makers/jit-only))
-- **Efficient subscriptions** ,  WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
-- **Multiple markets** ,  quote across markets simultaneously
+- **Oracle offset orders:** orders that automatically track oracle price, drastically reducing transactions ([DLOB MM](/developers/market-makers/dlob-mm#oracle-offset-orders))
+- **Inventory management:** adjust spread based on position size ([DLOB MM](/developers/market-makers/dlob-mm))
+- **Risk controls:** position limits, health checks, emergency cancel ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **JIT participation:** compete in auctions for better fills ([JIT-only MM](/developers/market-makers/jit-only))
+- **Efficient subscriptions:** WebSocket or gRPC for lower latency ([Bot Architecture](/developers/market-makers/bot-architecture))
+- **Multiple markets:** quote across markets simultaneously
 
 ## Common pitfalls
 
-- **Forgetting `PostOnlyParams`** ,  without it, your "maker" orders can cross the spread and execute as taker, paying fees instead of earning rebates
-- **Using `PRICE_PRECISION` wrong** ,  oracle prices are in `PRICE_PRECISION` (1e6), base amounts in `BASE_PRECISION` (1e9). Mixing them up causes orders at wildly wrong prices
-- **Not initializing user account** ,  first-time users must call `driftClient.initializeUserAccount()` before placing orders. The SDK will throw `User account not found` otherwise
-- **32-order limit** ,  each Drift subaccount supports a maximum of 32 open orders. Cancel stale orders or use multiple subaccounts for multi-market strategies
+- **Forgetting `PostOnlyParams`:** without it, your "maker" orders can cross the spread and execute as taker, paying fees instead of earning rebates
+- **Using `PRICE_PRECISION` wrong:** oracle prices are in `PRICE_PRECISION` (1e6), base amounts in `BASE_PRECISION` (1e9). Mixing them up causes orders at wildly wrong prices
+- **Not initializing user account:** first-time users must call `driftClient.initializeUserAccount()` before placing orders. The SDK will throw `User account not found` otherwise
+- **32-order limit:** each Drift subaccount supports a maximum of 32 open orders. Cancel stale orders or use multiple subaccounts for multi-market strategies
 
 For production patterns and best practices, see:
-- [Normal MM](/developers/market-makers/normal-mm) - comprehensive quoting strategies including oracle offset orders
+- [DLOB MM](/developers/market-makers/dlob-mm) - comprehensive quoting strategies including oracle offset orders
 - [Bot Architecture](/developers/market-makers/bot-architecture) - subscription loops, throttling, priority fees
 - [keeper-bots-v2 `FloatingPerpMaker`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/floatingMaker.ts) - production reference for oracle offset quoting
