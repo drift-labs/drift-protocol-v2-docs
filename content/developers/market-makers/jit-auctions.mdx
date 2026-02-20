@@ -72,6 +72,8 @@ A maker offering $100.05 would be eligible to fill starting at slot 5 (when the 
 ## Auction lifecycle
 
 **1. Taker places order**
+<SDKDoc>
+  <TypeScript name="placePerpOrder" type="method" owner="DriftClient">
 ```typescript
 await driftClient.placePerpOrder({
   orderType: OrderType.MARKET,
@@ -82,6 +84,8 @@ await driftClient.placePerpOrder({
   auctionEndPrice: oraclePrice,           // oracle
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 **2. Auction starts** ,  the order enters auction for `auctionDuration` slots. The auction price interpolates from `auctionStartPrice` toward `auctionEndPrice`.
 
@@ -105,6 +109,8 @@ await driftClient.placeAndMakePerpOrder(
 To participate in JIT auctions, bots typically:
 
 **1. Subscribe to auction feed**
+<SDKDoc>
+  <TypeScript name="AuctionSubscriber" type="class">
 ```typescript
 import { AuctionSubscriber } from "@drift-labs/sdk";
 
@@ -115,8 +121,12 @@ const auctionSubscriber = new AuctionSubscriber({
 
 await auctionSubscriber.subscribe();
 ```
+  </TypeScript>
+</SDKDoc>
 
 **2. Filter and price auctions**
+<SDKDoc>
+  <TypeScript name="getAuctionPrice" type="function">
 ```typescript
 import { getAuctionPrice, isVariant } from "@drift-labs/sdk";
 
@@ -139,6 +149,8 @@ auctionSubscriber.eventEmitter.on("onAccountUpdate", (userAccount, pubkey, slot)
   }
 });
 ```
+  </TypeScript>
+</SDKDoc>
 
 **3. Risk management**
 - **Oracle validity**: Reject if oracle is stale or invalid
@@ -155,6 +167,8 @@ The `placeAndMakePerpOrder` instruction atomically:
 
 This ensures you're credited as the maker (earning rebates) while filling the taker atomically.
 
+<SDKDoc>
+  <TypeScript name="placeAndMakePerpOrder" type="method" owner="DriftClient">
 ```typescript
 import { OrderType, PositionDirection, PostOnlyParams } from "@drift-labs/sdk";
 
@@ -176,6 +190,8 @@ const takerInfo = {
 
 await driftClient.placeAndMakePerpOrder(makerOrderParams, takerInfo);
 ```
+  </TypeScript>
+</SDKDoc>
 
 ## Multi-maker fills
 

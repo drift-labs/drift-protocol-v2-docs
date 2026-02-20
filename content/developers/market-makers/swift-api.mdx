@@ -4,22 +4,18 @@
 
 ## How SWIFT works
 
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
-
 ### Flow overview
 
-1. **Taker signs order offchain**
-   - Order signed with user's private key
-   - Broadcast to SWIFT WebSocket feed
+<Steps>
+### Taker signs order offchain
+Order is signed with the user's private key and broadcast to the SWIFT WebSocket feed.
 
-2. **Makers receive order via WebSocket**
-   - Order arrives before hitting onchain auction
-   - Makers inspect order (direction, size, auction params)
+### Makers receive order via WebSocket
+Order arrives before hitting onchain auction, and makers inspect direction, size, and auction params.
 
-3. **Makers submit place-and-make**
-   - Places maker order onchain
-   - Includes ed25519 verification instruction
-   - Fills taker atomically
+### Makers submit place-and-make
+Maker order is submitted onchain with ed25519 verification and atomically fills the taker.
+</Steps>
 
 **Key benefit:** Market makers see orders 100-500ms before they land onchain, allowing faster response times and better fills.
 
@@ -34,14 +30,12 @@ With SWIFT, the taker broadcasts the signed order offchain to the SWIFT WebSocke
 
 The tradeoff: you need fast infrastructure (dedicated RPC node, low-latency WebSocket connection) to capitalize on this advantage. If your fill tx doesn't land quickly, the latency edge is wasted.
 
-</div>
-
 ## Subscribing to SWIFT orders
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 ### Basic subscription
 
+<SDKDoc>
+  <TypeScript name="SwiftOrderSubscriber" type="class">
 ```typescript
 import { SwiftOrderSubscriber, loadKeypair } from "@drift-labs/sdk";
 
@@ -71,11 +65,15 @@ await swiftSubscriber.subscribe(
   }
 );
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### With UserAccount getter
 
 Optionally provide a `userAccountGetter` to resolve taker UserAccount details. This lets you inspect the taker's positions, collateral, and health before deciding to fill ,  useful for toxic flow filtering.
 
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
 ```typescript
 import { UserMap, loadKeypair } from "@drift-labs/sdk";
 
@@ -95,12 +93,10 @@ const swiftSubscriber = new SwiftOrderSubscriber({
   userAccountGetter: userMap,
 });
 ```
-
-</div>
+  </TypeScript>
+</SDKDoc>
 
 ## Place-and-make with SWIFT
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 SWIFT fills use a special instruction (`placeAndMakeSignedMsgPerpOrder`) that includes an ed25519 signature verification ,  proving the taker actually signed this order offchain. The SDK handles building this instruction for you.
 
@@ -108,6 +104,8 @@ For the standard onchain place-and-make pattern, see [JIT Auctions - Place-and-m
 
 ### Using DriftClient (recommended)
 
+<SDKDoc>
+  <TypeScript name="placeAndMakeSignedMsgPerpOrder" type="method" owner="DriftClient">
 ```typescript
 import {
   getLimitOrderParams,
@@ -171,11 +169,15 @@ async function fillSwiftOrder(orderMessageRaw, signedMessage, isDelegateSigner) 
   console.log("Filled SWIFT order:", txSig);
 }
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### Build instructions manually
 
 If you need more control over transaction construction (e.g., custom priority fees, specific ALTs, or bundling multiple instructions):
 
+<SDKDoc>
+  <TypeScript name="getPlaceAndMakeSignedMsgPerpOrderIxs" type="method" owner="DriftClient">
 ```typescript
 import { Transaction } from "@solana/web3.js";
 
@@ -195,14 +197,10 @@ const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
 const tx = new Transaction().add(...ixs);
 const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 ```
-
-</div>
+  </TypeScript>
+</SDKDoc>
 
 ## SWIFT vs onchain auction flow
-
-<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem'}}>
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
 
 ### SWIFT flow
 
@@ -225,10 +223,6 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 - Fast infrastructure to capitalize on latency advantage
 - Dedicated RPC node recommended
 
-</div>
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', backgroundColor: '#fafafa'}}>
-
 ### Standard onchain auction
 
 **Timeline:**
@@ -243,17 +237,11 @@ const txSig = await connection.sendTransaction(tx, [wallet.payer]);
 
 See [JIT Auctions](./jit-auctions) for full auction mechanics.
 
-</div>
-
-</div>
-
 ## Filtering and risk management
 
 Use the same filters as other JIT flows: oracle validation, position limits, and toxic-flow detection. See [Bot Architecture - Risk and filtering](./bot-architecture#risk-and-filtering) for shared patterns and code.
 
 ## Detecting SWIFT orders in onchain feeds
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 When subscribed to both SWIFT and onchain feeds, you may see the same order twice:
 1. First via SWIFT WebSocket (offchain)
@@ -261,6 +249,8 @@ When subscribed to both SWIFT and onchain feeds, you may see the same order twic
 
 Use `isSignedMsgOrder()` to identify SWIFT-origin orders and avoid double-handling:
 
+<SDKDoc>
+  <TypeScript name="isSignedMsgOrder" type="function">
 ```typescript
 import { isSignedMsgOrder } from "@drift-labs/sdk";
 
@@ -280,12 +270,10 @@ auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey,
   }
 });
 ```
-
-</div>
+  </TypeScript>
+</SDKDoc>
 
 ## Performance considerations
-
-<div style={{border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', backgroundColor: '#fafafa'}}>
 
 **Latency optimization:**
 - Use dedicated RPC nodes for fastest transaction submission
@@ -303,8 +291,6 @@ auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey,
 - SWIFT fills pay same maker rebates as regular fills
 - No additional fees for SWIFT participation
 - Transaction costs same as place-and-make
-
-</div>
 
 ## Gotchas
 

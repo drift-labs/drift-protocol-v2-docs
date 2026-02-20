@@ -242,6 +242,8 @@ ws.onmessage = (event) => {
 
 Build and maintain orderbook locally for maximum control. This subscribes directly to onchain UserAccount changes and builds the orderbook in-process, giving you the lowest latency view.
 
+<SDKDoc>
+  <TypeScript name="DLOB local setup" type="example">
 ```typescript
 import {
   DLOBSubscriber,
@@ -272,6 +274,8 @@ await dlobSubscriber.subscribe();
 const bestBid = dlobSubscriber.getBestBid(marketIndex);
 const bestAsk = dlobSubscriber.getBestAsk(marketIndex);
 ```
+  </TypeScript>
+</SDKDoc>
 
 ### Auction subscriber (JIT auctions)
 
