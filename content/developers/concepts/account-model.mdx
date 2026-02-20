@@ -6,7 +6,6 @@ This page dives deep into how Drift tracks positions, manages orders, and calcul
 
 Drift's account model is built around a few key principles:
 
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 **Key Design Principles**
 
@@ -16,13 +15,7 @@ Drift's account model is built around a few key principles:
 - **Inline orders** - Orders are stored directly in UserAccount (no separate order accounts)
 - **Account size limits** - Fixed limits (8 perp, 8 spot, 32 orders) keep transactions predictable
 
-</div>
-
 ## Position accounting
-
-<div className="doc-card-grid">
-
-<div className="doc-card">
 
 ### PerpPosition
 
@@ -41,9 +34,6 @@ Tracks long/short exposure in perpetual futures markets.
 **Liquidity provision:**
 - `lpShares` - If providing liquidity to the AMM
 
-</div>
-
-<div className="doc-card">
 
 ### SpotPosition
 
@@ -62,13 +52,8 @@ Represents deposits (positive) or borrows (negative) in spot markets.
 **Order locking:**
 - Tokens locked in open spot orders tracked separately
 
-</div>
-
-</div>
-
 ## Order mechanics
 
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 Orders are stored inline in UserAccount (no separate order accounts). Up to **32 orders per user** including both resting orders and trigger orders.
 
@@ -104,11 +89,7 @@ This gives better prices while maintaining MEV resistance. See [JIT Auctions](/d
 - `postOnly` - Order must be maker, rejected if would match immediately
 - `immediateOrCancel` - Fill what you can immediately, cancel the rest
 
-</div>
-
 ## Collateral and margin
-
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 ### Total collateral calculation
 
@@ -162,11 +143,7 @@ Health = Total Collateral / Margin Requirement
 
 When health drops below 1.0, liquidators can close your positions to bring the account back to health.
 
-</div>
-
 ## Cross-margin and subaccounts
-
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 All subaccounts under the same wallet **share collateral** for cross-margin benefits:
 
@@ -193,13 +170,8 @@ await driftClient.placePerpOrder(/* order params */); // Order goes to subaccoun
 - But they all share the same collateral/margin pool
 - Liquidation affects all subaccounts if total health drops below 1.0
 
-</div>
 
 ## State transitions
-
-<div className="doc-card-grid">
-
-<div className="doc-card">
 
 ### Deposit
 
@@ -212,10 +184,6 @@ Adds collateral to your account:
 
 *Interest starts accruing immediately on deposits*
 
-</div>
-
-<div className="doc-card">
-
 ### Withdraw
 
 Removes collateral from your account:
@@ -227,9 +195,6 @@ Removes collateral from your account:
 
 *Can't withdraw if it would make health < 1.0*
 
-</div>
-
-<div className="doc-card">
 
 ### Place order
 
@@ -243,9 +208,6 @@ Adds a new order to your account:
 
 *Order appears on DLOB immediately*
 
-</div>
-
-<div className="doc-card">
 
 ### Order fill
 
@@ -259,10 +221,6 @@ When an order matches:
 
 *Filled orders remain for history tracking*
 
-</div>
-
-<div className="doc-card">
-
 ### Settle PnL
 
 Converts unrealized perp PnL to realized:
@@ -274,9 +232,6 @@ Converts unrealized perp PnL to realized:
 
 *Required before withdrawing perp profits*
 
-</div>
-
-<div className="doc-card">
 
 ### Liquidation
 
@@ -290,19 +245,10 @@ When health < 1.0, liquidators can:
 
 *Partial liquidations are common*
 
-</div>
-
-</div>
-
 ## Account size limits
-
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 Drift enforces fixed limits to keep account size manageable and transaction costs predictable:
 
-<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginTop: '1rem'}}>
-
-<div>
 
 **Perp positions**
 
@@ -310,29 +256,17 @@ Maximum: **8 positions**
 
 Opening a 9th market fails unless you close an existing position first.
 
-</div>
-
-<div>
-
 **Spot positions**
 
 Maximum: **8 positions**
 
 Includes both deposits and borrows across all spot markets.
 
-</div>
-
-<div>
-
 **Orders**
 
 Maximum: **32 orders**
 
 Includes both resting orders and trigger orders combined.
-
-</div>
-
-</div>
 
 **Why limits?**
 - Keeps account data size predictable
@@ -344,8 +278,6 @@ Includes both resting orders and trigger orders combined.
 - Use multiple subaccounts for more positions
 - Each subaccount has its own 8/8/32 limits
 - Still shares margin across all subaccounts
-
-</div>
 
 ## Related
 

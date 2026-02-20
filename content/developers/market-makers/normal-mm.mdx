@@ -19,9 +19,6 @@ Post-only flags ensure your order is never executed as a taker (which would cost
 
 **Recommendation:** Use `MUST_POST_ONLY` for all quotes. If the order would cross (e.g., oracle moved), you'd rather cancel and re-quote at the new price than accidentally take.
 
-<details>
-<summary>View OrderParams import</summary>
-
 <SDKDoc>
   <TypeScript name="OrderParams" type="class">
 ```js
@@ -29,8 +26,6 @@ import { OrderParams } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
-
-</details>
 
 
 <SDKDoc>

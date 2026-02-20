@@ -192,6 +192,15 @@ const META = {
     "title": "Developers",
     "type": "page",
     "items": {
+      "concepts": {
+        "title": "Concepts",
+        "items": {
+          "index": "",
+          "architecture": "",
+          "program-structure": "",
+          "account-model": ""
+        }
+      },
       "drift-sdk": {
         "title": "Drift SDK",
         "items": {
@@ -218,14 +227,6 @@ const META = {
         "items": {
           "index": "",
           "glossary": ""
-        }
-      },
-      "concepts": {
-        "title": "Concepts",
-        "items": {
-          "index": "",
-          "program-structure": "",
-          "account-model": ""
         }
       },
       "--- guides": {
@@ -290,12 +291,6 @@ const META = {
           "orderbook-and-ws": "",
           "sending-actions": ""
         },
-      },
-      "architecture": {
-        "title": "Architecture",
-        "items": {
-          "index": ""
-        }
       },
       "builder-codes": "Builder Codes",
       "--- Contribute": {

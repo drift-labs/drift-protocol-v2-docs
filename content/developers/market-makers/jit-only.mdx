@@ -23,9 +23,6 @@ A JIT-only bot follows this loop:
 
 The `AuctionSubscriber` gives you a stream of active JIT auctions. Use `commitment: "processed"` for lowest latency.
 
-<details>
-<summary>View AuctionSubscriber import</summary>
-
 <SDKDoc>
   <TypeScript name="AuctionSubscriber" type="class">
 ```js
@@ -34,7 +31,6 @@ import { AuctionSubscriber } from "@drift-labs/sdk";
   </TypeScript>
 </SDKDoc>
 
-</details>
 
 ```typescript
 import { AuctionSubscriber } from "@drift-labs/sdk";
@@ -48,9 +44,6 @@ await auctionSubscriber.subscribe();
 
 For even lower latency, subscribe to [SWIFT](./swift-api) to receive signed taker orders 100-500ms before they land onchain.
 
-<details>
-<summary>View OrderSubscriber import</summary>
-
 <SDKDoc>
   <TypeScript name="OrderSubscriber" type="class">
 ```js
@@ -58,8 +51,6 @@ import { OrderSubscriber } from "@drift-labs/sdk";
 ```
   </TypeScript>
 </SDKDoc>
-
-</details>
 
 ## Compute auction prices (helpers)
 

@@ -3,12 +3,9 @@
 Core concepts for understanding Drift's onchain architecture. Language-agnostic fundamentals that apply to all SDKs.
 
 ## Understanding Drift's Onchain Model
+These pages explain how Drift's Solana program works at the account level. Understanding these concepts helps you build better integrations, debug issues, and optimize performance.
 
-<div className="doc-card-grid">
-
-<div className="doc-card">
-
-### [Program Structure](./program-structure)
+### Program Structure
 
 **High-level overview of Drift's account architecture**
 
@@ -18,14 +15,12 @@ Learn about the different account types that make up the protocol:
 - User accounts & stats
 - PDAs and account relationships
 
-*Start here to understand what accounts exist and their purpose.*
+<Cards.Card
+title="Understand how trading actually works onchain ↗"
+href="/developers/concepts/program-structure"
+/>
 
-</div>
-
-<div className="doc-card">
-
-### [Account Model](./account-model)
-
+### Account Model
 **Deep dive into positions, orders, and calculations**
 
 Understand the mechanics of trading:
@@ -34,13 +29,10 @@ Understand the mechanics of trading:
 - Collateral and margin calculations
 - Cross-margin accounting
 
-*Read this to understand how trading actually works onchain.*
-
-</div>
-
-</div>
-
-These pages explain how Drift's Solana program works at the account level. Understanding these concepts helps you build better integrations, debug issues, and optimize performance.
+<Cards.Card
+title="Understand what accounts exist and their purpose ↗"
+href="/developers/concepts/account-model"
+/>
 
 ## Related Resources
 

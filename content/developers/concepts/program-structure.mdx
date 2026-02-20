@@ -8,8 +8,6 @@ Drift uses several account types, each serving a specific purpose:
 
 ### State account
 
-<div className="doc-card" style={{marginBottom: '2rem'}}>
-
 **Single global account** holding protocol-wide configuration:
 
 - **Oracle guards** - Stale price thresholds and validity checks
@@ -21,7 +19,7 @@ Drift uses several account types, each serving a specific purpose:
 *The State account is a singleton, there's only one per deployment. It's read by almost every instruction to apply protocol-level rules.*
 
 <details>
-<summary>View TypeScript interface (other SDKs use equivalent structures with the same field names)</summary>
+<summary>View TypeScript interface</summary>
 
 ```typescript
 interface State {
@@ -52,13 +50,8 @@ interface State {
 
 </details>
 
-</div>
-
 ### Market accounts
 
-<div className="doc-card-grid">
-
-<div className="doc-card">
 
 **PerpMarketAccount**
 *One per perp market*
@@ -108,9 +101,6 @@ interface PerpMarketAccount {
 
 </details>
 
-</div>
-
-<div className="doc-card">
 
 **SpotMarketAccount**
 *One per spot market*
@@ -184,17 +174,10 @@ interface SpotMarketAccount {
 
 </details>
 
-</div>
-
-</div>
 
 Markets are identified by numeric indices (market 0, market 1, etc.). The SDK caches market accounts for fast lookups.
 
 ### User accounts
-
-<div className="doc-card-grid">
-
-<div className="doc-card">
 
 **UserAccount**
 *Holds all trading state for a specific subaccount*
@@ -241,9 +224,6 @@ interface UserAccount {
 
 </details>
 
-</div>
-
-<div className="doc-card">
 
 **UserStatsAccount**
 *Tracks aggregated stats across all subaccounts*
@@ -281,15 +261,10 @@ interface UserStatsAccount {
 
 </details>
 
-</div>
-
-</div>
 
 Users are PDAs derived from: `[authority, subaccount_id]`. Each wallet can have multiple subaccounts (0, 1, 2...) sharing cross-margin.
 
 ### Order accounting
-
-<div className="doc-card" style={{marginBottom: '2rem'}}>
 
 Orders are stored directly in the **UserAccount**, not as separate accounts. This design reduces transaction overhead and allows up to 32 orders per user.
 
@@ -336,8 +311,6 @@ interface Order {
 ```
 
 </details>
-
-</div>
 
 ## PDAs (Program Derived Addresses)
 
