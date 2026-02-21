@@ -263,21 +263,9 @@ const META = {
             "items": {
               "order-matching-bot": "",
               "order-trigger-bot": "",
-              "liquidation-bot": ""
+              "liquidation-bot": "",
+              "jit-maker-bot": ""
             }
-          },
-          "trading-bots": {
-            "title": "Trading Bots",
-            "items": {
-              "index": "",
-              "jit-trading-bot": ""
-            }
-          },
-          "liquidator-bots": {
-            "title": "Liquidator Bots",
-            "items": {
-              "index": "",
-            },
           },
           "rpc-providers": "",
           "troubleshooting": ""
