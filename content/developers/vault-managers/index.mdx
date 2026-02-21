@@ -22,6 +22,10 @@ Each vault has its own Drift user account that the manager trades with. The mana
 
 ## Managing vaults
 
+<Callout type="info" title="Get your vault listed">
+Reach out to `@wdotsol` on Telegram or [fill in this form](https://docs.google.com/forms/d/e/1FAIpQLSeC64AEy84bQfBquJLc5cWAv2HxslnK0Aik4ezMf9Ubh-hK5g/viewform) to get your vault listed on the Drift UI.
+</Callout>
+
 ### Step 1: Understand roles and lifecycle
 
 - **Manager/delegate**: trades for the vault, updates allowed parameters, collects fees.
@@ -113,6 +117,10 @@ See the drift-vaults CLI for the full command list and flags.
 ## Trusted vaults
 
 Trusted vaults extend the base vault with **manager borrowing** and (when enabled) margin trading. They are created like a normal vault; an admin must then update the vault class to Trusted. Once upgraded, the manager can borrow assets from the vault and repay or mark-to-market the borrow.
+
+<Callout type="warning" title="Approval required">
+Trusted vaults must be approved by the Drift team before they can be used in production.
+</Callout>
 
 <Callout type="warning" title="Trust and risk">
 Vault depositors in Trusted vaults place significant trust in the manager. Borrowing and margin increase the manager's ability to move or risk vault capital. Depositors should only use Trusted vaults when they accept this additional trust assumption.
