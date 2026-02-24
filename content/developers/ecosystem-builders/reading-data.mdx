@@ -1,19 +1,215 @@
 # Reading Data
 
-This page covers the core data sources used by Drift UI so external builders can mirror the same state.
+This page covers every way to read Drift state in your app -- from the high-level `AuthorityDrift` caches (what `drift-ui-template` uses) to the raw Data API REST endpoints.
 
-## Data API overview
+## Account data via AuthorityDrift
 
-The Data API provides historical and aggregate data via simple REST endpoints. No authentication required.
+Once `AuthorityDrift` is subscribed (see [setup](/developers/ecosystem-builders#setup)), user account data flows through the `userAccountCache` as `EnhancedAccountData` objects. Each object contains pre-computed positions, orders, balances, and margin info for a single subaccount.
+
+### Get the active account
+
+```ts
+import { UserAccountCache, EnhancedAccountData } from "@drift-labs/common";
+
+const accountKey = UserAccountCache.getUserAccountKey(subAccountId, authority);
+const account: EnhancedAccountData = userAccountLookup[accountKey];
+```
+
+`EnhancedAccountData` contains:
+
+| Field | Type | What it gives you |
+|---|---|---|
+| `subAccountId` | `number` | Subaccount index |
+| `authority` | `PublicKey` | Wallet that owns this account |
+| `name` | `string` | User-assigned account name |
+| `poolId` | `number` | Pool the account belongs to |
+| `openPerpPositions` | `PerpPositionInfo[]` | Active perp positions with PnL, liquidation price, funding |
+| `openOrders` | `UISerializableOrder[]` | Open orders with price, size, type, flags |
+| `spotBalances` | `SpotBalanceInfo[]` | Spot token balances per market |
+| `marginInfo` | `AccountMarginInfo` | Net USD value, leverage, health |
+
+### Positions
+
+`account.openPerpPositions` is an array of `PerpPositionInfo` objects. Each position includes everything you need for a positions table:
+
+```ts
+import { PerpPositionInfo, ENUM_UTILS, TRADING_UTILS, MarketId } from "@drift-labs/common";
+import { PositionDirection } from "@drift-labs/sdk";
+
+for (const position of account.openPerpPositions) {
+  const isLong = ENUM_UTILS.match(position.direction, PositionDirection.LONG);
+
+  position.marketIndex;                                    // market index
+  position.baseSize.prettyPrint();                         // "1.5" SOL
+  position.notionalSize.toNotional();                      // "$150.00"
+  position.entryPrice.toNotional();                        // "$100.00"
+  position.liquidationPrice.toNotional();                  // "$85.00"
+
+  // PnL breakdown
+  position.positionPnl.markBased.positionNotionalPnl;      // BigNum, unrealized PnL
+  position.positionPnl.markBased.positionPnlPercentage;    // number, e.g. 12.5
+  position.feesAndFundingPnl;                              // BigNum, cumulative fees + funding
+  position.costBasis;                                      // BigNum
+  position.quoteBreakEvenAmount;                           // BigNum
+
+  // Settlement
+  position.totalUnsettledPnl;                              // BigNum, unsettled PnL
+  position.totalClaimablePnl;                              // BigNum, claimable now
+  position.totalSettledPnl;                                // BigNum, already settled
+}
+```
+
+Use `TRADING_UTILS.getMarketTickSizeDecimals(driftClient, marketId)` to determine the right number of decimal places for price display.
+
+### Open orders
+
+`account.openOrders` is an array of `UISerializableOrder` objects:
+
+```ts
+import { UISerializableOrder, COMMON_UI_UTILS, TRADING_UTILS, ENUM_UTILS } from "@drift-labs/common";
+import { PositionDirection } from "@drift-labs/sdk";
+
+for (const order of account.openOrders) {
+  order.orderId;
+  order.marketIndex;
+  order.direction;               // PositionDirection enum
+  order.price;                   // BigNum, limit price (zero for market orders)
+  order.triggerPrice;            // BigNum, trigger price for stop/take-profit
+  order.baseAssetAmount;         // BigNum, total size
+  order.baseAssetAmountFilled;   // BigNum, filled so far
+  order.oraclePriceOffset;       // BN, offset from oracle for oracle orders
+  order.reduceOnly;              // boolean
+  order.postOnly;                // boolean
+  order.immediateOrCancel;       // boolean
+
+  // Human-readable order type label
+  const label = COMMON_UI_UTILS.getUIOrderTypeFromSdkOrderType(
+    order.orderType,
+    order.triggerCondition,
+    order.direction,
+    order.oraclePriceOffset,
+  ).label;  // e.g. "Limit", "Stop Market", "Oracle Limit"
+
+  // Check if order covers the entire position
+  const isEntirePosition = TRADING_UTILS.isEntirePositionOrder(order.baseAssetAmount);
+}
+```
+
+### Spot balances and collateral
+
+`account.spotBalances` contains a `SpotBalanceInfo` entry for each spot market the user has a balance in:
+
+```ts
+for (const balance of account.spotBalances) {
+  balance.marketIndex;
+  balance.baseBalance;  // BigNum, token amount in market precision
+}
+```
+
+For total account collateral, use `marginInfo`:
+
+```ts
+account.marginInfo.netUsdValue.toNotional();  // "$1,234.56"
+```
+
+## Market data via AuthorityDrift
+
+### Oracle and mark prices
+
+After subscribing, `AuthorityDrift` exposes price caches and emits updates via callbacks:
+
+```ts
+// One-time read from cache
+const oraclePrices = drift.oraclePriceCache;   // Record<MarketKey, OraclePriceData>
+const markPrices = drift.markPriceCache;        // Record<MarketKey, MarkPriceData>
+
+// Continuous updates
+drift.onOraclePricesUpdate((lookup) => { /* OraclePriceLookup */ });
+drift.onMarkPricesUpdate((lookup) => { /* MarkPriceLookup */ });
+```
+
+Each `MarkPriceData` entry contains `markPrice`, `bestBid`, `bestAsk`, and `lastUpdateSlot` (all `BN` values).
+
+In React, use `useOraclePriceStore` from `@drift-labs/react`:
+
+```tsx
+import { useOraclePriceStore } from "@drift-labs/react";
+import { MarketId } from "@drift-labs/common";
+
+const priceData = useOraclePriceStore((s) =>
+  s.getMarketPriceData(MarketId.createPerpMarket(0))
+);
+```
+
+### Orderbook
+
+`AuthorityDrift` manages an L2 orderbook via DLOB websocket. Read the current snapshot and subscribe to updates:
+
+```ts
+import { L2WithOracleAndMarketData, DEFAULT_ORDERBOOK_GROUPING } from "@drift-labs/common";
+
+const currentBook: L2WithOracleAndMarketData = drift.orderbookCache;
+// currentBook.bids, currentBook.asks, currentBook.bestBidPrice, currentBook.bestAskPrice
+
+const subscription = drift.onOrderbookUpdate((newBook) => {
+  // L2WithOracleAndMarketData with updated bids/asks
+});
+
+// Change price grouping
+drift.orderbookManager.updateSubscription({
+  marketId: MarketId.createPerpMarket(0),
+  grouping: 10,  // OrderbookGrouping multiplier
+});
+
+// Cleanup
+subscription.unsubscribe();
+```
+
+For lower-level orderbook access (REST snapshots, raw websocket), see [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
+
+### Candle charts
+
+`CandleClient` from `@drift-labs/common` fetches historical OHLCV data and streams live updates:
+
+```ts
+import { CandleClient, MarketId, UIEnv, JsonCandle } from "@drift-labs/common";
+
+const candleClient = new CandleClient();
+const env = UIEnv.createMainnet();
+
+// Fetch historical candles
+const candles: JsonCandle[] = await candleClient.fetch({
+  env,
+  marketId: MarketId.createPerpMarket(0),
+  resolution: "15",   // CandleResolution: "1", "5", "15", "60", "240", "1440"
+  fromTs: Math.floor(Date.now() / 1000) - 86400,
+  toTs: Math.floor(Date.now() / 1000),
+});
+
+// Each candle: { ts, fillOpen, fillHigh, fillLow, fillClose, baseVolume }
+
+// Subscribe to live updates
+const key = "sol-perp-15m";
+await candleClient.subscribe({ env, marketId: MarketId.createPerpMarket(0), resolution: "15" }, key);
+
+candleClient.on(key, "candle-update", (candle: JsonCandle) => {
+  // Update your chart with the new/updated candle
+});
+
+// Cleanup
+candleClient.unsubscribe(key);
+```
+
+## Data API (REST)
+
+The Data API provides historical and aggregate data via REST endpoints. No authentication required. Use this for dashboards, analytics, or any non-SDK integration.
 
 - Base URL: `https://data.api.drift.trade`
 - [Data API playground](/developers/data-api)
 
-## REST endpoints
-
 ### Market stats
 
-Returns aggregate stats for all markets ,  volume, open interest, funding rate, oracle price, and market status.
+Returns aggregate stats for all markets -- volume, open interest, funding rate, oracle price, and market status.
 
 ```
 GET https://data.api.drift.trade/stats/markets
@@ -69,9 +265,9 @@ GET https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100
 ```
 
 Query parameters:
-- `symbol` ,  Market symbol (required)
-- `limit` ,  Max results (default varies, max typically 1000)
-- `pageIndex` ,  For pagination
+- `symbol` -- Market symbol (required)
+- `limit` -- Max results (default varies, max typically 1000)
+- `pageIndex` -- For pagination
 
 Response shape:
 ```json
@@ -97,12 +293,11 @@ Response shape:
 
 Note: Amounts are in protocol precision (base: 1e9, quote: 1e6). Divide accordingly for human-readable values.
 
-## Fetching data in code
+### Fetching data in code
 
 <SDKDoc>
   <TypeScript name="fetch" type="function">
 ```js
-// Fetch market stats for a dashboard
 const marketsRes = await fetch("https://data.api.drift.trade/stats/markets");
 const markets = await marketsRes.json();
 
@@ -110,19 +305,15 @@ for (const m of markets) {
   console.log(`${m.symbol}: price=${m.oraclePrice} OI=${m.openInterest} funding=${m.fundingRate}`);
 }
 
-// Fetch recent trades for a market
 const tradesRes = await fetch(
   "https://data.api.drift.trade/trades?symbol=SOL-PERP&limit=100"
 );
 const trades = await tradesRes.json();
-console.log(`Got ${trades.length} trades`);
 
-// Fetch funding rate history
 const fundingRes = await fetch(
   "https://data.api.drift.trade/fundingRates?symbol=SOL-PERP"
 );
 const fundingRates = await fundingRes.json();
-console.log(`Funding rate entries: ${fundingRates.length}`);
 ```
   </TypeScript>
 </SDKDoc>
@@ -137,11 +328,10 @@ The Data API also supports websocket subscriptions for live candles and trades:
 const ws = new WebSocket("wss://data.api.drift.trade/ws");
 
 ws.onopen = () => {
-  // Subscribe to 1-minute candles for SOL-PERP
   ws.send(JSON.stringify({
     type: "subscribe",
     symbol: "SOL-PERP",
-    resolution: "1"  // 1-minute candles
+    resolution: "1"
   }));
 };
 
@@ -161,5 +351,5 @@ ws.onerror = (error) => {
 
 For real-time orderbook and order flow, Drift uses separate services:
 
-- **DLOB server** (`https://dlob.drift.trade`) ,  Orderbook snapshots and streaming. See [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
-- **Swift server** (`https://swift.drift.trade`) ,  Signed message orders for fast execution.
+- **DLOB server** (`https://dlob.drift.trade`) -- Orderbook snapshots and streaming. See [Orderbook + DLOB websocket](/developers/ecosystem-builders/orderbook-and-ws).
+- **Swift server** (`https://swift.drift.trade`) -- Signed message orders for fast execution.
