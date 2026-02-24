@@ -196,7 +196,6 @@ const META = {
         "title": "Concepts",
         "items": {
           "index": "",
-          "architecture": "",
           "program-structure": "",
           "account-model": ""
         }
