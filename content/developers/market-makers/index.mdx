@@ -62,9 +62,27 @@ React to incoming taker orders during JIT auctions without maintaining resting o
   href="/developers/market-makers/jit-only"
 />
 
+### SWIFT Market Making
+
+**Offchain JIT market making via signed order delivery**
+
+Receive signed taker orders over WebSocket before they hit the onchain auction. SWIFT is essentially an offchain JIT flow: takers sign their order and broadcast it offchain, and makers can fill it before or as the auction opens. Capital is only deployed when you choose to fill.
+
+**Best for:**
+- Makers who want earlier visibility into taker flow
+- Competitive auction environments
+- Flow selection with more time to decide
+
+<Cards.Card
+  title="Understand SWIFT market making ↗"
+  href="/developers/market-makers/swift-api"
+/>
+
+## Production
+
 ### Bot Architecture
 
-Production patterns and best practices for building reliable market making bots. Covers priority fees, health monitoring, graceful shutdown, error handling, and operational considerations.
+Production patterns and best practices for building reliable market making bots. Covers subscription loops, priority fees, health monitoring, graceful shutdown, error handling, and operational considerations. Applies to all strategies.
 
 <Cards.Card
   title="Understand bot architecture ↗"
