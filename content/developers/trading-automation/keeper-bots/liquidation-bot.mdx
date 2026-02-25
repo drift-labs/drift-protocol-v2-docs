@@ -12,26 +12,29 @@ For more information on our liquidation system, please read [Liquidations](/prot
 
 ## Getting Started
 
-### Step 1: Understand liquidation mechanics
+<Steps>
+### Understand liquidation mechanics
 
-Liquidations transfer liability from the liquidated account to the liquidator.
+Liquidations transfer liability from the liquidated account to the liquidator. The liquidator receives the liquidatee's position at a discount in exchange for taking on the risk. Because you inherit real positions, you need sufficient collateral to cover initial margin requirements.
 
-### Step 2: Choose a reference implementation
+### Choose a reference implementation
 
 The canonical implementations in `keeper-bots-v2` are:
 
 - [`src/bots/liquidator.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/liquidator.ts)
 - [`src/bots/liquidatorDerisk.ts`](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/liquidatorDerisk.ts) (derisk helper)
 
-### Step 3: Prepare the environment
+The full source is the best reference for implementation details — it handles user scanning, margin checks, and derisk logic.
+
+### Prepare the environment
 
 Follow the base keeper setup first:
 
 - [Keeper Bots](/developers/trading-automation/keeper-bots)
 
-Liquidator bots require collateral. Make sure the wallet is funded and has USDC deposited.
+Liquidator bots require collateral. Make sure the wallet is funded and has USDC deposited before starting.
 
-### Step 4: Run and tune
+### Run and tune
 
 Run the liquidator bot via your `keeper-bots-v2` config and monitor:
 
@@ -39,13 +42,14 @@ Run the liquidator bot via your `keeper-bots-v2` config and monitor:
 - Competing liquidators
 - Position risk and exposure
 
-### Step 5: Iterate and harden
+### Iterate and harden
 
 Common improvements include:
 
 - Filtering markets or subaccounts
 - Using derisk strategies
 - Adding guardrails for exposure and max size
+</Steps>
 
 ## Advanced
 

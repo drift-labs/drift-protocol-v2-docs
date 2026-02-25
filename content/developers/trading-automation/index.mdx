@@ -1,13 +1,14 @@
 # Trading Automation
 
-Trading Automation covers both **trading workflows** (SDK-first integrations) and **bots** (automation and keepers). It’s the single home for the trader/bot target group.
+Trading Automation covers both **trading workflows** (SDK-first integrations) and **bots** (automation and keepers). It's the single home for the trader/bot target group.
 
 - **Keeper bots**: protocol maintenance (matching, triggers, liquidations).
 - **Trading bots**: profit-seeking strategies (e.g. JIT market making).
 
-The reference implementation for keeper bots lives in [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2), and most examples below follow that repo’s config + entrypoint pattern.
+The reference implementation for keeper bots lives in [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2), and most examples below follow that repo's config + entrypoint pattern.
 
-### Step 1: Pick your path
+<Steps>
+### Pick your path
 
 **Trading workflows (SDK-first)**:
 
@@ -27,14 +28,14 @@ The reference implementation for keeper bots lives in [keeper-bots-v2](https://g
 | :------------ | :--------- | :--------------- | :------ | ----------------------------------------------------------------------- |
 | JIT Maker Bot | Advanced   | Yes              | TBD     | [Tutorial: JIT Maker Bot](/developers/trading-automation/keeper-bots/jit-maker-bot) |
 
-### Step 2: Prepare environment + wallet
+### Prepare environment + wallet
 
 All bots require a funded wallet for fees, and some require collateral. Use a bot wallet setup, and keep the keypair secure:
 
 - [Bot wallet setup](/protocol/getting-started/wallet-setup/bot-wallet-setup)
 - [RPC providers](/developers/trading-automation/rpc-providers)
 
-### Step 3: Configure the bot
+### Configure the bot
 
 `keeper-bots-v2` uses a YAML config (see `example.config.yaml` in the repo). At minimum, set:
 
@@ -42,7 +43,7 @@ All bots require a funded wallet for fees, and some require collateral. Use a bo
 - `global.keeperPrivateKey` (keypair or env var)
 - `enabledBots` + corresponding `botConfigs`
 
-### Step 4: Initialize a Drift user (if needed)
+### Initialize a Drift user (if needed)
 
 Bots that place orders or manage positions require a Drift user account. In `keeper-bots-v2`, you can use the built-in flag:
 
@@ -50,7 +51,7 @@ Bots that place orders or manage positions require a Drift user account. In `kee
 yarn run dev --init-user
 ```
 
-### Step 5: Run and monitor
+### Run and monitor
 
 Start the process with your config:
 
@@ -60,8 +61,9 @@ yarn run dev --config-file=example.config.yaml
 
 Monitor logs for resubscribe messages and track your RPC latency. Some deployments also expose Prometheus metrics.
 
-### Step 6: Troubleshoot common issues
+### Troubleshoot common issues
 
 Common issues (missing USDC ATA, user not initialized, RPC limits) are covered in:
 
 - [Troubleshooting](/developers/trading-automation/troubleshooting)
+</Steps>

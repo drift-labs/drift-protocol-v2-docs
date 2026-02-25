@@ -24,23 +24,24 @@ Matching Bots are similar to [Tutorial: Order Trigger Bot](/developers/trading-a
 
 The reference implementation of the Order Matching Bot is available [here](https://github.com/drift-labs/keeper-bots-v2/blob/master/src/bots/filler.ts).
 
-Follow the instructions at [Keeper Bots](/protocol/about-v3/keepers) to set the required environment variables and make sure a `ClearingHouseUser` is initialized.
+Follow [Keeper Bots](/developers/trading-automation/keeper-bots) to set required environment variables and initialize a Drift user account.
 
 Start the Matching Bot:
 
-```shell
+```shell copy
 yarn run dev:filler
 ```
 
 ## Technical Explanation
 
-### Step 1: Get nodes from the DLOB that are ready to be filled
+The matching bot runs a continuous loop: fetch fillable orders from the DLOB, filter out non-actionable ones, and submit fill transactions to earn keeper rewards.
 
-Market orders that are sent on the Drift Protocol first go through the [Just-In-Time (JIT) Auctions](/protocol/about-v3/matching-engine). After the auction period, Matching Bots step in to fill orders for a small reward.
+<Steps>
+### Get nodes from the DLOB that are ready to be filled
 
-The DLOB implementation includes a method for getting orders ready to be filled:
+Market orders first go through [JIT Auctions](/protocol/about-v3/matching-engine). After the auction period ends, they become available for matching bots to fill. The DLOB exposes a `findNodesToFill` method that returns these eligible orders, using the current virtual bid/ask and oracle price to determine which orders can be matched.
 
-```typescript
+```typescript copy
 const market = this.clearingHouse.getMarketAccounts()[0]; // get a MarketAccount
 
 const oraclePriceData = this.driftClient.getOracleDataForMarket(marketIndex);
@@ -63,11 +64,11 @@ const nodesToFill = this.dlob.findNodesToFill(
 );
 ```
 
-### Step 2: Filter for fillable nodes
+### Filter for fillable nodes
 
-To avoid trying to fill orders that aren't ready to be filled, filter out orders that are too small to fill
+Not every node returned is profitable to attempt. Filter out limit orders that are too small for the AMM to execute — submitting a fill for these would waste transaction fees and fail on-chain.
 
-```typescript
+```typescript copy
 if (
     !nodeToFill.makerNode &&
     (isVariant(nodeToFill.node.order.orderType, "limit") ||
@@ -89,9 +90,11 @@ if (
 }
 ```
 
-### Step 3: Call `fill_order` on `DriftClient`
+### Call `fill_order` on `DriftClient`
 
-```typescript
+Submit the fill transaction. On success, the keeper earns a small reward. Expect occasional failures from competing bots filling the same order — handle errors gracefully and continue to the next node.
+
+```typescript copy
 const user = this.userMap.get(nodeToFill.node.userAccount.toString());
 const txSig = await this.driftClient.fillOrder(
     nodeToFill.node.userAccount,
@@ -100,3 +103,4 @@ const txSig = await this.driftClient.fillOrder(
     undefined
 );
 ```
+</Steps>

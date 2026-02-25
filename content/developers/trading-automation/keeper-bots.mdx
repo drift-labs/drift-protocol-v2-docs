@@ -13,21 +13,21 @@ _Note: all bots require some SOL for rent and transaction fees._
 
 Reference implementations live in [keeper-bots-v2](https://github.com/drift-labs/keeper-bots-v2).
 
-### Step 1: Clone the repo and choose a branch
+<Steps>
+### Clone the repo and choose a branch
 
-Pick a branch that matches your cluster:
+Pick a branch that matches your cluster. Note: in this repo, `master` tracks **devnet** (not mainnet-beta).
 
 | Branch Name   | Cluster      |
 | ------------ | ------------ |
 | master       | devnet       |
-| devnet       | devnet       |
 | mainnet-beta | mainnet-beta |
 
 ```shell copy
-git clone https://github.com/drift-labs/keeper-bots-v2 -b devnet
+git clone https://github.com/drift-labs/keeper-bots-v2 -b mainnet-beta
 ```
 
-### Step 2: Configure environment + YAML config
+### Configure environment + YAML config
 
 Copy the env template and set required values:
 
@@ -47,7 +47,7 @@ The repo uses a YAML config for bot selection and per-bot settings. Start from `
 - `global.keeperPrivateKey` (or env var)
 - `enabledBots` + `botConfigs`
 
-### Step 3: Initialize a Drift user (if needed)
+### Initialize a Drift user (if needed)
 
 Bots that place orders or manage positions require a Drift user account. The repo provides a helper flag:
 
@@ -63,7 +63,7 @@ if (!(await driftClient.getUser().exists())) {
 }
 ```
 
-### Step 4: Deposit collateral (if needed)
+### Deposit collateral (if needed)
 
 Required for liquidators and JIT makers that keep open positions:
 
@@ -72,8 +72,9 @@ Required for liquidators and JIT makers that keep open positions:
 yarn run dev --force-deposit 10000
 ```
 
-### Step 5: Run the bots
+### Run the bots
 
 ```shell copy
 yarn run dev --config-file=example.config.yaml
 ```
+</Steps>
