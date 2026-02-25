@@ -62,17 +62,14 @@ const spot = driftClient.convertToSpotPrecision(0, 100); // 100 USDC as BN
 
 ## Token Math Helpers
 
+Spot balances are stored as interest-bearing scaled values. These helpers convert them to actual token amounts.
+
+`getTokenAmount` converts a raw scaled spot balance into a token amount, accounting for accumulated interest since the last update. Pass the user's `scaledBalance`, the spot market account (which contains the cumulative interest index), and the balance type (deposit or borrow).
+
 <SDKDoc>
   <TypeScript name="getTokenAmount" type="function">
 ```js
 import { getTokenAmount, SpotBalanceType, convertToNumber } from "@drift-labs/sdk";
-
-// getTokenAmount converts a raw scaled balance into a token amount,
-// accounting for cumulative interest.
-// Params:
-//   balanceAmount: BN - the raw balance from the user's spot position
-//   spotMarket: SpotMarketAccount - the spot market account (has interest data)
-//   balanceType: SpotBalanceType - DEPOSIT or BORROW
 
 const spotMarket = driftClient.getSpotMarketAccount(0); // e.g. USDC
 const user = driftClient.getUser();
@@ -88,15 +85,12 @@ console.log("Token amount:", tokenAmount.toString());
   </TypeScript>
 </SDKDoc>
 
+`getSignedTokenAmount` wraps `getTokenAmount` to return a signed value: positive for deposits, negative for borrows. Use this when you need to distinguish between the two in a single number.
+
 <SDKDoc>
   <TypeScript name="getSignedTokenAmount" type="function">
 ```js
 import { getTokenAmount, getSignedTokenAmount } from "@drift-labs/sdk";
-
-// getSignedTokenAmount returns a positive BN for deposits, negative for borrows.
-// Params:
-//   tokenAmount: BN - from getTokenAmount()
-//   balanceType: SpotBalanceType - DEPOSIT or BORROW
 
 const spotMarket = driftClient.getSpotMarketAccount(0);
 const spotPosition = driftClient.getUser().getUserAccount().spotPositions[0];
