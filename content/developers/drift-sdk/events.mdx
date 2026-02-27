@@ -1,14 +1,53 @@
 # Events
 
-Protocol events are emitted in transaction logs. The SDK provides an `EventSubscriber` that can listen, deserialize, and emit events to your app.
+Protocol events are emitted in transaction logs. The SDK provides an `EventSubscriber` that can listen, deserialize, and emit events to your app in real-time.
 
-<SDKDoc>
-  <TypeScript name="EventSubscriber" type="class">
+## Event Types
+
+| Event Type | Description |
+|---|---|
+| `DepositRecord` | A user depositing or withdrawing funds from the protocol |
+| `FundingPaymentRecord` | A user paying or receiving funding payments |
+| `LiquidationRecord` | A user being liquidated |
+| `OrderRecord` | A user placing an order (includes all order parameters) |
+| `OrderActionRecord` | A user action on an order: place, cancel, or fill |
+| `FundingRateRecord` | The funding rate changing for a market |
+| `NewUserRecord` | A new user account being created |
+| `SettlePnlRecord` | A user settling their perp PnL |
+| `LPRecord` | A user adding or removing passive perp liquidity |
+| `InsuranceFundRecord` | The insurance fund balance changing |
+| `SpotInterestRecord` | Spot interest accruing |
+| `InsuranceFundStakeRecord` | A user staking or unstaking from the insurance fund |
+| `CurveRecord` | The AMM curve parameters updating |
+| `SwapRecord` | A Jupiter swap being executed through Drift |
+
+## Subscribing to Events
+
+Create an `EventSubscriber` and pass the event types you want to receive. The `newEvent` emitter fires for every incoming event that matches your filter.
+
 ```js
 import { EventSubscriber } from "@drift-labs/sdk";
 
 const options = {
-  // eventTypes: ["DepositRecord", "OrderRecord", ...],
+  eventTypes: [
+    "DepositRecord",
+    "FundingPaymentRecord",
+    "LiquidationRecord",
+    "OrderRecord",
+    "OrderActionRecord",
+    "FundingRateRecord",
+    "NewUserRecord",
+    "SettlePnlRecord",
+    "LPRecord",
+    "InsuranceFundRecord",
+    "SpotInterestRecord",
+    "InsuranceFundStakeRecord",
+    "CurveRecord",
+  ],
+  maxTx: 4096,
+  maxEventsPerType: 4096,
+  orderBy: "blockchain",
+  orderDir: "asc",
   commitment: "confirmed",
   logProviderConfig: { type: "websocket" },
 };
@@ -16,19 +55,16 @@ const options = {
 const eventSubscriber = new EventSubscriber(connection, driftClient.program, options);
 await eventSubscriber.subscribe();
 
+// `newEvent` is the only real-time emitter: it fires for every incoming event
 eventSubscriber.eventEmitter.on("newEvent", (event) => {
-  console.log(event);
+  console.log(event.eventType, event);
 });
 ```
-  </TypeScript>
-</SDKDoc>
 
 ### Filtering Events
 
 You can filter events by market index, event type, or action using the `isVariant` helper function. This is useful for focusing on specific markets or event types in your bot.
 
-<SDKDoc>
-  <TypeScript name="isVariant" type="function">
 ```js
 import { isVariant } from "@drift-labs/sdk";
 
@@ -47,13 +83,9 @@ eventSubscriber.eventEmitter.on("newEvent", (event) => {
   if (isPerpFill(event)) console.log("Perp fill on market", marketIndex, event);
 });
 ```
-  </TypeScript>
-</SDKDoc>
 
 **Common filter patterns for bots:**
 
-<SDKDoc>
-  <TypeScript name="Event filter patterns" type="example">
 ```js
 // Filter by market index only
 eventSubscriber.eventEmitter.on("newEvent", (event) => {
@@ -76,6 +108,22 @@ eventSubscriber.eventEmitter.on("newEvent", (event) => {
   }
 });
 ```
-  </TypeScript>
-</SDKDoc>
 
+## Querying Stored Events
+
+The `EventSubscriber` keeps a rolling buffer of recent events in memory. You can query these at any time without waiting for a new event to arrive.
+
+Retrieve all stored events of a given type:
+
+```js
+// Returns all events of this type currently in memory
+const eventType = "OrderActionRecord";
+const events = eventSubscriber.getEventsReceived(eventType);
+```
+
+Retrieve all events from a specific transaction:
+
+```js
+const txSig = "3dq5PtQ3VnNTkQRrHhQ1nRACWZaFVvSBKs1RLXM8WvCqLHTzTuVGc7XER5awoLFLTdJ4kqZiNmo7e8b3pXaEGaoo";
+const events = eventSubscriber.getEventsByTx(txSig);
+```

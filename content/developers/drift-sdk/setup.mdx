@@ -4,16 +4,56 @@ The examples below use placeholders like `<RPC_URL>` and `<KEYPAIR_PATH>`.
 
 ### Program Addresses
 
-The Drift program id is environment-specific. In most cases you’ll use the default program id baked into the SDK config for `devnet` or `mainnet-beta`.
+| Network | Program ID |
+|---|---|
+| Drift (mainnet & devnet) | `dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH` |
+| Drift Vaults | `vAuLTsyrvSfZRuRB3XgvkPwNGgYSs9YRYymVebLKoxR` |
+
+You can also import the Drift program ID directly from the SDK:
+
+<SDKDoc>
+  <TypeScript name="DRIFT_PROGRAM_ID" type="variable">
+```js
+import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
+
+// The Drift program's public key on mainnet-beta and devnet.
+// Use this when deriving PDAs or referencing the program directly.
+console.log(DRIFT_PROGRAM_ID.toBase58());
+// dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH
+```
+  </TypeScript>
+</SDKDoc>
 
 ### Wallet / Authentication
 
-To interact with Solana you need a keypair. One common approach for bots is to point `ANCHOR_WALLET` (or your own env var) at a JSON keypair file.
+To interact with Solana you need a keypair, which consists of a public key and a private key. The private key is used to sign transactions and should be kept secure.
+
+Generate a new keypair using the [Solana CLI](https://docs.solanalabs.com/cli/install):
 
 ```bash
 solana-keygen new --outfile ~/.config/solana/my-keypair.json
+```
+
+To allow SDK code to use this keypair, set the `ANCHOR_WALLET` environment variable to the path of the keypair file:
+
+```bash
 export ANCHOR_WALLET=~/.config/solana/my-keypair.json
 ```
+
+Then load the keypair in your code:
+
+<SDKDoc>
+  <TypeScript name="Wallet / Authentication" type="example">
+```js
+import { Wallet, loadKeypair } from "@drift-labs/sdk";
+
+const keyPairFile = `${process.env.HOME}/.config/solana/my-keypair.json`;
+const wallet = new Wallet(loadKeypair(keyPairFile));
+```
+  </TypeScript>
+</SDKDoc>
+
+Make sure the wallet has some SOL, as it is used to pay for transaction fees and rent for account initializations.
 
 ### Install
 
@@ -110,6 +150,23 @@ await driftClient.unsubscribe();
   </TypeScript>
 </SDKDoc>
 
+**Key DriftClient parameters:**
+
+| Parameter | Description | Optional | Default |
+|---|---|---|---|
+| `connection` | Solana RPC connection | No | |
+| `wallet` | Wallet used to sign transactions | No | |
+| `env` | `devnet` or `mainnet-beta`, used to derive market accounts | Yes | |
+| `perpMarketIndexes` | Perp market accounts to subscribe to | Yes | Derived from env |
+| `spotMarketIndexes` | Spot market accounts to subscribe to | Yes | Derived from env |
+| `oracleInfos` | Oracle accounts to subscribe to | Yes | Derived from env |
+| `accountSubscription` | WebSocket or polling subscription mode | Yes | WebSocket |
+| `activeSubAccountId` | Which subaccount to use initially | Yes | 0 |
+| `subAccountIds` | All subaccount IDs to subscribe to | Yes | [] |
+| `authority` | Authority you're signing for, only set for delegated accounts | Yes | `wallet.publicKey` |
+
+> **Delegated accounts:** When signing on behalf of a delegated account, you must explicitly set `subAccountIds`, `activeSubAccountId`, and `authority`. Omitting any of these will cause the client to subscribe to the wrong accounts.
+
 ### Account Subscriptions (WebSocket vs Polling)
 
 For most bots, websocket subscriptions are the easiest way to keep markets and users up to date. For read-only workflows or when you need tighter control over RPC load, you can switch to polling with a `BulkAccountLoader`.
@@ -148,6 +205,8 @@ const driftClient = new DriftClient({
 
 ### Multiple Subaccounts
 
+Drift supports multiple subaccounts per wallet, each with its own isolated position and order state. This lets you run separate strategies (e.g., a market-making bot and a hedging bot) under the same authority without cross-contaminating risk or PnL. Use `addUser()` to subscribe to additional subaccounts after initialization.
+
 <SDKDoc>
   <TypeScript name="hasUser" type="method" owner="DriftClient">
 ```js
@@ -166,21 +225,9 @@ await driftClient.addUser(1);
   </TypeScript>
 </SDKDoc>
 
-### Program ID
-
-<SDKDoc>
-  <TypeScript name="DRIFT_PROGRAM_ID" type="variable">
-```js
-import { DRIFT_PROGRAM_ID } from "@drift-labs/sdk";
-
-// The Drift program's public key on mainnet-beta.
-// Use this when deriving PDAs or referencing the program directly.
-console.log(DRIFT_PROGRAM_ID.toBase58());
-```
-  </TypeScript>
-</SDKDoc>
-
 ### High Leverage Mode
+
+High Leverage Mode allows eligible accounts to trade with increased maximum leverage (up to 50x on supported markets) compared to the standard 10x cap. It is an opt-in feature that requires the account to meet specific criteria set by the protocol. You can fetch the current high leverage configuration to check limits and eligibility conditions.
 
 <SDKDoc>
   <TypeScript name="getHighLeverageModeConfigPublicKey" type="function">
@@ -192,4 +239,3 @@ const config = await driftClient.program.account.highLeverageModeConfig.fetch(pd
 ```
   </TypeScript>
 </SDKDoc>
-

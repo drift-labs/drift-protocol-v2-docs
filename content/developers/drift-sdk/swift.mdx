@@ -1,20 +1,64 @@
 # Swift (off-chain signed orders)
 
-Swift lets users sign an order message off-chain and submit it to a Swift endpoint. The SDK helps you build and sign the message; the HTTP POST is up to you.
+Swift is an extension to Drift that lets users place orders without submitting a transaction to the Solana network. Instead of paying gas and waiting for confirmation, users sign an order message off-chain and submit it to the Swift API. Keepers and market makers then bundle the signed message with their own transaction to fill the order on-chain.
 
-### Sign a Swift order message
+This enables faster order placement, lower latency, and a gas-free experience for takers, while market makers still settle on-chain.
+
+**Order flow:**
+1. Define order parameters
+2. Sign the order message off-chain
+3. Submit to the Swift API (`https://swift.drift.trade/orders`)
+4. Keepers/market makers pick up the order and fill it on-chain
+
+### Step 1: Define order parameters
+
+Set up a standard Drift order. For Swift, you typically use a market order with auction parameters that give market makers a window to fill:
+
+<SDKDoc>
+  <TypeScript name="Swift order setup" type="example">
+```js
+import {
+  getMarketOrderParams, MarketType, PositionDirection, isVariant
+} from "@drift-labs/sdk";
+
+const marketIndex = 0; // SOL-PERP
+
+const oracleInfo = driftClient.getOracleDataForPerpMarket(marketIndex);
+const direction = PositionDirection.LONG;
+
+// Set auction price range around the current oracle price
+const highPrice = oracleInfo.price.muln(101).divn(100); // oracle + 1%
+const lowPrice = oracleInfo.price;
+
+const orderParams = getMarketOrderParams({
+  marketIndex,
+  marketType: MarketType.PERP,
+  direction,
+  baseAssetAmount: driftClient.convertToPerpPrecision(0.1), // 0.1 SOL
+  auctionStartPrice: isVariant(direction, "long") ? lowPrice : highPrice,
+  auctionEndPrice: isVariant(direction, "long") ? highPrice : lowPrice,
+  auctionDuration: 50, // slots for market makers to compete
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Step 2: Sign the order message
+
+Sign the order parameters off-chain using your DriftClient's wallet. This produces a serialized message and signature that the Swift API will verify:
 
 <SDKDoc>
   <TypeScript name="signSignedMsgOrderParamsMessage" type="method" owner="DriftClient">
 ```js
-// `orderParams` is a normal Drift `OrderParams` object.
+import { generateSignedMsgUuid } from "@drift-labs/sdk";
+
 const slot = await driftClient.connection.getSlot();
 
 const orderMessage = {
   signedMsgOrderParams: orderParams,
   subAccountId: driftClient.activeSubAccountId,
-  slot,
-  uuid: "<UUID>",
+  slot: new BN(slot),
+  uuid: generateSignedMsgUuid(), // unique ID for deduplication
   stopLossOrderParams: null,
   takeProfitOrderParams: null,
 };
@@ -25,8 +69,9 @@ const { orderParams: message, signature } =
   </TypeScript>
 </SDKDoc>
 
-### Submit to the Swift API
+### Step 3: Submit to the Swift API
 
+POST the signed message to the Swift endpoint. The API validates the signature and queues the order for keepers and market makers:
 
 <SDKDoc>
   <TypeScript name="Swift API submit" type="example">
@@ -42,6 +87,7 @@ const response = await fetch(swiftUrl, {
     message: message.toString("hex"),
     signature: signature.toString("hex"),
     taker_authority: driftClient.wallet.publicKey.toBase58(),
+    // signing_authority: delegatePublicKey.toBase58(), // only needed for delegate flows
   }),
 });
 
@@ -53,13 +99,18 @@ if (!response.ok) {
   </TypeScript>
 </SDKDoc>
 
+> **Delegate flows:** When signing as a delegate for another account, also pass `signing_authority` (the delegate's public key) and ensure `taker_authority` is the account owner's public key. Initialize the DriftClient with `authority` set to the owner's key.
+
 ### Signed message accounts (delegate flow)
+
+For delegate accounts, you can initialize a `SignedMsgUserOrders` account to allow a delegate to place Swift orders on behalf of the owner:
 
 <SDKDoc>
   <TypeScript name="getSignedMsgUserAccountPublicKey" type="function">
 ```js
 import { getSignedMsgUserAccountPublicKey } from "@drift-labs/sdk";
 
+// Derive the PDA for the signed message orders account
 const pda = getSignedMsgUserAccountPublicKey(driftClient.program.programId, authority);
 ```
   </TypeScript>
@@ -68,6 +119,8 @@ const pda = getSignedMsgUserAccountPublicKey(driftClient.program.programId, auth
 <SDKDoc>
   <TypeScript name="initializeSignedMsgUserOrders" type="method" owner="DriftClient">
 ```js
+// Initialize the signed message orders account for `authority`
+// with space for 8 concurrent orders
 const [txSig, signedMsgUserAccount] =
   await driftClient.initializeSignedMsgUserOrders(authority, 8);
 ```
@@ -76,12 +129,14 @@ const [txSig, signedMsgUserAccount] =
 
 ### Decode signed messages
 
+Decode a raw signed message (e.g., received from the Swift API or another source) back into structured order params:
+
 <SDKDoc>
   <TypeScript name="decodeSignedMsgOrderParamsMessage" type="method" owner="DriftClient">
 ```js
 const signedMessage = driftClient.decodeSignedMsgOrderParamsMessage(
   Buffer.from(orderMessageHex, "hex"),
-  isDelegateSigner
+  isDelegateSigner  // true if the message was signed by a delegate
 );
 ```
   </TypeScript>
@@ -89,9 +144,14 @@ const signedMessage = driftClient.decodeSignedMsgOrderParamsMessage(
 
 ### Instruction builders (Swift taker + maker)
 
+For advanced use cases (such as building keeper or market-maker bots), you can construct Swift fill instructions directly instead of using the HTTP API flow.
+
+Build the taker-side instructions for placing a Swift order on-chain:
+
 <SDKDoc>
   <TypeScript name="getPlaceSignedMsgTakerPerpOrderIxs" type="method" owner="DriftClient">
 ```js
+// Used by keeper bots to submit a taker's signed Swift order on-chain
 const ixs = await driftClient.getPlaceSignedMsgTakerPerpOrderIxs(
   { orderParams: orderMessageHex, signature },
   marketIndex,
@@ -101,9 +161,12 @@ const ixs = await driftClient.getPlaceSignedMsgTakerPerpOrderIxs(
   </TypeScript>
 </SDKDoc>
 
+Build instructions to place a maker order and simultaneously fill a pending Swift taker order (atomic maker fill):
+
 <SDKDoc>
   <TypeScript name="getPlaceAndMakeSignedMsgPerpOrderIxs" type="method" owner="DriftClient">
 ```js
+// Used by market makers to fill a taker's Swift order with their own maker quote
 const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
   signedMsgOrderParams,
   signedMsgOrderUuid,
@@ -114,7 +177,9 @@ const ixs = await driftClient.getPlaceAndMakeSignedMsgPerpOrderIxs(
   </TypeScript>
 </SDKDoc>
 
-### Helpers commonly used in Swift flows
+### Helper functions
+
+Generate a unique UUID for a Swift order message. Each order must have a distinct UUID to prevent replay attacks:
 
 <SDKDoc>
   <TypeScript name="generateSignedMsgUuid" type="function">
@@ -126,6 +191,8 @@ const uuid = generateSignedMsgUuid();
   </TypeScript>
 </SDKDoc>
 
+Hash a signature for use in order deduplication or indexing:
+
 <SDKDoc>
   <TypeScript name="digestSignature" type="function">
 ```js
@@ -135,6 +202,8 @@ const hash = digestSignature(Uint8Array.from(signature));
 ```
   </TypeScript>
 </SDKDoc>
+
+Derive the user stats account PDA for an authority:
 
 <SDKDoc>
   <TypeScript name="getUserStatsAccountPublicKey" type="function">

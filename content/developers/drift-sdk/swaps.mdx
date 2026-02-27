@@ -1,6 +1,8 @@
 # Swaps (Jupiter)
 
-You can route spot swaps using Jupiter. In TypeScript, the SDK exposes a `JupiterClient` plus a convenience `driftClient.swap(...)` helper.
+You can route spot swaps using Jupiter directly from your Drift account. The SDK fetches a Jupiter quote, builds the swap transaction, and routes it so the input and output tokens flow through your Drift spot balances.
+
+To perform spot swaps, initialize a `JupiterClient` with your RPC connection:
 
 <SDKDoc>
   <TypeScript name="JupiterClient" type="class">
@@ -13,6 +15,8 @@ const jupiterClient = new JupiterClient({ connection });
 ```
   </TypeScript>
 </SDKDoc>
+
+Before executing a swap, preview the expected output and route with `getQuote()`. This lets you check slippage and confirm the route before committing:
 
 <SDKDoc>
   <TypeScript name="getQuote" type="method" owner="JupiterClient">
@@ -28,17 +32,19 @@ console.log(quote);
   </TypeScript>
 </SDKDoc>
 
+Execute the swap through Drift. The SDK fetches the best Jupiter route and sends the transaction so the tokens move in and out of your Drift spot balances:
+
 <SDKDoc>
   <TypeScript name="swap" type="method" owner="DriftClient">
 ```js
 // Assumes `driftClient` is subscribed.
 const txSig = await driftClient.swap({
   jupiterClient,
-  inMarketIndex: 0,  // e.g. USDC
-  outMarketIndex: 1, // e.g. SOL
-  amount: driftClient.convertToSpotPrecision(0, 10), // 10 USDC (example)
-  slippageBps: 50,
-  onlyDirectRoutes: false,
+  inMarketIndex: 0,  // e.g. USDC (spot market index)
+  outMarketIndex: 1, // e.g. SOL (spot market index)
+  amount: driftClient.convertToSpotPrecision(0, 10), // 10 USDC
+  slippageBps: 50,        // 0.5% max slippage
+  onlyDirectRoutes: false, // allow multi-hop routes for better pricing
 });
 
 console.log(txSig);
@@ -46,3 +52,15 @@ console.log(txSig);
   </TypeScript>
 </SDKDoc>
 
+**Parameters:**
+
+| Parameter | Description | Optional | Default |
+|---|---|---|---|
+| `jupiterClient` | Instance of JupiterClient for fetching quotes | No | |
+| `inMarketIndex` | Drift spot market index for the input token | No | |
+| `outMarketIndex` | Drift spot market index for the output token | No | |
+| `amount` | Amount to swap as a BN in spot market precision | No | |
+| `slippageBps` | Maximum allowed slippage in basis points | Yes | 50 |
+| `onlyDirectRoutes` | If true, restricts to direct token pairs only (no multi-hop) | Yes | false |
+| `computeUnits` | Override for compute budget | Yes | |
+| `prioritizationFeeMicroLamports` | Priority fee in micro-lamports | Yes | |

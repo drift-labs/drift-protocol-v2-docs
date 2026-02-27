@@ -19,14 +19,11 @@ Post-only flags ensure your order is never executed as a taker (which would cost
 
 **Recommendation:** Use `MUST_POST_ONLY` for all quotes. If the order would cross (e.g., oracle moved), you'd rather cancel and re quote at the new price than accidentally take.
 
-<SDKDoc>
-  <TypeScript name="OrderParams" type="class">
-```js
-import { OrderParams } from "@drift-labs/sdk";
-```
-  </TypeScript>
-</SDKDoc>
+### Quoting basics
 
+A two-sided quote means placing a bid (buy) and an ask (sell) simultaneously. The spread is the difference between your bid and ask prices, and that gap is where you earn. The tighter the spread, the more competitive you are but the less you earn per fill. Wider spreads earn more per fill but attract less flow.
+
+Each quote is an `OrderParams` object passed to a placement method. Key fields are `direction` (long for bid, short for ask), `price` or `oraclePriceOffset`, `baseAssetAmount`, and `postOnly`. The examples below show the most common patterns.
 
 <SDKDoc>
   <TypeScript name="placePerpOrder" type="method" owner="DriftClient">

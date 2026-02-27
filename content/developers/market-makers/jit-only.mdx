@@ -53,6 +53,8 @@ await auctionSubscriber.subscribe();
 
 For even lower latency, subscribe to [SWIFT](./swift-api) to receive signed taker orders 100-500ms before they land onchain.
 
+`OrderSubscriber` is a lower-level alternative to `AuctionSubscriber`. It streams all user order state changes rather than only active auction events. Most JIT bots use `AuctionSubscriber` because it surfaces only the orders that are currently in an open auction window. Use `OrderSubscriber` if you need visibility into the full lifecycle of orders (e.g., tracking when orders are placed, partially filled, or cancelled) rather than just reacting to active auctions.
+
 <SDKDoc>
   <TypeScript name="OrderSubscriber" type="class">
 ```js
@@ -67,12 +69,6 @@ Use `getAuctionPrice` to compute the current interpolated auction price at any s
 
 <SDKDoc>
   <TypeScript name="getAuctionPrice" type="function">
-```js
-import { getAuctionPrice } from "@drift-labs/sdk";
-```
-  </TypeScript>
-</SDKDoc>
-
 ```typescript
 import { getAuctionPrice, convertToNumber, PRICE_PRECISION } from "@drift-labs/sdk";
 
@@ -85,6 +81,8 @@ const auctionPrice = convertToNumber(auctionPriceBN, PRICE_PRECISION);
 
 console.log(`Auction price at slot ${currentSlot}: $${auctionPrice.toFixed(4)}`);
 ```
+  </TypeScript>
+</SDKDoc>
 
 See [JIT Auctions - Auction pricing](./jit-auctions#auction-pricing-formula) for the full interpolation formula and timeline explanation.
 
@@ -227,16 +225,55 @@ Apply risk and filtering checks before filling: oracle validity, position limits
 
 <SDKDoc>
   <TypeScript name="isSignedMsgOrder" type="function">
-```js
+```typescript
 import { isSignedMsgOrder } from "@drift-labs/sdk";
+
+// In your AuctionSubscriber callback, skip orders that came from SWIFT
+// so your onchain handler and SWIFT handler don't both try to fill the same order.
+auctionSubscriber.eventEmitter.on("onAccountUpdate", async (userAccount, pubkey, slot) => {
+  for (const order of userAccount.orders) {
+    if (order.baseAssetAmount.isZero()) continue;
+
+    if (isSignedMsgOrder(order)) {
+      // Already handled via SwiftOrderSubscriber callback -- skip here
+      continue;
+    }
+
+    // Handle regular onchain auction
+    await handleAuction(order, userAccount, pubkey, slot);
+  }
+});
 ```
   </TypeScript>
 </SDKDoc>
 
+`getMMOracleDataForPerpMarket` is the recommended oracle getter for market makers. Unlike `getOracleDataForPerpMarket`, it returns MM-specific oracle data that includes a validity flag and confidence interval. Always check `oracle.isValid` before using the price. An invalid oracle means the data is stale or the price feed is unhealthy, and you should skip the fill rather than quote at a bad price.
+
+Key fields:
+- `oracle.price`: current oracle price as a `BN` in `PRICE_PRECISION` (1e6) units
+- `oracle.isValid`: whether the oracle data is fresh and trustworthy
+- `oracle.confidence`: price confidence interval from the oracle provider
+
 <SDKDoc>
   <TypeScript name="getMMOracleDataForPerpMarket" type="method" owner="DriftClient">
-```js
-const oracle = driftClient.getMMOracleDataForPerpMarket(0);
+```typescript
+import { convertToNumber, PRICE_PRECISION } from "@drift-labs/sdk";
+
+const oracle = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+
+// Always guard against stale or unhealthy oracle data
+if (!oracle.isValid) {
+  console.warn("Oracle invalid for market", marketIndex, "-- skipping");
+  return;
+}
+
+const oraclePrice = convertToNumber(oracle.price, PRICE_PRECISION);
+const confidence = convertToNumber(oracle.confidence, PRICE_PRECISION);
+
+console.log(`Oracle price: $${oraclePrice.toFixed(4)}, confidence: ±$${confidence.toFixed(4)}`);
+
+// Optionally widen your spread when confidence is low
+const minSpread = Math.max(0.05, confidence * 2);
 ```
   </TypeScript>
 </SDKDoc>

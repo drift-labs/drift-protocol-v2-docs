@@ -167,7 +167,9 @@ const META = {
           "delisting-process": "",
           "protocol-guard-rails": "",
           "audits": "",
-          "bug-bounty": "",
+          "bug-bounty": {
+            display: 'hidden',
+          },
           "risks": "",
           "drift-safety-module": "",
         }

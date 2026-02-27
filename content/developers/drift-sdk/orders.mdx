@@ -4,9 +4,28 @@
 
 Orders on Drift go through a multi-stage matching process. When you place an order, it enters a **JIT auction** (Just-In-Time) where market makers can compete to fill it at better prices. If no one fills during the auction, the order either executes against the **DLOB** (Decentralized Limit Order Book) or the **AMM** as a fallback. This design ensures you get the best price from multiple liquidity sources.
 
-Drift supports several order types: **market** (immediate execution), **limit** (rests on the orderbook at a specific price), **oracle** (price pegged to oracle with an offset), and **trigger** orders (conditional execution when a price threshold is hit). Each order has parameters like size, price, post-only flags, and reduce-only settings that control how it behaves.
-
 Orders are stored in your user account and have both an onchain order ID and an optional user-assigned ID for tracking. When an order fills, your position updates automatically, and you can query fill events to see execution details.
+
+## Order Types
+
+| Type | Description |
+|---|---|
+| `MARKET` | Executes immediately. Goes through a JIT auction first (controlled by `auctionStartPrice`, `auctionEndPrice`, `auctionDuration`), then fills against the DLOB or AMM. |
+| `LIMIT` | Rests on the DLOB at a fixed price until filled or canceled. Set `postOnly: PostOnlyParams.MUST_POST_ONLY` to guarantee maker status and avoid crossing the spread. |
+| `ORACLE` | Like a market order, but auction prices and the resting limit price are expressed as **offsets from the oracle price** (not absolute prices). Useful for market makers who want tight spreads without hardcoding prices. |
+| `TRIGGER_MARKET` | A stop/take-profit market order. Executes as a market order when the oracle price crosses `triggerPrice` in the specified `triggerCondition` direction. |
+| `TRIGGER_LIMIT` | A stop/take-profit limit order. Same trigger mechanism as `TRIGGER_MARKET`, but executes as a limit order at `price` once triggered. |
+
+### Post-Only Params
+
+When placing limit orders, you can control maker/taker behavior with `postOnly`:
+
+| Value | Behavior |
+|---|---|
+| `PostOnlyParams.NONE` | Order can be maker or taker (default) |
+| `PostOnlyParams.MUST_POST_ONLY` | Transaction fails if the order would cross the spread |
+| `PostOnlyParams.TRY_POST_ONLY` | Order is silently skipped (not placed) if it would cross; tx succeeds |
+| `PostOnlyParams.SLIDE` | Order price is adjusted one tick inside the spread to guarantee maker status |
 
 ## SDK Usage
 
@@ -67,6 +86,51 @@ console.log(txSig);
   </TypeScript>
 </SDKDoc>
 
+### Place a Spot Order
+
+<SDKDoc>
+  <TypeScript name="placeSpotOrder" type="method" owner="DriftClient">
+```js
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
+
+await driftClient.placeSpotOrder({
+  orderType: OrderType.LIMIT,
+  marketIndex: 1, // e.g. SOL spot
+  direction: PositionDirection.LONG,
+  baseAssetAmount: driftClient.convertToSpotPrecision(1, 1), // 1 SOL
+  price: driftClient.convertToPricePrecision(150),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Place Multiple Orders
+
+<SDKDoc>
+  <TypeScript name="placeOrders" type="method" owner="DriftClient">
+```js
+await driftClient.placeOrders([
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.LONG,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    price: driftClient.convertToPricePrecision(21.23),
+  },
+  {
+    orderType: OrderType.LIMIT,
+    marketType: MarketType.PERP,
+    marketIndex: 0,
+    direction: PositionDirection.SHORT,
+    baseAssetAmount: driftClient.convertToPerpPrecision(1),
+    oraclePriceOffset: driftClient.convertToPricePrecision(0.05).toNumber(),
+  },
+]);
+```
+  </TypeScript>
+</SDKDoc>
+
 ### Oracle / Auction-Style Orders
 
 Oracle orders have prices that track the oracle feed with an offset. They go through a JIT auction before execution, with auction prices that gradually converge from the start offset to the end offset relative to oracle.
@@ -94,6 +158,112 @@ const orderParams = {
   auctionEndPrice,
   oraclePriceOffset: driftClient.convertToPricePrecision(0.30).toNumber(), // +$0.30 from oracle
   auctionDuration: 30, // slots
+};
+
+await driftClient.placePerpOrder(orderParams);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Cancel Orders
+
+Cancel a specific order by its onchain order ID.
+
+<SDKDoc>
+  <TypeScript name="cancelOrder" type="method" owner="DriftClient">
+```js
+await driftClient.cancelOrder(1);
+```
+  </TypeScript>
+</SDKDoc>
+
+Cancel multiple specific orders by their onchain order IDs in a single transaction.
+
+<SDKDoc>
+  <TypeScript name="cancelOrdersByIds" type="method" owner="DriftClient">
+```js
+await driftClient.cancelOrdersByIds([1, 2, 3]);
+```
+  </TypeScript>
+</SDKDoc>
+
+Cancel all orders matching the given market and direction filters. Pass `null` for any filter to match all. Omit all parameters to cancel every open order.
+
+<SDKDoc>
+  <TypeScript name="cancelOrders" type="method" owner="DriftClient">
+```js
+import { MarketType, PositionDirection } from "@drift-labs/sdk";
+
+// Cancel all long perp orders on market 0
+await driftClient.cancelOrders(MarketType.PERP, 0, PositionDirection.LONG);
+
+// Cancel all orders across all markets
+await driftClient.cancelOrders(null, null, null);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Cancel and Place (Atomic)
+
+Atomically cancels existing orders and places new ones in a single transaction. This is the preferred approach for market makers who need to replace quotes without risk of being filled on stale orders in the gap between a separate cancel and re-quote.
+
+<SDKDoc>
+  <TypeScript name="cancelAndPlaceOrders" type="method" owner="DriftClient">
+```js
+await driftClient.cancelAndPlaceOrders(
+  { marketType: MarketType.PERP, marketIndex: 0 },
+  [
+    {
+      orderType: OrderType.LIMIT,
+      marketIndex: 0,
+      direction: PositionDirection.LONG,
+      baseAssetAmount: driftClient.convertToPerpPrecision(1),
+      price: driftClient.convertToPricePrecision(21.23),
+    },
+  ]
+);
+```
+  </TypeScript>
+</SDKDoc>
+
+### Modify Orders
+
+<SDKDoc>
+  <TypeScript name="modifyOrder" type="method" owner="DriftClient">
+```js
+await driftClient.modifyOrder({
+  orderId: 1,
+  newBaseAmount: driftClient.convertToPerpPrecision(2),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+<SDKDoc>
+  <TypeScript name="modifyOrderByUserOrderId" type="method" owner="DriftClient">
+```js
+await driftClient.modifyOrderByUserOrderId({
+  userOrderId: 1,
+  newBaseAmount: driftClient.convertToPerpPrecision(2),
+});
+```
+  </TypeScript>
+</SDKDoc>
+
+### Trigger Orders (Stop / Take-Profit)
+
+<SDKDoc>
+  <TypeScript name="Trigger order" type="example">
+```js
+import { OrderTriggerCondition, OrderType, PositionDirection } from "@drift-labs/sdk";
+
+const orderParams = {
+  orderType: OrderType.TRIGGER_MARKET,
+  marketIndex: 0,
+  direction: PositionDirection.SHORT,
+  baseAssetAmount: driftClient.convertToPerpPrecision(1),
+  triggerPrice: driftClient.convertToPricePrecision(95),
+  triggerCondition: OrderTriggerCondition.BELOW,
 };
 
 await driftClient.placePerpOrder(orderParams);
@@ -350,143 +520,3 @@ const ix = await driftClient.getJupiterSwapIxV6({
 ```
   </TypeScript>
 </SDKDoc>
-### Place a Spot Order
-
-<SDKDoc>
-  <TypeScript name="placeSpotOrder" type="method" owner="DriftClient">
-```js
-import { OrderType, PositionDirection } from "@drift-labs/sdk";
-
-await driftClient.placeSpotOrder({
-  orderType: OrderType.LIMIT,
-  marketIndex: 1, // e.g. SOL spot
-  direction: PositionDirection.LONG,
-  baseAssetAmount: driftClient.convertToSpotPrecision(1, 1), // 1 SOL
-  price: driftClient.convertToPricePrecision(150),
-});
-```
-  </TypeScript>
-</SDKDoc>
-
-### Place Multiple Orders
-
-<SDKDoc>
-  <TypeScript name="placeOrders" type="method" owner="DriftClient">
-```js
-await driftClient.placeOrders([
-  {
-    orderType: OrderType.LIMIT,
-    marketType: MarketType.PERP,
-    marketIndex: 0,
-    direction: PositionDirection.LONG,
-    baseAssetAmount: driftClient.convertToPerpPrecision(1),
-    price: driftClient.convertToPricePrecision(21.23),
-  },
-  {
-    orderType: OrderType.LIMIT,
-    marketType: MarketType.PERP,
-    marketIndex: 0,
-    direction: PositionDirection.SHORT,
-    baseAssetAmount: driftClient.convertToPerpPrecision(1),
-    oraclePriceOffset: driftClient.convertToPricePrecision(0.05).toNumber(),
-  },
-]);
-```
-  </TypeScript>
-</SDKDoc>
-
-### Cancel Orders
-
-<SDKDoc>
-  <TypeScript name="cancelOrder" type="method" owner="DriftClient">
-```js
-await driftClient.cancelOrder(1);
-```
-  </TypeScript>
-</SDKDoc>
-
-<SDKDoc>
-  <TypeScript name="cancelOrdersByIds" type="method" owner="DriftClient">
-```js
-await driftClient.cancelOrdersByIds([1]);
-```
-  </TypeScript>
-</SDKDoc>
-
-<SDKDoc>
-  <TypeScript name="cancelOrders" type="method" owner="DriftClient">
-```js
-import { MarketType, PositionDirection } from "@drift-labs/sdk";
-
-// Cancels orders matching the filters. To cancel all orders, omit parameters.
-await driftClient.cancelOrders(MarketType.PERP, 0, PositionDirection.LONG);
-```
-  </TypeScript>
-</SDKDoc>
-
-### Cancel and Place (Atomic)
-
-<SDKDoc>
-  <TypeScript name="cancelAndPlaceOrders" type="method" owner="DriftClient">
-```js
-await driftClient.cancelAndPlaceOrders(
-  { marketType: MarketType.PERP, marketIndex: 0 },
-  [
-    {
-      orderType: OrderType.LIMIT,
-      marketIndex: 0,
-      direction: PositionDirection.LONG,
-      baseAssetAmount: driftClient.convertToPerpPrecision(1),
-      price: driftClient.convertToPricePrecision(21.23),
-    },
-  ]
-);
-```
-  </TypeScript>
-</SDKDoc>
-
-### Modify Orders
-
-<SDKDoc>
-  <TypeScript name="modifyOrder" type="method" owner="DriftClient">
-```js
-await driftClient.modifyOrder({
-  orderId: 1,
-  newBaseAmount: driftClient.convertToPerpPrecision(2),
-});
-```
-  </TypeScript>
-</SDKDoc>
-
-<SDKDoc>
-  <TypeScript name="modifyOrderByUserOrderId" type="method" owner="DriftClient">
-```js
-await driftClient.modifyOrderByUserOrderId({
-  userOrderId: 1,
-  newBaseAmount: driftClient.convertToPerpPrecision(2),
-});
-```
-  </TypeScript>
-</SDKDoc>
-
-### Trigger Orders (Stop / Take-Profit)
-
-<SDKDoc>
-  <TypeScript name="Trigger order" type="example">
-```js
-import { OrderTriggerCondition, OrderType, PositionDirection } from "@drift-labs/sdk";
-
-const orderParams = {
-  orderType: OrderType.TRIGGER_MARKET,
-  marketIndex: 0,
-  direction: PositionDirection.SHORT,
-  baseAssetAmount: driftClient.convertToPerpPrecision(1),
-  triggerPrice: driftClient.convertToPricePrecision(95),
-  triggerCondition: OrderTriggerCondition.BELOW,
-};
-
-await driftClient.placePerpOrder(orderParams);
-```
-  </TypeScript>
-</SDKDoc>
-

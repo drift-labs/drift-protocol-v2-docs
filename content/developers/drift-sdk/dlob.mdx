@@ -1,0 +1,193 @@
+# DLOB (Decentralized Limit Order Book)
+
+## What is the DLOB?
+
+The **Decentralized Limit Order Book (DLOB)** is Drift's on-chain representation of all resting limit orders across all users. Unlike a traditional centralized order book maintained by an exchange, the DLOB is constructed locally by reading on-chain user accounts and aggregating their open limit orders into a price-ordered book.
+
+When a new order arrives, keepers and market makers query the DLOB to find matching resting orders. Drift's matching engine then executes fills between the incoming taker and the resting makers on the DLOB, or routes to the AMM as a fallback.
+
+**When you'd use the DLOB:**
+- **Market makers**: quote against the current best bid/ask and respond to order flow
+- **Keeper/filler bots**: identify and fill matchable orders for fee rewards
+- **Orderbook UIs**: display a live aggregated L2 or L3 view of the market
+
+## SDK Usage
+
+The SDK provides several classes to subscribe to and query the DLOB.
+
+### OrderSubscriber
+
+Subscribes to all open user orders in real-time via WebSocket or polling. This is the raw data feed that the DLOB is built from. You need this running before you can maintain a local DLOB.
+
+<SDKDoc>
+  <TypeScript name="OrderSubscriber" type="class">
+```js
+import { OrderSubscriber } from "@drift-labs/sdk";
+
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: { type: "websocket" },
+  fastDecode: true,
+  decodeData: true,
+});
+await orderSubscriber.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+### DLOBSubscriber
+
+Builds and continuously maintains an aggregated orderbook from the order stream. Use this when you need a live L2/L3 view without manually managing the DLOB state.
+
+<SDKDoc>
+  <TypeScript name="DLOBSubscriber" type="class">
+```js
+import { DLOBSubscriber } from "@drift-labs/sdk";
+
+const dlobSubscriber = new DLOBSubscriber({
+  driftClient,
+  dlobSource: orderSubscriber,   // feeds from your OrderSubscriber
+  slotSource: slotSubscriber,    // needed for order expiry/timing
+  updateFrequency: 1000,         // rebuild the book every 1000ms
+});
+await dlobSubscriber.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+### SlotSubscriber
+
+Tracks the current Solana slot. Required for timing-sensitive operations like JIT auction windows and order expiry checks.
+
+<SDKDoc>
+  <TypeScript name="SlotSubscriber" type="class">
+```js
+import { SlotSubscriber } from "@drift-labs/sdk";
+
+const slotSubscriber = new SlotSubscriber(connection);
+await slotSubscriber.subscribe();
+
+const currentSlot = slotSubscriber.getSlot();
+```
+  </TypeScript>
+</SDKDoc>
+
+### DLOB
+
+The core data structure with bid/ask sides and query methods. Under normal usage you access this via `dlobSubscriber.getDLOB()` rather than instantiating it directly.
+
+<SDKDoc>
+  <TypeScript name="DLOB" type="class">
+```js
+import { DLOB } from "@drift-labs/sdk";
+
+// Access via DLOBSubscriber (recommended)
+const dlob = dlobSubscriber.getDLOB();
+```
+  </TypeScript>
+</SDKDoc>
+
+### UserMap
+
+Efficiently tracks and caches the accounts of many users simultaneously. Used by liquidation bots and other applications that need to monitor positions across the whole protocol, rather than just orders.
+
+<SDKDoc>
+  <TypeScript name="UserMap" type="class">
+```js
+import { UserMap } from "@drift-labs/sdk";
+```
+  </TypeScript>
+</SDKDoc>
+
+### Setting Up a Local DLOB
+
+This is the full setup sequence to get a live, continuously-updated orderbook running:
+
+<SDKDoc>
+  <TypeScript name="DLOB setup" type="example">
+```js
+import { SlotSubscriber, OrderSubscriber, DLOBSubscriber } from "@drift-labs/sdk";
+
+// 1. Track the current slot (needed for order expiry)
+const slotSubscriber = new SlotSubscriber(connection);
+await slotSubscriber.subscribe();
+
+// 2. Subscribe to all open orders across all users
+const orderSubscriber = new OrderSubscriber({
+  driftClient,
+  subscriptionConfig: { type: "websocket" },
+  fastDecode: true,
+  decodeData: true,
+});
+await orderSubscriber.subscribe();
+
+// 3. Build and maintain the DLOB from the order stream
+const dlobSubscriber = new DLOBSubscriber({
+  driftClient,
+  dlobSource: orderSubscriber,
+  slotSource: slotSubscriber,
+  updateFrequency: 1000,
+});
+await dlobSubscriber.subscribe();
+```
+  </TypeScript>
+</SDKDoc>
+
+### Getting L2 Orderbook Data
+
+Once subscribed, query the aggregated L2 orderbook (price levels with cumulative size):
+
+<SDKDoc>
+  <TypeScript name="L2 orderbook" type="example">
+```js
+import { MarketType, PRICE_PRECISION, BASE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const dlob = dlobSubscriber.getDLOB();
+const marketIndex = 0; // SOL-PERP
+// For perp markets, use getMMOracleDataForPerpMarket (returns MMOraclePriceData)
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const slot = slotSubscriber.getSlot();
+
+const l2 = dlob.getL2({
+  marketIndex,
+  marketType: MarketType.PERP,
+  oraclePriceData,
+  slot,
+  depth: 10, // number of price levels per side
+});
+
+// l2.bids and l2.asks are arrays of { price: BN, size: BN }
+console.log("Top bid:", convertToNumber(l2.bids[0].price, PRICE_PRECISION),
+            "size:", convertToNumber(l2.bids[0].size, BASE_PRECISION));
+console.log("Top ask:", convertToNumber(l2.asks[0].price, PRICE_PRECISION),
+            "size:", convertToNumber(l2.asks[0].size, BASE_PRECISION));
+```
+  </TypeScript>
+</SDKDoc>
+
+### Getting Best Bid/Ask
+
+For quick access to the best bid and ask prices without fetching the full orderbook:
+
+<SDKDoc>
+  <TypeScript name="Best bid/ask" type="example">
+```js
+import { MarketType, PRICE_PRECISION, convertToNumber } from "@drift-labs/sdk";
+
+const dlob = dlobSubscriber.getDLOB();
+const marketIndex = 0;
+const oraclePriceData = driftClient.getMMOracleDataForPerpMarket(marketIndex);
+const slot = slotSubscriber.getSlot();
+
+// Returns BN | undefined (undefined if no orders on that side)
+const bestBid = dlob.getBestBid(marketIndex, slot, MarketType.PERP, oraclePriceData);
+const bestAsk = dlob.getBestAsk(marketIndex, slot, MarketType.PERP, oraclePriceData);
+
+if (bestBid && bestAsk) {
+  console.log("Best bid:", convertToNumber(bestBid, PRICE_PRECISION));
+  console.log("Best ask:", convertToNumber(bestAsk, PRICE_PRECISION));
+  console.log("Spread:", convertToNumber(bestAsk.sub(bestBid), PRICE_PRECISION));
+}
+```
+  </TypeScript>
+</SDKDoc>
