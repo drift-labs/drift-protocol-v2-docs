@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     title: "Drift Protocol",
     description:
       "Drift brings on-chain, cross-margined perpetual futures to Solana. Making futures DEXs the best way to trade.",
-    images: ["/assets/Hw-EeD1Xigo3jzRru1jQ__driftoverview.png"],
+    images: ["/assets/meta-introduction.png"],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/assets/Hw-EeD1Xigo3jzRru1jQ__driftoverview.png"],
+    images: ["/assets/meta-introduction.png"],
   },
   icons: {
     icon: [
