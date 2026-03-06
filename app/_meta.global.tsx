@@ -218,7 +218,7 @@ const META = {
           "swift": "",
           "builder-codes": "",
           "sdk-internals": "",
-          "rust": {
+          "autogen": {
             "display": displayWip,
           },
         },

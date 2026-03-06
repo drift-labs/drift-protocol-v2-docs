@@ -38,7 +38,12 @@ This reduces drift_rs.json from 44mb to about 1mb.
 
 ### Python
 
-Coming soon
+In driftpy run the command:
+```
+/usr/bin/python3 scripts/export_api_docs.py
+```
+
+This will output `docs/generated/api_reference.json` which you can copy to `types/sdks/driftpy.json`
 
 ## License
 
