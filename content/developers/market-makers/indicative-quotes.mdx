@@ -74,7 +74,7 @@ quoter.setQuote({
 
 ### Complete example: publish quotes that track oracle
 
-This example publishes indicative quotes at a fixed spread around the oracle price, updating every 5 seconds:
+This example publishes indicative quotes at a fixed spread around the oracle price, updating every second:
 
 ```typescript
 import {
@@ -112,7 +112,7 @@ setInterval(() => {
   });
 
   console.log(`Published indicative: bid $${bidPrice.toFixed(2)} / ask $${askPrice.toFixed(2)} (${quoteSize} SOL each side)`);
-}, 5_000);
+}, 1_000);
 ```
 
 ### Using oracle offsets
@@ -156,7 +156,7 @@ Indicative quotes show up in the [L2 orderbook](/developers/market-makers/orderb
 - **Indicative ≠ committed:** aggregators and UIs display indicative quotes as available liquidity, but there's no onchain enforcement. If you publish quotes you can't honor, takers will experience slippage and your reputation with routing algorithms may suffer.
 - **WebSocket reconnection:** if your WebSocket connection drops, your indicative quotes disappear from the orderbook. Implement auto-reconnect and re-publish quotes on reconnection.
 - **Oracle offset mode simplifies maintenance:** using `isOracleOffset: true` means you don't need to update quotes when the oracle moves. Only update when changing spread or size. This mirrors [oracle offset orders](./dlob-mm#oracle-offset-orders) for onchain quoting.
-- **Rate limiting:** the DLOB WebSocket server may throttle rapid `setQuote` updates. Publishing every 1-5 seconds is sufficient for most use cases.
+- **Rate limiting:** the DLOB WebSocket server may throttle rapid `setQuote` updates. Publishing every second is sufficient for most use cases.
 - **Null fields to clear:** sending `null` for price/size fields removes your quote. This is important for graceful shutdown; clear your indicative quotes before stopping your bot to avoid showing phantom liquidity.
 
 ## Related
