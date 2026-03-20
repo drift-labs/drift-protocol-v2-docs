@@ -39,7 +39,7 @@ import {
 // Constructor takes the WebSocket endpoint and your keypair (for auth)
 const keypair = loadKeypair("<KEYPAIR_PATH>");
 const quoter = new IndicativeQuotesSender(
-  "wss://dlob.drift.trade/ws",
+  "wss://dlob.drift.trade/quotes/ws",
   keypair
 );
 ```
@@ -91,7 +91,7 @@ const spread = 0.25;   // $0.25 on each side
 const quoteSize = 10;  // 10 SOL per side
 
 const keypair = loadKeypair("<KEYPAIR_PATH>");
-const quoter = new IndicativeQuotesSender("wss://dlob.drift.trade/ws", keypair);
+const quoter = new IndicativeQuotesSender("wss://dlob.drift.trade/quotes/ws", keypair);
 await quoter.connect();
 
 // Update quotes periodically
