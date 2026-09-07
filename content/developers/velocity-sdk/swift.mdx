@@ -1,5 +1,6 @@
 ---
 title: "Swift (offchain signed orders)"
+description: "The taker side of signed orders: sign an order message offchain, post it to the Swift API, and let a keeper land the fill. No transaction fee, no confirmation wait, settlement still onchain."
 ---
 
 Swift lets a taker place an order without sending a transaction. The taker signs an order message offchain and posts it to the Swift API; keepers and market makers then bundle that signed message into their own transaction and land the fill onchain. The taker pays no transaction fee and waits on no confirmation, and settlement is still fully onchain.

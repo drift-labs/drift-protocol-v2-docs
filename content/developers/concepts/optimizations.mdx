@@ -1,5 +1,6 @@
 ---
 title: "AMM Liquidity and Settlement"
+description: "Why a market maker that cannot step back has to manage depth through its parameters instead: how the AMM sizes depth, when it competes for a fill, and how the P&L it takes on is settled."
 ---
 
 Velocity's AMM is a designated market maker: it quotes both sides of every perp market whether or not an external maker is present, so an order always has a counterparty. That obligation is also its problem. A market maker that cannot step back has to manage depth and inventory through its parameters instead, and those parameters move.

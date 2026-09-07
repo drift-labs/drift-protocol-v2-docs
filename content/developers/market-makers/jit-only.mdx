@@ -1,5 +1,6 @@
 ---
 title: "JIT-only MM"
+description: "Market making with no standing book, reacting to incoming taker orders in real time: the subscribe, price, and atomic place-and-make loop, plus the filters that keep it safe."
 ---
 
 JIT-only market making keeps **no standing book**. Instead of resting limit orders on the DLOB, a JIT-only maker competes in [JIT auctions](./jit-auctions) by reacting to incoming taker orders in real time. See [Matching Engine](/protocol/trading/how-fills-work) for how the liquidity sources compete once an auction ends.

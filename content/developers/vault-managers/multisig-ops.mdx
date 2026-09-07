@@ -1,5 +1,6 @@
 ---
 title: "Multisig Manager"
+description: "A vault's manager key is rare and irreversible, its delegate key signs thousands of orders a day. How to split them so the manager sits behind a multisig and the delegate stays hot."
 ---
 
 A vault has two privileged keys, and they want different security. The **manager** owns the vault: it sets fees and caps, appoints the trading delegate, collects the management and profit share, and on a Trusted vault can borrow from it. Every one of those actions is rare and irreversible enough to want more than one signature. The **delegate** signs every order the vault places, thousands of times a day, and has to be a hot key on the trading machine.

@@ -148,6 +148,17 @@ export function frontmatterTitle(text) {
   return m ? m[1].trim().replace(/^["']|["']$/g, "") : null;
 }
 
+// The hand-written one-line summary of a page. Preferred over the first
+// paragraph of the body, which only ever approximated it and had to be cut at
+// a character count to fit one line.
+export function frontmatterDescription(text) {
+  if (!text.startsWith("---")) return null;
+  const end = text.indexOf("\n---", 3);
+  if (end === -1) return null;
+  const m = text.slice(3, end).match(/^description:\s*(.+)$/m);
+  return m ? m[1].trim().replace(/^["']|["']$/g, "") : null;
+}
+
 export function stripFrontmatter(text) {
   if (text.startsWith("---\n") || text.startsWith("---\r\n")) {
     const end = text.indexOf("\n---", 4);

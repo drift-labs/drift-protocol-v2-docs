@@ -1,5 +1,6 @@
 ---
 title: "Slot Duration and Wall-Clock Time"
+description: "Solana's slot time is dropping from 400ms to 200ms in steps, so a slot count is no longer a stable unit of time. Where the live value lives onchain, and what it affects."
 ---
 
 Solana's slot time is dropping from 400ms to 200ms in steps (400, 350, 300, 250, 200), one per IBRL feature gate. A slot count is therefore no longer a stable unit of time. Velocity handles this by storing the current slot length on chain and converting every wall-clock rule through it at the point of use.

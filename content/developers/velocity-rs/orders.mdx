@@ -1,5 +1,6 @@
 ---
 title: "Building and sending orders"
+description: "TransactionBuilder assembles every transaction and owns the account resolution, so the caller describes the action and it works out the markets, oracles and user accounts to list."
 ---
 
 Every transaction in `velocity-rs` is assembled by `TransactionBuilder`. It owns the account resolution, so the caller describes the intended action and it works out which markets, oracles and user accounts have to appear in the account list. It produces a `VersionedMessage`, which is then signed and sent.
