@@ -1,5 +1,6 @@
 ---
 title: "Precision and Types"
+description: "Nothing in the SDK is a JavaScript number where money is involved. Every price, size and balance is a BN scaled by a fixed power of 10, with spot token amounts carrying the mint's own decimals."
 ---
 
 Nothing in the SDK is a JavaScript number where money is involved. Prices, sizes, and balances are all `BN` integers scaled by a fixed power of 10, because a float cannot represent them exactly and the program will not accept one. Convert with the constants and helpers on this page rather than multiplying by hand.

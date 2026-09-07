@@ -1,5 +1,6 @@
 ---
 title: "Bot Architecture Patterns"
+description: "Order placement is the smallest part of a bot that runs unattended. Staying subscribed, staying inside the compute and fee budget, and shutting down without leaving quotes on the book."
 ---
 
 Order placement logic is the smallest part of a bot that runs unattended. This page covers the infrastructure around it: staying subscribed, staying inside the compute and fee budget, noticing when the bot's own account is in trouble, and shutting down without leaving quotes on the book. The patterns come from Velocity's keeper-bots-v2 and apply to market making, filling, and triggering bots alike.

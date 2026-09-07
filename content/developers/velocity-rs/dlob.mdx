@@ -1,5 +1,6 @@
 ---
 title: "The DLOB"
+description: "Resting orders live inside each owner's User account, not a shared book. How velocity_rs::dlob rebuilds a price-ordered book from them, event driven rather than periodic."
 ---
 
 Resting orders on Velocity live inside each owner's `User` account, not in a shared book account. The **decentralized limit order book (DLOB)** is the offchain reconstruction of that: read every `User` account, pull the open orders out, and aggregate them into a price-ordered book. `velocity_rs::dlob` builds and maintains one in the consuming process.

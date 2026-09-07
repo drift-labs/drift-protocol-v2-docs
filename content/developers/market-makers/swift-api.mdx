@@ -1,5 +1,6 @@
 ---
 title: "SWIFT API"
+description: "The maker side of signed orders: receiving and filling them. Why the standard onchain flow costs 2 to 4 seconds from taker intent to maker fill, and how SWIFT removes the wait."
 ---
 
 **SWIFT** is Velocity's offchain signed-order protocol: it lets market makers receive signed taker orders over WebSocket before they hit the onchain JIT auction. In the SDK, SWIFT orders are called signed-message orders (`SignedMsgOrderParams`, `isSignedMsgOrder`, `SwiftOrderSubscriber`). The "SWIFT" name is the product-facing term for the same feature.

@@ -1,5 +1,6 @@
 ---
 title: "Swaps (Jupiter / Titan)"
+description: "A spot swap routed through Jupiter or Titan from a Velocity account, wrapped in begin_swap and end_swap so both tokens move through the account's spot balances in one checked transaction."
 ---
 
 A spot swap can route through Jupiter or Titan directly from a Velocity account. The SDK fetches a quote from the chosen provider, builds the swap transaction, and wraps it in `begin_swap` and `end_swap` so the input and output tokens move through the account's Velocity spot balances inside one atomically-checked transaction.

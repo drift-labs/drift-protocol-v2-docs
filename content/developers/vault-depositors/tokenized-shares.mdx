@@ -1,5 +1,6 @@
 ---
 title: "Tokenized Shares"
+description: "Shares on a VaultDepositor PDA cannot be sent, held by a contract, or listed. Converting them into a standard SPL token, transferring it, and burning it back into shares."
 ---
 
 Vault shares live on a `VaultDepositor` PDA, so they cannot be sent to another wallet, held by a smart contract, or listed anywhere. Tokenized shares solve that: a depositor can convert shares into a standard SPL token, transfer or hold that token freely, and later burn it back into shares.
