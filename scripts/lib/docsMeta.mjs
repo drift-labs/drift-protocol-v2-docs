@@ -168,3 +168,22 @@ export function toRoute(mdxFile) {
   const withoutIndex = rel.replace(/\/index$/, "").replace(/^index$/, "");
   return { relPath: rel.replace(/\/index$/, ""), route: `/${withoutIndex}` };
 }
+
+// --- The included page set ---------------------------------------------------
+// Every machine-readability output covers the same pages, so both generators
+// (the per-page mirrors and llms-full.txt) build their page list from here
+// rather than re-implementing the exclusion checks.
+export function collectIncludedPages() {
+  const pages = [];
+  for (const file of findMdxFiles().sort()) {
+    const { relPath, route } = toRoute(file);
+    if (isExcludedDir(relPath) || isHidden(relPath)) continue;
+    pages.push({ file, relPath, route, raw: readFileSync(file, "utf8") });
+  }
+  return pages;
+}
+
+// Routes that will have a .md mirror, for rewriting internal links.
+export function mirroredRoutes(pages) {
+  return new Set(pages.map((p) => p.route));
+}
