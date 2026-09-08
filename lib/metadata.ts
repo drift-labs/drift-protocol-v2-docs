@@ -5,11 +5,11 @@ import { source } from "@/lib/source";
  * Shared metadata for the docs site.
  *
  * The share card used to be one committed PNG with the word "Introduction"
- * drawn into it, served from the root layout for all 107 pages. The card is
+ * drawn into it, served from the root layout for all 110 pages. The card is
  * now generated per page by app/og/[...slug]/route.tsx.
  */
 
-/** Used when a page has no description of its own. 76 of 110 pages have none. */
+/** Used when a page has no description of its own. 3 of 110 pages have none. */
 export const SITE_DESCRIPTION =
   "Velocity brings on-chain, cross-margined perpetual futures to Solana.";
 

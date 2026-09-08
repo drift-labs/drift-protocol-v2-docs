@@ -8,6 +8,7 @@ import { RootProvider } from "fumadocs-ui/provider";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Providers } from "./providers";
 import { SITE_DESCRIPTION } from "@/lib/metadata";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Slack and X have to fetch the card image, so og:image must be absolute.
@@ -18,7 +19,7 @@ import { SITE_DESCRIPTION } from "@/lib/metadata";
 const siteUrl =
   process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production"
     ? `https://${process.env.VERCEL_URL}`
-    : "https://docs.velocity.exchange";
+    : SITE_URL;
 
 const sans = IBM_Plex_Sans({
   subsets: ["latin"],
