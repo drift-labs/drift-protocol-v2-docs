@@ -1,5 +1,6 @@
 ---
 title: "The client"
+description: "Constructing a VelocityClient from a network context, an RpcClient and a Wallet, the wallet modes it accepts, and the subscription model behind it over both WebSocket and gRPC."
 ---
 
 `VelocityClient` is the entry point. It holds the RPC connection, the wallet, the network context, and a background cache of onchain accounts. Almost every other type in the crate either takes a client or is reached through one.

@@ -1,5 +1,6 @@
 ---
 title: "Delisting"
+description: "A perpetual has no expiry, but a market can still have to be closed. Velocity gives it an expiry on demand, then runs reduce-only, settlement price, settlement, and winding up the pools."
 ---
 
 A perpetual has no expiry, but a market can still have to be closed: its oracle fails, its liquidity goes, or its unrealized P&L grows past anything the protocol can pay. Velocity gives a perpetual an expiry date on demand and then runs it through the same shape as any dated contract: reduce-only, then a settlement price, then settlement, then the market's pools are wound up. Every step after the first is permissionless.

@@ -1,5 +1,6 @@
 ---
 title: "Builder Codes"
+description: "A builder fee rides on top of the taker's tiered fee, capped at 1% of notional, and settles to the builder's revenue-share account on fill. Setup, SDK usage, and the fills that pay nothing."
 ---
 
 Builder Codes let integrators earn fees by routing order flow through their application. A builder fee rides on top of the taker's normal tiered fee: it attaches to an order through `builderIdx` and `builderFeeTenthBps`, and it settles to the builder's revenue-share account when the order fills. The program caps it at 1% of notional via `MAX_BUILDER_FEE_TENTH_BPS`.

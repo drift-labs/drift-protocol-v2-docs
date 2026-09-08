@@ -7,7 +7,23 @@ import {
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/components/mdx";
+import { CopyMarkdownButton } from "@/components/CopyMarkdownButton";
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
+import {
+  metadataImage,
+  OG_IMAGE_SIZE,
+  SITE_DESCRIPTION,
+} from "@/lib/metadata";
+
+// Legal pages are deliberately left out of the machine-readable outputs, so
+// they have no .md mirror to link to. Kept in step with EXCLUDED_DIRS in
+// scripts/lib/docsMeta.mjs.
+const NO_MARKDOWN_MIRROR = "/protocol/legal-and-regulations";
+
+function hasMarkdownMirror(url: string) {
+  return url !== NO_MARKDOWN_MIRROR && !url.startsWith(`${NO_MARKDOWN_MIRROR}/`);
+}
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -30,6 +46,9 @@ export default async function Page(props: {
         path: `content/${page.file.path}`,
       }}
     >
+      {hasMarkdownMirror(page.url) ? (
+        <CopyMarkdownButton route={page.url} />
+      ) : null}
       <DocsTitle>{page.data.title}</DocsTitle>
       {page.data.description ? (
         <DocsDescription>{page.data.description}</DocsDescription>
@@ -52,8 +71,38 @@ export async function generateMetadata(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const slug = params.slug ?? [];
+  const url = `${SITE_URL}${page.url}`;
+  const description = page.data.description ?? SITE_DESCRIPTION;
+  // Next.js never copies `title` into `openGraph.title`, so without these two
+  // blocks every page inherits the root layout's "Velocity Protocol".
+  const image = {
+    ...metadataImage.getImageMeta(slug),
+    alt: page.data.title,
+    ...OG_IMAGE_SIZE,
+  };
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical: url,
+      // Advertise the plain-markdown mirror so an agent that lands on the HTML
+      // page can find it without guessing the .md convention.
+      ...(hasMarkdownMirror(page.url)
+        ? { types: { "text/markdown": `${url}.md` } }
+        : {}),
+    },
+    openGraph: {
+      title: page.data.title,
+      description,
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description,
+      images: [image],
+    },
   };
 }

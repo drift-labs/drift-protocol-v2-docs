@@ -1,5 +1,6 @@
 ---
 title: "SDK Internals"
+description: "The machinery under the call-level pages: how account state is kept fresh, which subscribers and maps ship, how instructions are layered into transactions, and where the caches are."
 ---
 
 This page covers the machinery underneath the call-level pages: how the SDK keeps account state fresh, which subscribers and maps it ships, how it layers instruction building into transactions, and where the caches are that make reads free. It is the page for deciding how a long-running process should stay subscribed, and for working out why a value read back is not the expected one.

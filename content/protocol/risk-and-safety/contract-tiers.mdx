@@ -1,5 +1,6 @@
 ---
 title: "Contract tiers"
+description: "Every perpetual market carries a tier from A to Isolated, and one admin instruction changes it. A new market defaults to HighlySpeculative, so a safer tier is always an explicit promotion."
 ---
 
 Every perpetual market carries a **contract tier**: `A`, `B`, `C`, `Speculative`, `HighlySpeculative` or `Isolated`, ordered safest to riskiest. Everything on this page derives from that one value, and one admin instruction changes it. A newly created market defaults to `HighlySpeculative`, so a market has to be explicitly promoted to a safer tier, never demoted into one by accident.

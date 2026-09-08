@@ -1,5 +1,6 @@
 ---
 title: "Contributing to Velocity"
+description: "Velocity is not open source yet. What that leaves open to an outside contributor, which is a shorter list than most projects but not an empty one."
 ---
 
 Velocity is not open source yet. This page says exactly what that leaves open to an outside contributor, which is a shorter list than most projects but not an empty one.
@@ -39,7 +40,7 @@ Listed so the work is visible in advance, not as an invitation to start before p
 | Onchain program and its test suite | `programs/velocity` |
 | Vaults program | `programs/vaults` |
 
-There is no Python SDK. The Rust client (`velocity-rs`, in a separate `rust/` workspace alongside `keep-rs` and `swift`) is source-only and not on crates.io, and `@velocity-exchange/jit-proxy` is vendored in the monorepo rather than released to npm, so it has to be built from source.
+There is no Python SDK. The Rust client (`velocity-rs`, in a separate `rust/` workspace alongside `keep-rs` and `swift`) is source-only and not on crates.io, so it has to be built from source. `@velocity-exchange/jit-proxy` is published to npm, so the JIT client does not need monorepo access.
 
 ## Reporting a vulnerability
 

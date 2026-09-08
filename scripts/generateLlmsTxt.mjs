@@ -2,8 +2,9 @@
 // H1 site name, a blockquote summary, then H2 sections listing pages as
 // markdown links with one-line descriptions.
 //
-// Source of truth for page titles/descriptions is the actual .mdx content
-// (first H1 + first paragraph). Source of truth for grouping/section titles
+// Source of truth for page titles and descriptions is each page's frontmatter,
+// falling back to the first H1 and first paragraph of the body for a page that
+// carries neither. Source of truth for grouping/section titles
 // and for excluding hidden/WIP pages is app/_meta.global.tsx (the sidebar),
 // via scripts/lib/docsMeta.mjs. Legal/regulatory content is excluded on
 // purpose (out of scope for an LLM-facing index).
@@ -22,6 +23,7 @@ import {
   sectionFor,
   findMdxFiles,
   frontmatterTitle,
+  frontmatterDescription,
   stripFrontmatter,
   toRoute,
   loadSiteUrl,
@@ -69,6 +71,11 @@ function extractTitleAndDescription(raw) {
   }
   if (!title) return null;
 
+  // An authored description is used verbatim: it is already one line, and
+  // truncating it would undo the point of writing it.
+  const authored = frontmatterDescription(raw);
+  if (authored) return { title, description: authored };
+
   let description = "";
   for (let i = titleIdx + 1; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -94,6 +101,8 @@ function extractTitleAndDescription(raw) {
     i = j; // paragraph stripped to nothing (e.g. a JSX comment) - try the next one
   }
 
+  // Only the body-paragraph fallback gets cut, since it is a whole paragraph
+  // standing in for a summary rather than a summary.
   if (description.length > 220) {
     const cut = description.slice(0, 220);
     const lastSpace = cut.lastIndexOf(" ");
