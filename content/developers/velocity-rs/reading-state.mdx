@@ -1,5 +1,6 @@
 ---
 title: "Reading state"
+description: "Every read comes from the subscription cache or from RPC, and the method name decides which. Getting that wrong is the most common performance mistake in a bot built on this crate."
 ---
 
 Every read in `velocity-rs` comes from one of two places: the local cache filled by a subscription, or an RPC call. Which one a given call uses is decided by the method name, and getting that wrong is the most common performance mistake in a bot built on this crate.

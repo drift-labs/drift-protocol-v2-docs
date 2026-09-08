@@ -1,5 +1,6 @@
 ---
 title: "Events"
+description: "The program emits events into transaction logs. How EventSubscriber tails them, deserializes each into a typed object, and buffers recent ones for reading without waiting."
 ---
 
 The program emits its events into transaction logs. `EventSubscriber` tails those logs, deserializes each event into a typed object, emits it in real time, and keeps a bounded buffer of recent ones that can be read without waiting for the next arrival.

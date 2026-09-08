@@ -9,7 +9,7 @@
     "rust-docs": "bun scripts/rustDocs.ts",
     "legal-pages": "bun scripts/replaceLegalPageContentFromS3.ts",
     "test": "vitest run",
-    "postbuild": "next-sitemap && bun scripts/generateLlmsTxt.mjs && bun scripts/generateMarkdownPages.mjs"
+    "postbuild": "next-sitemap && bun scripts/generateLlmsTxt.mjs && bun scripts/generateMarkdownPages.mjs && bun scripts/generateLlmsFullTxt.mjs"
   },
   "repository": {
     "type": "git",
