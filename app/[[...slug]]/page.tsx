@@ -10,6 +10,11 @@ import { getMDXComponents } from "@/components/mdx";
 import { CopyMarkdownButton } from "@/components/CopyMarkdownButton";
 import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
+import {
+  metadataImage,
+  OG_IMAGE_SIZE,
+  SITE_DESCRIPTION,
+} from "@/lib/metadata";
 
 // Legal pages are deliberately left out of the machine-readable outputs, so
 // they have no .md mirror to link to. Kept in step with EXCLUDED_DIRS in
@@ -66,7 +71,16 @@ export async function generateMetadata(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const slug = params.slug ?? [];
   const url = `${SITE_URL}${page.url}`;
+  const description = page.data.description ?? SITE_DESCRIPTION;
+  // Next.js never copies `title` into `openGraph.title`, so without these two
+  // blocks every page inherits the root layout's "Velocity Protocol".
+  const image = {
+    ...metadataImage.getImageMeta(slug),
+    alt: page.data.title,
+    ...OG_IMAGE_SIZE,
+  };
 
   return {
     title: page.data.title,
@@ -78,6 +92,17 @@ export async function generateMetadata(props: {
       ...(hasMarkdownMirror(page.url)
         ? { types: { "text/markdown": `${url}.md` } }
         : {}),
+    },
+    openGraph: {
+      title: page.data.title,
+      description,
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description,
+      images: [image],
     },
   };
 }
