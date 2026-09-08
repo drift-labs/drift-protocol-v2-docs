@@ -13,9 +13,12 @@ An account's tier is selected by its trailing 30-day volume at the moment of eac
 
 | Tier | Trailing 30-day volume | Taker fee | Maker rebate |
 | --- | --- | --- | --- |
-| Regular | under \$5,000,000 | 4 bps (0.040%) | 0.25 bps (0.0025%) |
-| VIP 1 | \$5,000,000 to \$80,000,000 | 3 bps (0.030%) | 0.25 bps (0.0025%) |
-| VIP 2 | above \$80,000,000 | 2 bps (0.020%) | 0.25 bps (0.0025%) |
+| Regular | under \$5,000,000 | 6 bps (0.060%) | 0.25 bps (0.0025%) |
+| VIP 1 | \$5,000,000 to \$80,000,000 | 5 bps (0.050%) | 0.25 bps (0.0025%) |
+| VIP 2 | \$80,000,000 to \$200,000,000 | 4 bps (0.040%) | 0.25 bps (0.0025%) |
+| VIP 3 | above \$200,000,000 | 2 bps (0.020%) | 0.25 bps (0.0025%) |
+
+These are the baseline rates for the major markets, SOL-PERP, BTC-PERP, and ETH-PERP. Other markets can be priced above or below this baseline; see [Per-market rates](#per-market-rates) below for the live number each market actually charges.
 
 The rates are admin-settable, so read the live values rather than treating the table as fixed.
 
@@ -41,9 +44,9 @@ These are the rates in force on every perp market, read live from the program. A
 
 ## Worked example
 
-The **\$10,000 account** opens 20 SOL long at \$100, a notional of \$2,000, as a taker on a market priced at the published rate. At the Regular tier that is 4 bps, or **\$0.80**, charged against the position's cost basis. Closing the same size pays it again, so the round trip costs \$1.60. Posted with the post-only flag instead, the same order would have earned 0.25 bps of \$2,000, or **\$0.05**.
+The **\$10,000 account** opens 20 SOL long at \$100, a notional of \$2,000, as a taker on a market priced at the published rate. At the Regular tier that is 6 bps, or **\$1.20**, charged against the position's cost basis. Closing the same size pays it again, so the round trip costs \$2.40. Posted with the post-only flag instead, the same order would have earned 0.25 bps of \$2,000, or **\$0.05**.
 
-The **\$5,000,000 desk** sits in VIP 1. On a \$100,000 fill it pays 3 bps, or **\$30**, where the Regular tier would have charged \$40 and VIP 2 would charge \$20. On a market priced 1.5 bps above the schedule the same fill costs 4.5 bps, or **\$45**.
+The **\$5,000,000 desk** sits in VIP 1. On a \$100,000 fill it pays 5 bps, or **\$50**, where the Regular tier would have charged \$60 and VIP 2 would charge \$40. On a market priced 1.5 bps above the schedule the same fill costs 6.5 bps, or **\$65**.
 
 ## Where the fee goes
 
@@ -64,7 +67,7 @@ Protocol fees land in a per-market pool that only designated, admin-set recipien
 
 ## Referral legs apply to the pre-discount fee
 
-Both referral percentages are computed against the taker fee **before** the referee discount is applied, not against the fee actually paid. On a \$0.80 taker fee that means a 5% discount of \$0.04 and a 10% referrer reward of \$0.08, giving a charged fee of \$0.76. Maker fills generate no referral reward, and the referrer's share comes out of the remainder rather than adding to the taker's bill. See [Referrals](/protocol/referrals).
+Both referral percentages are computed against the taker fee **before** the referee discount is applied, not against the fee actually paid. On a \$1.20 taker fee that means a 5% discount of \$0.06 and a 10% referrer reward of \$0.12, giving a charged fee of \$1.14. Maker fills generate no referral reward, and the referrer's share comes out of the remainder rather than adding to the taker's bill. See [Referrals](/protocol/referrals).
 
 ## Fees that are not trading fees
 
