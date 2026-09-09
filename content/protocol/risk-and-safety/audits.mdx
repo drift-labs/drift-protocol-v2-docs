@@ -1,32 +1,39 @@
 ---
 title: "Audits"
-description: "What the two published reports actually cover, and the status of the review of Velocity's own code."
+description: "The three reports covering Velocity and the codebase it forked from: who reviewed what, what they found, and where to read each one."
 ---
 
-The two audit reports published below were performed on the pre-fork [Drift Protocol v2](https://github.com/drift-labs/protocol-v2) codebase, at fork point `0ae3e3b1d`. They do not cover Velocity's own deployment, and they do not cover anything added or changed since the fork. OtterSec has separately reviewed Velocity's own program. **That review is complete and its findings are fixed in the deployed code; the final report is pending publication** and will be linked here as soon as it is. So the accurate reading of this page is neither "audited" nor "unaudited": the inherited base has two published reports, and the post-fork work has been reviewed by a firm whose report is not out yet.
-
-Until that report lands, the [migration guide](/developers/migrate-from-drift) is the public record of what changed after the fork, and its change log lists the audit-fix work alongside the rest. [Risks](/protocol/risk-and-safety/risks) covers what that gap means for an open position, and [Bug bounty](/protocol/risk-and-safety/bug-bounty) is the disclosure route for a finding.
-
-## Pre-fork: Drift Protocol v2
-
-### Trail of Bits
-
-Drift Protocol engaged Trail of Bits to audit its decentralized exchange and its onchain program. The team conducted the security review from November 7 to December 2, 2022, with full knowledge of the target system, including source access and documentation, and using a mix of automated and manual static and dynamic testing. The focus was flaws that could compromise the confidentiality, integrity or availability of the exchange.
-
-The audit uncovered no high-severity flaws in any of those three categories. Trail of Bits then reviewed Drift's fixes and mitigations between January 23 and January 25, 2023. A summary of the outstanding findings after that review is below.
-
-![Audit Result](/assets/UJlUS9AzTG1yI-iSq2EOl_auditresult.png)
-
-The full list of unresolved and partially resolved findings is on page 73 of the report. The one finding marked undetermined concerns testing code used in production and is described on page 77. View the full report [here](https://github.com/velocity-exchange/audits/blob/master/protocol-v2/tob.pdf).
-
-### Neodyme
-
-Neodyme's review covers the same pre-fork protocol-v2 codebase. It was authored on May 10th 2024 and last updated on June 27th 2024. View the full report [here](https://github.com/velocity-exchange/audits/blob/master/protocol-v2/neodyme.pdf).
+Three reports cover the code behind Velocity. OtterSec audited Velocity's own program after the fork, and the Drift Protocol v2 codebase it forked from carries two earlier audits, by Trail of Bits and by Neodyme. All three are linked below.
 
 ## Post-fork: Velocity
 
 ### OtterSec
 
-The scope was the Velocity program and the vaults program as they stood after the fork. This is the only review that covers Velocity's own changes, which is to say the AMM, the fee redesign, the tiered admin key model, isolated pools, builder codes, and the signed-message order path. None of that surface appears in either report above.
+OtterSec audited the Velocity program between June 19th and July 20th, 2026, and issued the final report on September 3rd, 2026. The review covers everything Velocity added after the fork, which is the surface neither earlier report reaches.
 
-The review delivered a set of numbered High and Medium findings across the two programs, and every one of them is fixed. The final report is pending publication rather than pending completion, so what is outstanding is the document, not the work. This page will carry the link the moment it is final.
+The report separates its results into advisories, which have immediate impact and are meant to be remediated, and suggestions, which do not. It produced 154 findings in total: no Critical, 41 High, 109 Medium, 1 Low and 3 Informational. Every High finding is fixed in the deployed code.
+
+<Card
+  className="my-6"
+  title="OtterSec: Velocity Protocol v2 Security Assessment"
+  href="/audit.pdf"
+  description="Final report, September 3rd, 2026. PDF, 382 pages."
+/>
+
+## Pre-fork: Drift Protocol v2
+
+Velocity forked [Drift Protocol v2](https://github.com/drift-labs/protocol-v2). Both reports in this section were performed on that codebase, so they describe the inherited base and not the deployed program. Neither covers anything added or changed since the fork.
+
+### Trail of Bits
+
+Drift Protocol engaged Trail of Bits to audit its exchange and its onchain program. The review ran from November 7th to December 2nd, 2022, with full knowledge of the target system, including source access and documentation, and used a mix of automated and manual static and dynamic testing. It reported no high-severity flaws in the confidentiality, integrity or availability of the exchange.
+
+Trail of Bits then re-reviewed Drift's fixes and mitigations between January 23rd and January 25th, 2023. The findings still unresolved or partially resolved after that pass are listed on page 73. View the full report [here](https://github.com/velocity-exchange/audits/blob/master/protocol-v2/tob.pdf).
+
+### Neodyme
+
+Neodyme reviewed the same pre-fork codebase. The report was authored on May 10th, 2024 and last updated on June 27th, 2024. View the full report [here](https://github.com/velocity-exchange/audits/blob/master/protocol-v2/neodyme.pdf).
+
+## What an audit does not cover
+
+An audit reads code at a point in time. It does not cover the running deployment: the keys that can change parameters on a live market are a separate surface, documented in [Admin keys](/protocol/risk-and-safety/admin-keys). [Risks](/protocol/risk-and-safety/risks) covers what that means for an open position, and [Bug bounty](/protocol/risk-and-safety/bug-bounty) is the route for reporting anything these audits did not catch.
