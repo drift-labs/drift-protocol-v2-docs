@@ -6,7 +6,14 @@ export function Logo() {
         width="26"
         height="26"
         alt="Velocity"
-        className="md:hidden"
+        className="md:hidden dark:hidden"
+      />
+      <img
+        src="/assets/velocity-logo-dark.svg"
+        width="26"
+        height="26"
+        alt=""
+        className="hidden md:hidden dark:block"
       />
       <span className="hidden md:block">
         <img
