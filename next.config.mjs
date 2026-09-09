@@ -102,6 +102,8 @@ const redirects = [
     ["/risk-and-safety/risk-parameters", "/protocol/risk-and-safety/guard-rails"],
     ["/drift-safety-module", "/protocol/risk-and-safety/drift-safety-module"],
     ["/security/audits", "/protocol/risk-and-safety/audits"],
+    ["/audit", "/protocol/risk-and-safety/audits"],
+    ["/audits", "/protocol/risk-and-safety/audits"],
     ["/security/risks", "/protocol/risk-and-safety/risks"],
     ["/glossary", "/protocol/glossary"],
     ["/additional-resources-data", "/developers/data-api"],
