@@ -1,20 +1,29 @@
 export function Logo() {
   return (
-    <svg
-      width="26"
-      height="26"
-      viewBox="0 0 23 23"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M0 3.55068C0 1.58969 1.58969 0 3.55067 0H18.4635C20.4245 0 22.0142 1.58969 22.0142 3.55067V18.4635C22.0142 20.4245 20.4245 22.0142 18.4635 22.0142H3.55068C1.58969 22.0142 0 20.4245 0 18.4635V3.55068Z"
-        fill="#15BC25"
+    <>
+      <img
+        src="/assets/velocity.svg"
+        width="26"
+        height="26"
+        alt="Velocity"
+        className="md:hidden"
       />
-      <path
-        d="M8.45738 4.52122C8.41187 4.64123 8.5005 4.76963 8.62885 4.76966H11.1402C11.2591 4.76966 11.3465 4.88109 11.3184 4.9966L9.72561 11.527C9.67962 11.7156 9.91976 11.8371 10.0444 11.6883L15.7872 4.83537C15.8221 4.79378 15.8736 4.76966 15.9278 4.76966H19.6112C19.768 4.76966 19.8525 4.95395 19.7502 5.07289L5.18064 22.0142H3.81342L6.91697 9.03186C6.94453 8.91656 6.8571 8.80565 6.73857 8.8056H2.40442C2.24975 8.80558 2.16459 8.62599 2.26243 8.50619L9.20913 0H10.172L8.45738 4.52122Z"
-        fill="white"
-      />
-    </svg>
+      <span className="hidden md:block">
+        <img
+          src="/assets/velocity-text-light.svg"
+          width="141"
+          height="32"
+          alt="Velocity"
+          className="h-[26px] w-auto dark:hidden"
+        />
+        <img
+          src="/assets/velocity-text-dark.svg"
+          width="141"
+          height="32"
+          alt=""
+          className="hidden h-[26px] w-auto dark:block"
+        />
+      </span>
+    </>
   );
 }
